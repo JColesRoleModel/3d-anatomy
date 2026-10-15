@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>3D Anatomy</title>
+  <meta name="description" content="Interactive 3D human anatomy you can filter by body system.">
+  <meta name="theme-color" content="#101418">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Anatomy">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js",
+        "three/addons/": "./vendor/addons/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="view"></canvas>
+
+  <header class="topbar">
+    <h1>3D Anatomy</h1>
+    <div class="topbar-actions">
+      <button id="btn-reset" class="icon-btn" title="Reset view" aria-label="Reset view">⟲</button>
+      <button id="btn-about" class="icon-btn" title="About" aria-label="About">i</button>
+    </div>
+  </header>
+
+  <div id="loading" class="loading" hidden>
+    <div class="spinner"></div><span id="loading-text">Loading…</span>
+  </div>
+
+  <section id="info" class="info" hidden>
+    <div class="info-head">
+      <div>
+        <div id="info-system" class="info-system"></div>
+        <h2 id="info-name"></h2>
+      </div>
+      <button id="info-close" class="icon-btn" aria-label="Close">✕</button>
+    </div>
+    <div id="info-path" class="info-path"></div>
+    <div class="info-actions">
+      <button id="act-focus">Focus</button>
+      <button id="act-isolate">Isolate</button>
+      <button id="act-hide">Hide</button>
+    </div>
+  </section>
+
+  <nav id="systems" class="systems" aria-label="Body systems"></nav>
+
+  <div id="restore" class="restore" hidden>
+    <span id="restore-text"></span>
+    <button id="act-showall">Show all</button>
+  </div>
+
+  <dialog id="about">
+    <h2>About</h2>
+    <p>Tap a system to show or hide it. Drag to rotate, pinch or scroll to zoom, and two-finger drag to pan. Tap any structure to see its name.</p>
+    <p class="small">3D models from <a href="https://www.z-anatomy.com" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derived from BodyParts3D, © The Database Center for Life Science (CC BY-SA 2.1 Japan). Converted and simplified for the web. This app's models are shared under the same CC BY-SA license.</p>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
