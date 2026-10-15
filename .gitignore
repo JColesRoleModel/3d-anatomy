@@ -2,3 +2,4 @@ node_modules/
 raw/
 out/
 .DS_Store
+node_modules

@@ -1,9 +1,9 @@
 // Offline support: app files are network-first so updates show up,
 // models and libraries are cache-first because they are large and rarely change.
-const VERSION = 'v5';
+const VERSION = 'v6';
 const SHELL = `shell-${VERSION}`;
 const ASSETS = `assets-${VERSION}`;
-const PRECACHE = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'data/catalog.json',
+const PRECACHE = ['./', 'index.html', 'style.css', 'app.js', 'occult.js', 'manifest.webmanifest', 'data/catalog.json', 'data/occult.json',
   'vendor/three.module.js', 'vendor/three.core.js', 'vendor/addons/controls/OrbitControls.js',
   'vendor/addons/loaders/GLTFLoader.js', 'vendor/addons/utils/BufferGeometryUtils.js',
   'vendor/addons/utils/SkeletonUtils.js', 'vendor/addons/libs/meshopt_decoder.module.js'];

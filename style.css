@@ -193,3 +193,38 @@ table.keys td { padding: 5px 0; }
   .info { left: 16px; right: auto; bottom: 16px; width: 380px; margin: 0; }
   .restore { left: calc(50% - 160px); }
 }
+
+/* ---------- Occult anatomy ---------- */
+.occ-title { display: flex; align-items: baseline; gap: 8px; margin: 18px 0 4px; padding-top: 10px; border-top: 1px solid var(--line); }
+.occ-title h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.occ-title span { font-size: 12px; color: var(--muted); }
+.occ-icon { width: 20px; height: 20px; flex: none; object-fit: contain; opacity: 0.45; }
+.sys-toggle[aria-pressed="true"] .occ-icon { opacity: 1; }
+.occ-glyph { display: grid; place-items: center; font: 500 16px/1 'Noto Sans Symbols', sans-serif; }
+.occ-dot { width: 12px; height: 12px; border-radius: 50%; }
+.occ-about { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.occ-pill { font-family: 'Noto Sans Symbols', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: inline-flex; align-items: center; gap: 6px; color: var(--text); }
+.occ-pill:hover { border-color: color-mix(in srgb, var(--c) 55%, transparent); }
+.occ-pill-icon { width: 16px; height: 16px; object-fit: contain; flex: none; }
+.occ-pill-icon.occ-glyph { font-size: 13px; }
+.occ-pill-icon.occ-dot { width: 9px; height: 9px; }
+.occ-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 8px; font-size: 12px; color: var(--muted); }
+.occ-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+
+.info { max-height: calc(100vh - 150px); overflow-y: auto; }
+.info-extra { margin-top: 8px; font-size: 13px; color: var(--text); }
+.info-title { flex: 1; min-width: 0; }
+.occ-card-icon-wrap { flex: none; display: grid; place-items: center; width: 52px; height: 52px; }
+.occ-card-icon { width: 52px; height: 52px; object-fit: contain; }
+.occ-card-icon.occ-glyph { font-size: 38px; }
+.occ-fields { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 10px 0 0; font-size: 13px; }
+.occ-fields dt { color: var(--muted); }
+.occ-fields dd { margin: 0; font-family: 'Noto Sans Symbols', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.occ-fields dd small { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.occ-fields dd small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.q, .occ-fields dd.q { color: #e8b04a; }
+.occ-fields dd.q b { margin-left: 2px; }
+.occ-note, .occ-place { clear: both; margin: 10px 0 0; font-size: 12px; color: var(--muted); }
+.occ-note { color: #e8b04a; }
+.occ-foot { margin: 10px 0 0; font-size: 11px; color: var(--muted); }
+.occ-foot:empty { display: none; }

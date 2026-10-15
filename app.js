@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { initOccult } from './occult.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -129,6 +130,7 @@ function save() {
   } catch {}
 }
 
+let occult = null; // occult anatomy layers (occult.js), set up once the panel exists
 const hidden = new Set(); // structure keys the user hid
 let isolated = null; // Set of structure keys shown solid while everything else fades, or null
 let isolatedLabel = '';
@@ -163,6 +165,8 @@ const highlight = new THREE.MeshStandardMaterial({ color: HIGHLIGHT, emissive: 0
 // Colour precedence: the part's own colour, then a sub-filter colour (e.g. all cranial nerves),
 // then the system colour, then the default colour from the model.
 function colorOf(s, key, sys = shownBy(s) || s.tags[0]) {
+  const oc = occult?.colorFor(s, key);
+  if (oc) return oc;
   const c = state.colors;
   if (c.part[key]) return c.part[key];
   for (const facet of systemsById[sys]?.facets || []) {
@@ -242,7 +246,8 @@ function applyVisibility() {
       if (isolated.has(key)) { visible = true; material = materialFor(colorOf(s, key, sys)); }
       else if (sys && state.ghost > 0) { visible = true; material = materialFor(colorOf(s, key, sys), state.ghost); }
     } else if (sys) {
-      visible = true; material = materialFor(colorOf(s, key, sys), opacityOf(sys));
+      const op = occult ? occult.opacityFor(sys, opacityOf(sys)) : opacityOf(sys);
+      visible = true; material = materialFor(colorOf(s, key, sys), op);
     }
     for (const m of s.meshes) {
       m.visible = visible;
@@ -359,7 +364,7 @@ catalog.systems.forEach((sys, i) => {
 function syncUI() {
   for (const el of document.querySelectorAll('[data-sys]')) el.setAttribute('aria-pressed', state.enabled.has(el.dataset.sys));
   for (const pill of document.querySelectorAll('.pill')) pill.setAttribute('aria-pressed', !state.off.has(pill.dataset.opt));
-  for (const row of panelList.children) {
+  for (const row of panelList.querySelectorAll('.sys:not(.occ)')) {
     const id = row.querySelector('.sys-toggle').dataset.sys;
     const v = Math.round(opacityOf(id) * 100);
     row.querySelector('input[type=range]').value = v;
@@ -412,6 +417,8 @@ canvas.addEventListener('pointerup', (e) => {
 function pick(x, y) {
   pointer.set((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1);
   raycaster.setFromCamera(pointer, camera);
+  const occ = occult?.pick(raycaster);
+  if (occ) { occult.select(occ.layer, occ.item); return; }
   const hits = raycaster.intersectObject(body, true).filter((h) => h.object.visible && h.object.userData.key);
   // Prefer solid parts, so tapping through faded skin or ghosts picks what's inside.
   const hit = hits.find((h) => h.object.material.opacity >= 0.5) || hits[0];
@@ -424,9 +431,16 @@ function prettyName(name) {
 
 function select(key) {
   selected = key;
-  $('info').hidden = !key;
+  if (key) occult?.deselect();
+  $('info').hidden = !key && !occult?.isSelected();
   if (key) {
+    $('info-part').hidden = false;
+    $('info-occult').hidden = true;
+    $('occ-icon').hidden = true;
     const s = structures.get(key);
+    const extra = occult?.describePart(s, key) || '';
+    $('info-extra').textContent = extra;
+    $('info-extra').hidden = !extra;
     $('info-name').textContent = prettyName(s.name);
     syncPartColor();
     $('info-system').textContent = s.tags.map((t) => systemsById[t].name).join(' · ');
@@ -453,7 +467,7 @@ function isolateGroup(file, group) {
   focusOnKeys(keys);
 }
 
-$('info-close').addEventListener('click', () => select(null));
+$('info-close').addEventListener('click', () => { select(null); occult?.deselect(); });
 
 function syncPartColor() {
   if (!selected) return;
@@ -509,6 +523,28 @@ function focusOnKeys(keys) {
   const dist = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.3;
   startFly(center, center.clone().add(dir.multiplyScalar(dist)));
 }
+function focusPoint(center, radius, dir = camera.position.clone().sub(controls.target).normalize()) {
+  const dist = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.3;
+  startFly(center.clone(), center.clone().add(dir.multiplyScalar(dist)));
+}
+// Light up a set of structures (turning their systems on) while everything else fades, then fly to them.
+function showStructures(keys, label) {
+  keys = keys.filter((k) => structures.has(k));
+  if (!keys.length) return;
+  for (const k of keys) {
+    const s = structures.get(k);
+    if (!s.tags.some((t) => state.enabled.has(t))) state.enabled.add(s.tags[0]);
+  }
+  select(null);
+  hidden.clear();
+  isolated = new Set(keys);
+  isolatedLabel = label;
+  refresh();
+  Promise.all([...new Set(keys.map((k) => structures.get(k).file))].map(loadFile)).then(() => {
+    applyVisibility();
+    focusOnKeys(keys);
+  });
+}
 function startFly(target, position) {
   flyTo = { t0: performance.now(), fromT: controls.target.clone(), fromP: camera.position.clone(), target, position };
 }
@@ -542,7 +578,7 @@ window.addEventListener('keydown', (e) => {
     case 'KeyH': $('act-hide').click(); break;
     case 'KeyI': $('act-isolate').click(); break;
     case 'KeyX': $('act-showall').click(); break;
-    case 'Escape': select(null); break;
+    case 'Escape': select(null); occult?.deselect(); break;
     case 'KeyL': togglePanel(); break;
     case 'Slash': {
       const d = $('keys');
@@ -562,6 +598,14 @@ window.addEventListener('blur', () => held.clear());
 $('btn-keys').addEventListener('click', () => $('keys').showModal());
 
 // ---------- Go ----------
+occult = await initOccult({
+  scene, structures, applyVisibility, focusPoint, showStructures,
+  render: () => (needsRender = true),
+  enableSystem: (id) => { state.enabled.add(id); refresh(); },
+  deselectPart: () => { if (selected) { selected = null; applyVisibility(); } },
+  hasPartSelected: () => !!selected,
+}).catch((err) => { console.error('Occult layers failed to load', err); return null; });
+occult?.syncPanel();
 refresh();
 
 if ('serviceWorker' in navigator) {
