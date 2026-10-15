@@ -4,7 +4,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 const $ = (id) => document.getElementById(id);
-const STORE_KEY = 'anatomy.enabled';
 
 // ---------- Scene ----------
 const canvas = $('view');
@@ -105,29 +104,58 @@ const systemsById = Object.fromEntries(catalog.systems.map((s) => [s.id, s]));
 const structures = new Map(); // key "file/name" -> { ...struct, meshes: [] }
 for (const s of catalog.structures) structures.set(`${s.file}/${s.name}`, { ...s, meshes: [] });
 
-let enabled = new Set(['skeletal']);
+// How many structures each sub-filter option has, so empty options can be left out.
+const optionCounts = {};
+for (const s of catalog.structures) for (const [k, v] of Object.entries(s.f || {})) optionCounts[`${k}:${v}`] = (optionCounts[`${k}:${v}`] || 0) + 1;
+
+// ---------- View state (remembered between visits) ----------
+const STATE_KEY = 'anatomy.state.v2';
+const DEFAULT_OPACITY = { skin: 0.3, fascia: 0.7 };
+const state = { enabled: new Set(['skeletal']), off: new Set(), opacity: {}, ghost: 0.15 };
 try {
-  const saved = JSON.parse(localStorage.getItem(STORE_KEY));
-  if (Array.isArray(saved)) enabled = new Set(saved.filter((id) => systemsById[id]));
+  const saved = JSON.parse(localStorage.getItem(STATE_KEY));
+  if (saved) {
+    state.enabled = new Set((saved.enabled || []).filter((id) => systemsById[id]));
+    state.off = new Set(saved.off || []);
+    state.opacity = saved.opacity || {};
+    if (typeof saved.ghost === 'number') state.ghost = saved.ghost;
+  }
 } catch {}
+const opacityOf = (sys) => state.opacity[sys] ?? DEFAULT_OPACITY[sys] ?? 1;
+function save() {
+  try {
+    localStorage.setItem(STATE_KEY, JSON.stringify({ enabled: [...state.enabled], off: [...state.off], opacity: state.opacity, ghost: state.ghost }));
+  } catch {}
+}
 
 const hidden = new Set(); // structure keys the user hid
-let isolated = null; // Set of structure keys, or null
+let isolated = null; // Set of structure keys shown solid while everything else fades, or null
+let isolatedLabel = '';
 let selected = null;
+
+// A structure shows through a system if that system is on and none of its sub-filters exclude it.
+function passes(s, sys) {
+  if (!state.enabled.has(sys)) return false;
+  for (const facet of systemsById[sys].facets || []) {
+    const v = s.f?.[`${sys}.${facet.id}`];
+    if (v && state.off.has(`${sys}.${facet.id}:${v}`)) return false;
+  }
+  return true;
+}
+const shownBy = (s) => s.tags.find((t) => passes(s, t));
 
 // ---------- Materials ----------
 const materialCache = new Map();
-function materialFor(color, see_through = false) {
-  const id = color + (see_through ? '/glass' : '');
+function materialFor(color, opacity = 1) {
+  const op = Math.round(opacity * 20) / 20;
+  const id = `${color}|${op}`;
   if (!materialCache.has(id)) {
     const m = new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.0 });
-    // Skin is drawn see-through so the systems underneath stay visible.
-    if (see_through) Object.assign(m, { transparent: true, opacity: 0.28, depthWrite: false });
+    if (op < 1) Object.assign(m, { transparent: true, opacity: op, depthWrite: false });
     materialCache.set(id, m);
   }
   return materialCache.get(id);
 }
-const baseMaterial = (s) => materialFor(colorOf(s), s.tags.includes('skin'));
 const highlight = new THREE.MeshStandardMaterial({ color: 0x7cc4ff, emissive: 0x1d4f7a, roughness: 0.5 });
 
 function colorOf(s) {
@@ -141,7 +169,7 @@ const loadingFiles = new Set();
 
 function filesNeeded() {
   const need = new Set();
-  for (const s of structures.values()) if (s.tags.some((t) => enabled.has(t))) need.add(s.file);
+  for (const s of structures.values()) if (s.tags.some((t) => state.enabled.has(t))) need.add(s.file);
   return need;
 }
 
@@ -156,7 +184,6 @@ function loadFile(file) {
       obj.traverse((m) => {
         if (!m.isMesh) return;
         m.userData.key = `${file}/${s.name}`;
-        m.material = baseMaterial(s);
         s.meshes.push(m);
       });
     });
@@ -176,55 +203,145 @@ function loadFile(file) {
 
 function updateLoading() {
   $('loading').hidden = loadingFiles.size === 0;
-  const names = [...loadingFiles].join(', ');
-  $('loading-text').textContent = `Loading ${names}…`;
-  for (const chip of document.querySelectorAll('.chip')) {
-    const busy = [...structures.values()].some((s) => s.tags.includes(chip.dataset.id) && loadingFiles.has(s.file));
-    chip.classList.toggle('busy', busy && enabled.has(chip.dataset.id));
+  $('loading-text').textContent = `Loading ${[...loadingFiles].join(', ')}…`;
+  for (const el of document.querySelectorAll('[data-sys]')) {
+    const id = el.dataset.sys;
+    const busy = state.enabled.has(id) && [...structures.values()].some((s) => s.tags.includes(id) && loadingFiles.has(s.file));
+    el.classList.toggle('busy', busy);
   }
 }
 
-function isVisible(key, s) {
-  if (isolated) return isolated.has(key);
-  return !hidden.has(key) && s.tags.some((t) => enabled.has(t));
-}
-
+// ---------- Visibility ----------
 function applyVisibility() {
   for (const [key, s] of structures) {
-    const v = isVisible(key, s);
-    for (const m of s.meshes) m.visible = v;
+    if (!s.meshes.length) continue;
+    const sys = shownBy(s);
+    let visible = false, material = null;
+    if (key === selected) {
+      visible = true; material = highlight;
+    } else if (hidden.has(key)) {
+      visible = false;
+    } else if (isolated) {
+      if (isolated.has(key)) { visible = true; material = materialFor(colorOf(s)); }
+      else if (sys && state.ghost > 0) { visible = true; material = materialFor(colorOf(s), state.ghost); }
+    } else if (sys) {
+      visible = true; material = materialFor(colorOf(s), opacityOf(sys));
+    }
+    for (const m of s.meshes) {
+      m.visible = visible;
+      if (material) m.material = material;
+    }
   }
-  if (selected && !isVisible(selected, structures.get(selected))) select(null);
-  const n = isolated ? isolated.size : hidden.size;
-  $('restore').hidden = !isolated && hidden.size === 0;
-  $('restore-text').textContent = isolated ? 'Isolated view' : `${n} hidden`;
+  const restore = $('restore');
+  restore.hidden = !isolated && hidden.size === 0;
+  $('restore-text').textContent = isolated ? `Focused: ${isolatedLabel}` : `${hidden.size} hidden`;
+  $('ghost-wrap').hidden = !isolated;
   needsRender = true;
 }
 
 function refresh() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify([...enabled])); } catch {}
+  save();
   for (const f of filesNeeded()) loadFile(f);
   applyVisibility();
   updateLoading();
+  syncUI();
 }
 
-// ---------- System chips ----------
+// ---------- Systems UI: quick chips (phone) and the layers panel ----------
 const nav = $('systems');
-for (const sys of catalog.systems) {
-  const b = document.createElement('button');
-  b.className = 'chip';
-  b.dataset.id = sys.id;
-  b.style.setProperty('--c', sys.color);
-  const n = catalog.systems.indexOf(sys) + 1;
-  b.innerHTML = `<span class="dot"></span>${sys.name}${n <= 10 ? `<kbd>${n % 10}</kbd>` : ''}`;
-  b.setAttribute('aria-pressed', enabled.has(sys.id));
-  b.addEventListener('click', () => {
-    enabled.has(sys.id) ? enabled.delete(sys.id) : enabled.add(sys.id);
-    b.setAttribute('aria-pressed', enabled.has(sys.id));
+const panelList = $('panel-list');
+const layersChip = document.createElement('button');
+layersChip.className = 'chip chip-layers';
+layersChip.innerHTML = '☰ Layers';
+layersChip.addEventListener('click', () => togglePanel());
+nav.append(layersChip);
+
+function togglePanel(open = $('panel').classList.contains('closed')) {
+  $('panel').classList.toggle('closed', !open);
+}
+$('panel-close').addEventListener('click', () => togglePanel(false));
+
+catalog.systems.forEach((sys, i) => {
+  const key = i < 10 ? `<kbd>${(i + 1) % 10}</kbd>` : '';
+
+  const chip = document.createElement('button');
+  chip.className = 'chip';
+  chip.dataset.sys = sys.id;
+  chip.style.setProperty('--c', sys.color);
+  chip.innerHTML = `<span class="dot"></span>${sys.name}${key}`;
+  chip.addEventListener('click', () => toggleSystem(sys.id));
+  nav.append(chip);
+
+  const row = document.createElement('section');
+  row.className = 'sys';
+  row.style.setProperty('--c', sys.color);
+  const facets = (sys.facets || []).map((fc) => {
+    const options = fc.options.filter((o) => optionCounts[`${sys.id}.${fc.id}:${o.id}`]);
+    return `<div class="facet" data-facet="${sys.id}.${fc.id}">
+      <div class="facet-head"><span>${fc.name}</span><button data-all>All</button><button data-none>None</button></div>
+      <div class="pills">${options.map((o) => `<button class="pill" data-opt="${sys.id}.${fc.id}:${o.id}">${o.name}</button>`).join('')}</div>
+    </div>`;
+  }).join('');
+  row.innerHTML = `
+    <div class="sys-row">
+      <button class="sys-toggle" data-sys="${sys.id}"><span class="dot"></span><span class="sys-name">${sys.name}</span>${key}</button>
+      <button class="sys-expand" aria-label="Show ${sys.name} filters" aria-expanded="false">▾</button>
+    </div>
+    <div class="sys-body" hidden>
+      <label class="opacity">Opacity <input type="range" min="5" max="100" step="5"><output></output></label>
+      ${facets}
+    </div>`;
+  row.querySelector('.sys-toggle').addEventListener('click', () => toggleSystem(sys.id));
+  const expand = row.querySelector('.sys-expand');
+  expand.addEventListener('click', () => {
+    const open = expand.getAttribute('aria-expanded') !== 'true';
+    expand.setAttribute('aria-expanded', open);
+    row.querySelector('.sys-body').hidden = !open;
+  });
+  const slider = row.querySelector('input[type=range]');
+  slider.addEventListener('input', () => {
+    state.opacity[sys.id] = slider.value / 100;
+    if (!state.enabled.has(sys.id)) state.enabled.add(sys.id);
     refresh();
   });
-  nav.append(b);
+  for (const pill of row.querySelectorAll('.pill')) {
+    pill.addEventListener('click', () => {
+      const id = pill.dataset.opt;
+      state.off.has(id) ? state.off.delete(id) : state.off.add(id);
+      state.enabled.add(sys.id);
+      refresh();
+    });
+  }
+  for (const facet of row.querySelectorAll('.facet')) {
+    const pills = [...facet.querySelectorAll('.pill')].map((p) => p.dataset.opt);
+    facet.querySelector('[data-all]').addEventListener('click', () => { pills.forEach((id) => state.off.delete(id)); state.enabled.add(sys.id); refresh(); });
+    facet.querySelector('[data-none]').addEventListener('click', () => { pills.forEach((id) => state.off.add(id)); refresh(); });
+  }
+  panelList.append(row);
+});
+
+function syncUI() {
+  for (const el of document.querySelectorAll('[data-sys]')) el.setAttribute('aria-pressed', state.enabled.has(el.dataset.sys));
+  for (const pill of document.querySelectorAll('.pill')) pill.setAttribute('aria-pressed', !state.off.has(pill.dataset.opt));
+  for (const row of panelList.children) {
+    const id = row.querySelector('.sys-toggle').dataset.sys;
+    const v = Math.round(opacityOf(id) * 100);
+    row.querySelector('input[type=range]').value = v;
+    row.querySelector('output').textContent = `${v}%`;
+  }
+  $('ghost').value = Math.round(state.ghost * 100);
 }
+
+function toggleSystem(id) {
+  state.enabled.has(id) ? state.enabled.delete(id) : state.enabled.add(id);
+  refresh();
+}
+
+$('ghost').addEventListener('input', (e) => {
+  state.ghost = e.target.value / 100;
+  save();
+  applyVisibility();
+});
 
 // ---------- Picking ----------
 const raycaster = new THREE.Raycaster();
@@ -247,7 +364,9 @@ canvas.addEventListener('pointerup', (e) => {
 function pick(x, y) {
   pointer.set((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1);
   raycaster.setFromCamera(pointer, camera);
-  const hit = raycaster.intersectObject(body, true).find((h) => h.object.visible && h.object.userData.key);
+  const hits = raycaster.intersectObject(body, true).filter((h) => h.object.visible && h.object.userData.key);
+  // Prefer solid parts, so tapping through faded skin or ghosts picks what's inside.
+  const hit = hits.find((h) => h.object.material.opacity >= 0.5) || hits[0];
   select(hit ? hit.object.userData.key : null);
 }
 
@@ -256,17 +375,33 @@ function prettyName(name) {
 }
 
 function select(key) {
-  if (selected) for (const m of structures.get(selected).meshes) m.material = baseMaterial(structures.get(selected));
   selected = key;
   $('info').hidden = !key;
   if (key) {
     const s = structures.get(key);
-    for (const m of s.meshes) m.material = highlight;
     $('info-name').textContent = prettyName(s.name);
     $('info-system').textContent = s.tags.map((t) => systemsById[t].name).join(' · ');
-    $('info-path').textContent = s.groups.join(' › ');
+    const path = $('info-path');
+    path.replaceChildren();
+    s.groups.forEach((g, i) => {
+      if (i) path.append(' › ');
+      const b = document.createElement('button');
+      b.textContent = g;
+      b.title = `Focus on all of ${g}`;
+      b.addEventListener('click', () => isolateGroup(s.file, g));
+      path.append(b);
+    });
   }
-  needsRender = true;
+  applyVisibility();
+}
+
+// Focus on a whole group (e.g. "Cranial nerves"): it stays solid while everything else fades.
+function isolateGroup(file, group) {
+  const keys = [...structures].filter(([, s]) => s.file === file && s.groups.includes(group)).map(([k]) => k);
+  isolated = new Set(keys);
+  isolatedLabel = group;
+  select(null);
+  focusOnKeys(keys);
 }
 
 $('info-close').addEventListener('click', () => select(null));
@@ -275,13 +410,13 @@ $('act-hide').addEventListener('click', () => {
   hidden.add(selected);
   if (isolated) isolated.delete(selected);
   select(null);
-  applyVisibility();
 });
 $('act-isolate').addEventListener('click', () => {
   if (!selected) return;
   isolated = new Set([selected]);
-  applyVisibility();
+  isolatedLabel = prettyName(structures.get(selected).name);
   focusOn(selected);
+  applyVisibility();
 });
 $('act-focus').addEventListener('click', () => selected && focusOn(selected));
 $('act-showall').addEventListener('click', () => {
@@ -292,8 +427,11 @@ $('act-showall').addEventListener('click', () => {
 
 // ---------- Camera moves ----------
 function focusOn(key) {
+  focusOnKeys([key]);
+}
+function focusOnKeys(keys) {
   const box = new THREE.Box3();
-  for (const m of structures.get(key).meshes) box.expandByObject(m);
+  for (const k of keys) for (const m of structures.get(k).meshes) box.expandByObject(m);
   if (box.isEmpty()) return;
   const center = box.getCenter(new THREE.Vector3());
   const radius = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 0.03);
@@ -316,12 +454,6 @@ $('btn-reset').addEventListener('click', () => startFly(HOME.target.clone(), HOM
 $('btn-about').addEventListener('click', () => $('about').showModal());
 
 // ---------- Keyboard shortcuts ----------
-function toggleSystem(id) {
-  enabled.has(id) ? enabled.delete(id) : enabled.add(id);
-  document.querySelector(`.chip[data-id="${id}"]`).setAttribute('aria-pressed', enabled.has(id));
-  refresh();
-}
-
 window.addEventListener('keydown', (e) => {
   if (e.target.closest?.('input, textarea, [contenteditable]') || e.metaKey || e.ctrlKey) { held.clear(); return; }
   if (document.querySelector('dialog[open]') && e.code !== 'Slash') return;
@@ -341,6 +473,7 @@ window.addEventListener('keydown', (e) => {
     case 'KeyI': $('act-isolate').click(); break;
     case 'KeyX': $('act-showall').click(); break;
     case 'Escape': select(null); break;
+    case 'KeyL': togglePanel(); break;
     case 'Slash': {
       const d = $('keys');
       d.open ? d.close() : d.showModal();

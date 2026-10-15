@@ -57,14 +57,23 @@
 
   <nav id="systems" class="systems" aria-label="Body systems"></nav>
 
+  <aside id="panel" class="panel closed" aria-label="Systems and layers">
+    <div class="panel-head">
+      <h2>Systems &amp; layers</h2>
+      <button id="panel-close" class="icon-btn" aria-label="Close">✕</button>
+    </div>
+    <div id="panel-list"></div>
+  </aside>
+
   <div id="restore" class="restore" hidden>
     <span id="restore-text"></span>
+    <label id="ghost-wrap" class="ghost" title="How visible everything else stays">Fade others <input id="ghost" type="range" min="0" max="60" step="5"></label>
     <button id="act-showall">Show all</button>
   </div>
 
   <dialog id="about">
     <h2>About</h2>
-    <p>Tap a system to show or hide it. Drag to rotate, pinch or scroll to zoom, and two-finger drag to pan. Tap any structure to see its name. On a computer, press <kbd>?</kbd> for keyboard controls.</p>
+    <p>Tap a system to show or hide it. Open <b>Layers</b> (or the ▾ next to a system) for sub-filters like spine regions, muscle depth and cranial nerves, plus an opacity slider for each system. In a part's info card, tap any group name, such as Cranial nerves, to focus on the whole group while everything else fades. Drag to rotate, pinch or scroll to zoom, and two-finger drag to pan. Tap any structure to see its name. On a computer, press <kbd>?</kbd> for keyboard controls.</p>
     <p class="small">3D models from <a href="https://www.z-anatomy.com" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derived from BodyParts3D, © The Database Center for Life Science (CC BY-SA 2.1 Japan). Converted and simplified for the web. This app's models are shared under the same CC BY-SA license.</p>
     <form method="dialog"><button>Close</button></form>
   </dialog>
@@ -79,6 +88,7 @@
       <tr><th>Faster / slower</th><td>hold <kbd>Shift</kbd> / <kbd>Alt</kbd></td></tr>
       <tr><th>Reset view</th><td><kbd>R</kbd></td></tr>
       <tr><th>Show / hide systems</th><td><kbd>1</kbd> … <kbd>0</kbd></td></tr>
+      <tr><th>Layers panel (phone)</th><td><kbd>L</kbd></td></tr>
       <tr><th>Selected part</th><td><kbd>F</kbd> focus, <kbd>I</kbd> isolate, <kbd>H</kbd> hide</td></tr>
       <tr><th>Show everything again</th><td><kbd>X</kbd></td></tr>
       <tr><th>Deselect</th><td><kbd>Esc</kbd></td></tr>
