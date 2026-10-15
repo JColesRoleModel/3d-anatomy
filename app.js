@@ -48,7 +48,49 @@ resize();
 let needsRender = true;
 let flyTo = null;
 controls.addEventListener('change', () => (needsRender = true));
+// ---------- Keyboard camera ----------
+// Held keys move the camera smoothly; see the shortcuts dialog for the full list.
+const held = new Set();
+const clock = new THREE.Clock();
+const spherical = new THREE.Spherical();
+const offset = new THREE.Vector3();
+const panVec = new THREE.Vector3();
+const MOVE_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'Equal', 'Minus', 'NumpadAdd', 'NumpadSubtract']);
+const axis = (pos, neg) => (held.has(pos) ? 1 : 0) - (held.has(neg) ? 1 : 0);
+
+function stepKeys(dt) {
+  if (!held.size) return false;
+  const fast = held.has('ShiftLeft') || held.has('ShiftRight');
+  const slow = held.has('AltLeft') || held.has('AltRight');
+  const k = dt * (fast ? 2.5 : slow ? 0.3 : 1);
+  const yaw = axis('ArrowLeft', 'ArrowRight');
+  const pitch = axis('ArrowUp', 'ArrowDown');
+  const panX = axis('KeyD', 'KeyA');
+  const panY = axis('KeyW', 'KeyS');
+  const zoom = axis('KeyE', 'KeyQ') + axis('Equal', 'Minus') + axis('NumpadAdd', 'NumpadSubtract');
+  if (!yaw && !pitch && !panX && !panY && !zoom) return false;
+  flyTo = null;
+
+  offset.copy(camera.position).sub(controls.target);
+  spherical.setFromVector3(offset);
+  spherical.theta -= yaw * 1.6 * k;
+  spherical.phi = THREE.MathUtils.clamp(spherical.phi - pitch * 1.2 * k, 0.05, Math.PI - 0.05);
+  spherical.radius = THREE.MathUtils.clamp(spherical.radius * Math.exp(-zoom * 1.4 * k), controls.minDistance, controls.maxDistance);
+  offset.setFromSpherical(spherical);
+
+  // Pan in the screen plane, scaled to how far away the camera is.
+  const step = spherical.radius * 0.7 * k;
+  panVec.set(0, 0, 0)
+    .addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0), panX * step)
+    .addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1), panY * step);
+  controls.target.add(panVec);
+  camera.position.copy(controls.target).add(offset);
+  return true;
+}
+
 renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (stepKeys(dt)) needsRender = true;
   controls.update();
   if (needsRender || flyTo) {
     stepFly();
@@ -173,7 +215,8 @@ for (const sys of catalog.systems) {
   b.className = 'chip';
   b.dataset.id = sys.id;
   b.style.setProperty('--c', sys.color);
-  b.innerHTML = `<span class="dot"></span>${sys.name}`;
+  const n = catalog.systems.indexOf(sys) + 1;
+  b.innerHTML = `<span class="dot"></span>${sys.name}${n <= 10 ? `<kbd>${n % 10}</kbd>` : ''}`;
   b.setAttribute('aria-pressed', enabled.has(sys.id));
   b.addEventListener('click', () => {
     enabled.has(sys.id) ? enabled.delete(sys.id) : enabled.add(sys.id);
@@ -268,6 +311,45 @@ function stepFly() {
 }
 $('btn-reset').addEventListener('click', () => startFly(HOME.target.clone(), HOME.position.clone()));
 $('btn-about').addEventListener('click', () => $('about').showModal());
+
+// ---------- Keyboard shortcuts ----------
+function toggleSystem(id) {
+  enabled.has(id) ? enabled.delete(id) : enabled.add(id);
+  document.querySelector(`.chip[data-id="${id}"]`).setAttribute('aria-pressed', enabled.has(id));
+  refresh();
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.target.closest?.('input, textarea, [contenteditable]') || e.metaKey || e.ctrlKey) return;
+  if (document.querySelector('dialog[open]') && e.code !== 'Slash') return;
+  held.add(e.code);
+  if (MOVE_KEYS.has(e.code) || e.code.startsWith('Alt')) { e.preventDefault(); return; }
+  if (e.repeat) return;
+  const digit = e.code.match(/^(?:Digit|Numpad)(\d)$/);
+  if (digit) {
+    const sys = catalog.systems[(+digit[1] + 9) % 10];
+    if (sys) toggleSystem(sys.id);
+    return;
+  }
+  switch (e.code) {
+    case 'KeyR': case 'Home': startFly(HOME.target.clone(), HOME.position.clone()); break;
+    case 'KeyF': if (selected) focusOn(selected); break;
+    case 'KeyH': $('act-hide').click(); break;
+    case 'KeyI': $('act-isolate').click(); break;
+    case 'KeyX': $('act-showall').click(); break;
+    case 'Escape': select(null); break;
+    case 'Slash': {
+      const d = $('keys');
+      d.open ? d.close() : d.showModal();
+      break;
+    }
+    default: return;
+  }
+  e.preventDefault();
+});
+window.addEventListener('keyup', (e) => held.delete(e.code));
+window.addEventListener('blur', () => held.clear());
+$('btn-keys').addEventListener('click', () => $('keys').showModal());
 
 // ---------- Go ----------
 refresh();

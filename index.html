@@ -29,7 +29,8 @@
   <header class="topbar">
     <h1>3D Anatomy</h1>
     <div class="topbar-actions">
-      <button id="btn-reset" class="icon-btn" title="Reset view" aria-label="Reset view">⟲</button>
+      <button id="btn-keys" class="icon-btn desktop-only" title="Keyboard controls (?)" aria-label="Keyboard controls">⌨</button>
+      <button id="btn-reset" class="icon-btn" title="Reset view (R)" aria-label="Reset view">⟲</button>
       <button id="btn-about" class="icon-btn" title="About" aria-label="About">i</button>
     </div>
   </header>
@@ -63,8 +64,25 @@
 
   <dialog id="about">
     <h2>About</h2>
-    <p>Tap a system to show or hide it. Drag to rotate, pinch or scroll to zoom, and two-finger drag to pan. Tap any structure to see its name.</p>
+    <p>Tap a system to show or hide it. Drag to rotate, pinch or scroll to zoom, and two-finger drag to pan. Tap any structure to see its name. On a computer, press <kbd>?</kbd> for keyboard controls.</p>
     <p class="small">3D models from <a href="https://www.z-anatomy.com" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derived from BodyParts3D, © The Database Center for Life Science (CC BY-SA 2.1 Japan). Converted and simplified for the web. This app's models are shared under the same CC BY-SA license.</p>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+
+  <dialog id="keys">
+    <h2>Keyboard controls</h2>
+    <table class="keys">
+      <tr><th>Rotate</th><td><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd></td></tr>
+      <tr><th>Move</th><td><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></td></tr>
+      <tr><th>Zoom in / out</th><td><kbd>E</kbd> / <kbd>Q</kbd> &nbsp;or&nbsp; <kbd>+</kbd> / <kbd>−</kbd></td></tr>
+      <tr><th>Faster / slower</th><td>hold <kbd>Shift</kbd> / <kbd>Alt</kbd></td></tr>
+      <tr><th>Reset view</th><td><kbd>R</kbd></td></tr>
+      <tr><th>Show / hide systems</th><td><kbd>1</kbd> … <kbd>0</kbd></td></tr>
+      <tr><th>Selected part</th><td><kbd>F</kbd> focus, <kbd>I</kbd> isolate, <kbd>H</kbd> hide</td></tr>
+      <tr><th>Show everything again</th><td><kbd>X</kbd></td></tr>
+      <tr><th>Deselect</th><td><kbd>Esc</kbd></td></tr>
+      <tr><th>This list</th><td><kbd>?</kbd></td></tr>
+    </table>
     <form method="dialog"><button>Close</button></form>
   </dialog>
 

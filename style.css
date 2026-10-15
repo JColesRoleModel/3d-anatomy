@@ -103,6 +103,21 @@ dialog .small { font-size: 13px; color: var(--muted); }
 dialog a { color: var(--accent); }
 [hidden] { display: none !important; }
 
+kbd {
+  display: inline-block; min-width: 1.6em; padding: 1px 6px; border-radius: 6px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: rgba(255, 255, 255, 0.06);
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center; color: var(--text);
+}
+.chip kbd { margin-left: auto; opacity: 0.6; }
+table.keys { border-collapse: collapse; margin-bottom: 16px; }
+table.keys th { text-align: left; font-weight: 500; color: var(--muted); padding: 5px 16px 5px 0; white-space: nowrap; }
+table.keys td { padding: 5px 0; }
+.desktop-only, .chip kbd { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .desktop-only { display: grid; }
+  .chip kbd { display: inline-block; }
+}
+
 @media (min-width: 800px) {
   .systems { left: auto; top: 70px; bottom: auto; right: 16px; flex-direction: column; background: none; padding: 0; overflow: visible; }
   .info { left: 16px; right: auto; bottom: 16px; width: 380px; margin: 0; }
