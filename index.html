@@ -53,6 +53,10 @@
       <button id="act-isolate">Isolate</button>
       <button id="act-hide">Hide</button>
     </div>
+    <div class="info-color">
+      Colour <label class="swatch big" title="Colour this part"><input type="color" id="part-color" aria-label="Colour this part"></label>
+      <button id="part-color-reset" hidden>Reset colour</button>
+    </div>
   </section>
 
   <nav id="systems" class="systems" aria-label="Body systems"></nav>
@@ -73,7 +77,7 @@
 
   <dialog id="about">
     <h2>About</h2>
-    <p>Tap a system to show or hide it. Open <b>Layers</b> (or the ▾ next to a system) for sub-filters like spine regions, muscle depth and cranial nerves, plus an opacity slider for each system. In a part's info card, tap any group name, such as Cranial nerves, to focus on the whole group while everything else fades. Drag to rotate, pinch or scroll to zoom, and two-finger drag to pan. Tap any structure to see its name. On a computer, press <kbd>?</kbd> for keyboard controls.</p>
+    <p>Tap a system to show or hide it. Open <b>Layers</b> (or the ▾ next to a system) for sub-filters like spine regions, muscle depth and cranial nerves, plus an opacity slider and colour for each system. Tap the small circle next to any sub-filter, or the colour swatch in a part's info card, to give it its own colour. In a part's info card, tap any group name, such as Cranial nerves, to focus on the whole group while everything else fades. Drag to rotate, pinch or scroll to zoom, and two-finger drag to pan. Tap any structure to see its name. On a computer, press <kbd>?</kbd> for keyboard controls.</p>
     <p class="small">3D models from <a href="https://www.z-anatomy.com" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derived from BodyParts3D, © The Database Center for Life Science (CC BY-SA 2.1 Japan). Converted and simplified for the web. This app's models are shared under the same CC BY-SA license.</p>
     <form method="dialog"><button>Close</button></form>
   </dialog>

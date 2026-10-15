@@ -111,7 +111,7 @@ for (const s of catalog.structures) for (const [k, v] of Object.entries(s.f || {
 // ---------- View state (remembered between visits) ----------
 const STATE_KEY = 'anatomy.state.v2';
 const DEFAULT_OPACITY = { skin: 0.3, fascia: 0.7 };
-const state = { enabled: new Set(['skeletal']), off: new Set(), opacity: {}, ghost: 0.15 };
+const state = { enabled: new Set(['skeletal']), off: new Set(), opacity: {}, ghost: 0.15, colors: { sys: {}, opt: {}, part: {} } };
 try {
   const saved = JSON.parse(localStorage.getItem(STATE_KEY));
   if (saved) {
@@ -119,12 +119,13 @@ try {
     state.off = new Set(saved.off || []);
     state.opacity = saved.opacity || {};
     if (typeof saved.ghost === 'number') state.ghost = saved.ghost;
+    if (saved.colors) state.colors = { sys: {}, opt: {}, part: {}, ...saved.colors };
   }
 } catch {}
 const opacityOf = (sys) => state.opacity[sys] ?? DEFAULT_OPACITY[sys] ?? 1;
 function save() {
   try {
-    localStorage.setItem(STATE_KEY, JSON.stringify({ enabled: [...state.enabled], off: [...state.off], opacity: state.opacity, ghost: state.ghost }));
+    localStorage.setItem(STATE_KEY, JSON.stringify({ enabled: [...state.enabled], off: [...state.off], opacity: state.opacity, ghost: state.ghost, colors: state.colors }));
   } catch {}
 }
 
@@ -156,10 +157,26 @@ function materialFor(color, opacity = 1) {
   }
   return materialCache.get(id);
 }
-const highlight = new THREE.MeshStandardMaterial({ color: 0x7cc4ff, emissive: 0x1d4f7a, roughness: 0.5 });
+const HIGHLIGHT = '#ff2d95';
+const highlight = new THREE.MeshStandardMaterial({ color: HIGHLIGHT, emissive: 0x7a0a45, roughness: 0.45 });
 
-function colorOf(s) {
-  return s.color || systemsById[s.tags[0]]?.color || '#cccccc';
+// Colour precedence: the part's own colour, then a sub-filter colour (e.g. all cranial nerves),
+// then the system colour, then the default colour from the model.
+function colorOf(s, key, sys = shownBy(s) || s.tags[0]) {
+  const c = state.colors;
+  if (c.part[key]) return c.part[key];
+  for (const facet of systemsById[sys]?.facets || []) {
+    const v = s.f?.[`${sys}.${facet.id}`];
+    if (v && c.opt[`${sys}.${facet.id}:${v}`]) return c.opt[`${sys}.${facet.id}:${v}`];
+  }
+  return c.sys[sys] || s.color || systemsById[sys]?.color || '#cccccc';
+}
+const defaultColorOf = (s) => s.color || systemsById[s.tags[0]]?.color || '#cccccc';
+
+// Recolouring a whole system (or resetting it) clears the finer overrides inside it.
+function clearColorsIn(sys) {
+  for (const k of Object.keys(state.colors.opt)) if (k.startsWith(`${sys}.`)) delete state.colors.opt[k];
+  for (const k of Object.keys(state.colors.part)) if (structures.get(k)?.tags.includes(sys)) delete state.colors.part[k];
 }
 
 // ---------- Loading ----------
@@ -222,10 +239,10 @@ function applyVisibility() {
     } else if (hidden.has(key)) {
       visible = false;
     } else if (isolated) {
-      if (isolated.has(key)) { visible = true; material = materialFor(colorOf(s)); }
-      else if (sys && state.ghost > 0) { visible = true; material = materialFor(colorOf(s), state.ghost); }
+      if (isolated.has(key)) { visible = true; material = materialFor(colorOf(s, key, sys)); }
+      else if (sys && state.ghost > 0) { visible = true; material = materialFor(colorOf(s, key, sys), state.ghost); }
     } else if (sys) {
-      visible = true; material = materialFor(colorOf(s), opacityOf(sys));
+      visible = true; material = materialFor(colorOf(s, key, sys), opacityOf(sys));
     }
     for (const m of s.meshes) {
       m.visible = visible;
@@ -279,7 +296,7 @@ catalog.systems.forEach((sys, i) => {
     const options = fc.options.filter((o) => optionCounts[`${sys.id}.${fc.id}:${o.id}`]);
     return `<div class="facet" data-facet="${sys.id}.${fc.id}">
       <div class="facet-head"><span>${fc.name}</span><button data-all>All</button><button data-none>None</button></div>
-      <div class="pills">${options.map((o) => `<button class="pill" data-opt="${sys.id}.${fc.id}:${o.id}">${o.name}</button>`).join('')}</div>
+      <div class="pills">${options.map((o) => `<span class="pill-wrap"><button class="pill" data-opt="${sys.id}.${fc.id}:${o.id}">${o.name}</button><label class="swatch" title="Colour ${o.name}"><input type="color" data-color-opt="${sys.id}.${fc.id}:${o.id}" aria-label="Colour ${o.name}"></label></span>`).join('')}</div>
     </div>`;
   }).join('');
   row.innerHTML = `
@@ -289,6 +306,7 @@ catalog.systems.forEach((sys, i) => {
     </div>
     <div class="sys-body" hidden>
       <label class="opacity">Opacity <input type="range" min="5" max="100" step="5"><output></output></label>
+      <div class="colors">Colour <label class="swatch big" title="Colour every part of ${sys.name}"><input type="color" data-color-sys="${sys.id}" aria-label="Colour all of ${sys.name}"></label><button data-reset-colors>Reset colours</button></div>
       ${facets}
     </div>`;
   row.querySelector('.sys-toggle').addEventListener('click', () => toggleSystem(sys.id));
@@ -304,6 +322,24 @@ catalog.systems.forEach((sys, i) => {
     if (!state.enabled.has(sys.id)) state.enabled.add(sys.id);
     refresh();
   });
+  row.querySelector('[data-color-sys]').addEventListener('input', (e) => {
+    clearColorsIn(sys.id);
+    state.colors.sys[sys.id] = e.target.value;
+    state.enabled.add(sys.id);
+    refresh();
+  });
+  row.querySelector('[data-reset-colors]').addEventListener('click', () => {
+    clearColorsIn(sys.id);
+    delete state.colors.sys[sys.id];
+    refresh();
+  });
+  for (const input of row.querySelectorAll('[data-color-opt]')) {
+    input.addEventListener('input', () => {
+      state.colors.opt[input.dataset.colorOpt] = input.value;
+      state.enabled.add(sys.id);
+      refresh();
+    });
+  }
   for (const pill of row.querySelectorAll('.pill')) {
     pill.addEventListener('click', () => {
       const id = pill.dataset.opt;
@@ -330,6 +366,18 @@ function syncUI() {
     row.querySelector('output').textContent = `${v}%`;
   }
   $('ghost').value = Math.round(state.ghost * 100);
+  for (const input of document.querySelectorAll('[data-color-sys]')) {
+    const id = input.dataset.colorSys;
+    input.value = state.colors.sys[id] || systemsById[id].color;
+    input.parentElement.style.background = input.value;
+  }
+  for (const input of document.querySelectorAll('[data-color-opt]')) {
+    const c = state.colors.opt[input.dataset.colorOpt];
+    input.value = c || '#ff2d95';
+    input.parentElement.classList.toggle('set', !!c);
+    input.parentElement.style.background = c || '';
+  }
+  syncPartColor();
 }
 
 function toggleSystem(id) {
@@ -380,6 +428,7 @@ function select(key) {
   if (key) {
     const s = structures.get(key);
     $('info-name').textContent = prettyName(s.name);
+    syncPartColor();
     $('info-system').textContent = s.tags.map((t) => systemsById[t].name).join(' · ');
     const path = $('info-path');
     path.replaceChildren();
@@ -405,6 +454,27 @@ function isolateGroup(file, group) {
 }
 
 $('info-close').addEventListener('click', () => select(null));
+
+function syncPartColor() {
+  if (!selected) return;
+  const s = structures.get(selected);
+  const c = colorOf(s, selected);
+  $('part-color').value = c;
+  $('part-color').parentElement.style.background = c;
+  $('part-color-reset').hidden = !state.colors.part[selected];
+}
+$('part-color').addEventListener('input', (e) => {
+  state.colors.part[selected] = e.target.value;
+  save();
+  syncPartColor();
+});
+// Close the card after picking so the new colour is visible instead of the pink highlight.
+$('part-color').addEventListener('change', () => select(null));
+$('part-color-reset').addEventListener('click', () => {
+  delete state.colors.part[selected];
+  save();
+  syncPartColor();
+});
 $('act-hide').addEventListener('click', () => {
   if (!selected) return;
   hidden.add(selected);
