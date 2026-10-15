@@ -231,7 +231,10 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let down = null;
 
+canvas.tabIndex = 0;
+canvas.style.outline = 'none';
 canvas.addEventListener('pointerdown', (e) => {
+  canvas.focus({ preventScroll: true });
   down = e.isPrimary ? { x: e.clientX, y: e.clientY, t: performance.now() } : null;
 });
 canvas.addEventListener('pointerup', (e) => {
@@ -320,7 +323,7 @@ function toggleSystem(id) {
 }
 
 window.addEventListener('keydown', (e) => {
-  if (e.target.closest?.('input, textarea, [contenteditable]') || e.metaKey || e.ctrlKey) return;
+  if (e.target.closest?.('input, textarea, [contenteditable]') || e.metaKey || e.ctrlKey) { held.clear(); return; }
   if (document.querySelector('dialog[open]') && e.code !== 'Slash') return;
   held.add(e.code);
   if (MOVE_KEYS.has(e.code) || e.code.startsWith('Alt')) { e.preventDefault(); return; }
@@ -347,7 +350,11 @@ window.addEventListener('keydown', (e) => {
   }
   e.preventDefault();
 });
-window.addEventListener('keyup', (e) => held.delete(e.code));
+window.addEventListener('keyup', (e) => {
+  held.delete(e.code);
+  // macOS drops keyup events for keys released while Cmd is down.
+  if (e.key === 'Meta') held.clear();
+});
 window.addEventListener('blur', () => held.clear());
 $('btn-keys').addEventListener('click', () => $('keys').showModal());
 
