@@ -509,6 +509,16 @@ polarityRows.push({ id: 'pol-brain', name: 'The brain (Abel and Cain)', sub: 'po
     F('Left half of the brain', 'CAIN · corresponds to the RIGHT side of the BODY', { src: 'WB' }),
     F('The brain', 'able governs the R side · cain governs the L side · R ear · L ear · R eye · L eye · mouth · R nostril · L nostril', { src: 'WB', q: true, note: 'These two notes on your board point opposite ways: the first says Abel (right brain) goes with the left of the body, the second says Abel governs the right side.' }),
   ] });
+// Man, woman and handedness, from Franz Bardon's Initiation into Hermetics (quoted from the 1987 English edition).
+polarityRows.push({ id: 'pol-bardon', name: 'Man, woman and handedness', sub: 'Bardon', listOnly: true, color: '#c05cff',
+  fields: [
+    F('Man and woman', '"The head region of the female is electrical, therefore red, the region of the genitals is magnetical, consequently blue." "As for the male, it happens to be in inverted order."', { src: 'Bardon p. 8' }),
+    F('Genitals', 'Male: front electric, back and sides neutral, inside magnetic · Female: front magnetic, back and sides neutral, inside electric', { src: 'Bardon p. 18', note: 'The same as the male and female rows on your board.' }),
+    F('Left-handed people', '"The right side of the human body is active-electric, provided that the individual be right-handed." "The left side is passive-magnetic. As for the left-handed person, the contrary will take place."', { src: 'Bardon', note: 'Read plainly, a left-handed person\'s right and left side values swap.' }),
+    F('This body', 'The 3D body is male and the colours assume a right-handed person.'),
+    F('Hands, inside', 'Bardon: "the inside neutral" · your board: interior is magnetic', { src: 'Bardon p. 17', q: true, note: 'The two sources differ. The hand bones are coloured magnetic, as on your board.' }),
+    F('Feet', '"Fore- and back part neutral, right side magnetical, left side electrical, the inside neutral."', { src: 'Bardon p. 17', note: 'Not on your board, so the feet are not coloured.' }),
+  ] });
 const polarityLegend = [
   { id: 'electric', name: 'Electric', color: '#ff4d4d' }, { id: 'magnetic', name: 'Magnetic', color: '#4d8bff' },
   { id: 'neutral', name: 'Neutral', color: '#c8ced6' }, { id: 'electro-magnetic', name: 'Electro-magnetic', color: '#c05cff' },
@@ -536,7 +546,7 @@ const layers = [
     about: 'Sushumna through the real central canal, ida and pingala crossing at each chakra to the nostrils, and kundalini coiled at the base.' },
   { id: 'polarity', name: 'Electric / magnetic polarity', icon: 'icons/occult/polarity.svg', color: '#c05cff', items: polarityRows, legend: polarityLegend,
     skin: Object.fromEntries(Object.entries(SKIN).map(([k, v]) => [k, v])), interior: INTERIOR, rows: Object.fromEntries(POLARITY_ROWS.map(([id, title, text]) => [id, { title, text }])),
-    about: 'Colours the skin and inner organs by your electric / magnetic table. Turn on Skin (and Organs, Nervous) to see it.' },
+    about: 'Colours the skin and inner organs by your electric / magnetic table. Turn on Skin (and Organs, Nervous) to see it. Man, woman and handedness, from Bardon, are at the end of the list.' },
 ];
 const SOURCES = {
   'WB': 'OCCULT ANATOMY OF MAN - WHITEBOARD (Canva)',
@@ -544,6 +554,7 @@ const SOURCES = {
   'UM p5': 'UNIVERSAL MAP, page 5 (Canva)',
   'UM p6': 'UNIVERSAL MAP, page 6 (Canva)',
   '7C': '7 CHAKRAS, pages 1 and 3 (Canva)',
+  'Bardon': 'Franz Bardon, Initiation into Hermetics (1987 English edition)',
 };
 fs.writeFileSync('data/occult.json', JSON.stringify({ sources: SOURCES, layers }));
 console.log('wrote data/occult.json', (fs.statSync('data/occult.json').size / 1024).toFixed(1), 'KB');

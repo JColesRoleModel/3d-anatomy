@@ -77,6 +77,18 @@ export async function initOccult(api) {
     return t;
   }
   const overlay = (m) => Object.assign(m, { depthTest: false, depthWrite: false, transparent: true });
+  // The nadis carry pulses of light rising from the base of the spine.
+  const flowTime = { value: 0 };
+  const flowMaterial = (color) => new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(color) }, uTime: flowTime },
+    vertexShader: 'varying float vX; void main(){ vX = uv.x; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: /* glsl */`
+      uniform vec3 uColor; uniform float uTime; varying float vX;
+      void main(){
+        float pulse = pow(0.5 + 0.5 * sin(vX * 18.85 - uTime * 2.2), 10.0);
+        gl_FragColor = vec4(mix(uColor, vec3(1.0, 0.97, 0.88), pulse * 0.65), 0.9);
+      }`,
+  });
 
   for (const layer of layers) {
     const group = new THREE.Group();
@@ -93,7 +105,7 @@ export async function initOccult(api) {
       if (item.points) {
         const curve = new THREE.CatmullRomCurve3(item.points.map((p) => new THREE.Vector3(...p)), false, 'centripetal');
         const geo = new THREE.TubeGeometry(curve, item.points.length * 6, item.radius, 8, false);
-        const mesh = new THREE.Mesh(geo, overlay(new THREE.MeshBasicMaterial({ color: item.color, opacity: 0.9 })));
+        const mesh = new THREE.Mesh(geo, overlay(flowMaterial(item.color)));
         mesh.renderOrder = 19;
         mesh.userData.occult = { layer: layer.id, item: item.id };
         group.add(mesh);
@@ -104,6 +116,7 @@ export async function initOccult(api) {
         const sprite = new THREE.Sprite(overlay(new THREE.SpriteMaterial({ map })));
         sprite.position.set(...item.pos);
         sprite.scale.setScalar(item.size || 0.05);
+        sprite.userData.size = item.size || 0.05;
         sprite.renderOrder = 20;
         sprite.userData.occult = { layer: layer.id, item: item.id };
         group.add(sprite);
@@ -243,13 +256,22 @@ export async function initOccult(api) {
   }
 
   // The chosen symbol grows a little so it is easy to find.
-  let grown = null;
+  let grown = null, breathScale = 1;
+  const sizeOf = (sprite) => sprite.userData.size * (sprite === grown ? 1.45 : 1) * breathScale;
   function highlight(itemId) {
-    if (grown) { grown.obj.scale.setScalar(grown.size); grown = null; }
+    const was = grown;
     const obj = itemId && objectsByItem.get(itemId);
-    if (obj?.isSprite) {
-      grown = { obj, size: obj.scale.x };
-      obj.scale.setScalar(grown.size * 1.45);
+    grown = obj?.isSprite ? obj : null;
+    if (was) was.scale.setScalar(sizeOf(was));
+    if (grown) grown.scale.setScalar(sizeOf(grown));
+  }
+  // Every frame: the symbols breathe with the sky, and light flows up the nadis.
+  function animate(time, breath) {
+    flowTime.value = time;
+    breathScale = 1 + 0.08 * (breath - 0.5);
+    for (const group of Object.values(groups)) {
+      if (!group.visible) continue;
+      for (const obj of group.children) if (obj.isSprite) obj.scale.setScalar(sizeOf(obj));
     }
   }
 
@@ -314,6 +336,7 @@ export async function initOccult(api) {
   }
 
   return {
+    animate,
     pick,
     select,
     deselect,

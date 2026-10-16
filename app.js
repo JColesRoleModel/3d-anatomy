@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { initOccult } from './occult.js';
+import { initCosmos } from './cosmos.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -12,14 +13,14 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x101418);
+const scene = new THREE.Scene(); // the sky comes from cosmos.js
 
 const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 50);
-const HOME = { target: new THREE.Vector3(0, 0.82, 0), position: new THREE.Vector3(0, 0.85, 3.5) };
+const HOME = { target: new THREE.Vector3(0, 0.95, 0), position: new THREE.Vector3(0, 1.0, 4.3) };
 camera.position.copy(HOME.position);
 
-scene.add(new THREE.HemisphereLight(0xffffff, 0x2a2f36, 1.6));
+const hemi = new THREE.HemisphereLight(0xffffff, 0x2a2f36, 1.6);
+scene.add(hemi);
 const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
 keyLight.position.set(0.6, 1, 1.2);
 camera.add(keyLight);
@@ -32,6 +33,9 @@ controls.dampingFactor = 0.08;
 controls.minDistance = 0.08;
 controls.maxDistance = 8;
 controls.update();
+
+const cosmos = initCosmos({ scene, camera, renderer, controls, hemi });
+if (new URLSearchParams(location.search).has('debug')) Object.assign(window, { cosmos, scene, camera, controls }); // for testing
 
 const body = new THREE.Group();
 scene.add(body);
@@ -47,11 +51,13 @@ resize();
 
 let needsRender = true;
 let flyTo = null;
+let occult = null; // occult anatomy layers (occult.js), set up once the panel exists
 controls.addEventListener('change', () => (needsRender = true));
 // ---------- Keyboard camera ----------
 // Held keys move the camera smoothly; see the shortcuts dialog for the full list.
 const held = new Set();
-const clock = new THREE.Clock();
+const timer = new THREE.Timer();
+timer.connect(document);
 const spherical = new THREE.Spherical();
 const offset = new THREE.Vector3();
 const panVec = new THREE.Vector3();
@@ -88,14 +94,24 @@ function stepKeys(dt) {
   return true;
 }
 
-renderer.setAnimationLoop(() => {
-  const dt = Math.min(clock.getDelta(), 0.05);
+// The sky and the art keep moving, so frames are drawn continuously unless motion is turned off. Those ambient
+// frames are capped near 60 a second, and if the device can't keep up the drawing resolution is lowered.
+let sinceFrame = 0, slowFor = 0;
+renderer.setAnimationLoop((now) => {
+  timer.update(now);
+  const dt = Math.min(timer.getDelta(), 0.05);
   if (stepKeys(dt)) needsRender = true;
   controls.update();
-  if (needsRender || flyTo) {
+  sinceFrame += dt;
+  const ambient = cosmos.update(dt);
+  if (needsRender || flyTo || (ambient && sinceFrame >= 0.015)) {
     stepFly();
+    occult?.animate?.(cosmos.time, cosmos.breath);
     renderer.render(scene, camera);
     needsRender = false;
+    slowFor = sinceFrame > 0.04 ? slowFor + sinceFrame : 0;
+    if (slowFor > 3 && renderer.getPixelRatio() > 1) { renderer.setPixelRatio(1); resize(); slowFor = 0; }
+    sinceFrame = 0;
   }
 });
 
@@ -130,7 +146,6 @@ function save() {
   } catch {}
 }
 
-let occult = null; // occult anatomy layers (occult.js), set up once the panel exists
 const hidden = new Set(); // structure keys the user hid
 let isolated = null; // Set of structure keys shown solid while everything else fades, or null
 let isolatedLabel = '';
@@ -596,6 +611,20 @@ window.addEventListener('keyup', (e) => {
 });
 window.addEventListener('blur', () => held.clear());
 $('btn-keys').addEventListener('click', () => $('keys').showModal());
+
+// ---------- Sky & art settings ----------
+const syncStill = () => {
+  document.body.classList.toggle('still', !cosmos.settings.motion);
+  $('set-wish').disabled = !(cosmos.settings.sky && cosmos.settings.motion);
+};
+for (const key of ['sky', 'art', 'motion']) {
+  const box = $(`set-${key}`);
+  box.checked = cosmos.settings[key];
+  box.addEventListener('change', () => { cosmos.set(key, box.checked); syncStill(); needsRender = true; });
+}
+$('set-wish').addEventListener('click', () => { cosmos.event(); $('scene').close(); });
+$('btn-scene').addEventListener('click', () => $('scene').showModal());
+syncStill();
 
 // ---------- Go ----------
 occult = await initOccult({
