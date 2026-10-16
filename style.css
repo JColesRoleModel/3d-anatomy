@@ -344,3 +344,42 @@ table.keys td { padding: 5px 0; }
   .brand-logo { width: 36px; }
   .brand-sub { font-size: 10.5px; letter-spacing: 0.6px; white-space: normal; }
 }
+
+/* ---------- Path tracing ---------- */
+.trace { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.trace-head { font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--accent); }
+.trace-about { margin: 4px 0 0; font-size: 13px; color: var(--text); }
+.trace-facts { margin: 4px 0 0; font-size: 12px; color: var(--cream); }
+.trace-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.trace-actions button {
+  flex: 1 1 auto; padding: 7px 10px; border-radius: 10px; font-size: 13px;
+  border: 1px solid var(--line); background: rgba(246, 227, 180, 0.06);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.trace-actions button:hover { border-color: rgba(230, 189, 106, 0.55); background: rgba(230, 189, 106, 0.12); }
+.trace-actions button.on { border-color: var(--accent); background: rgba(230, 189, 106, 0.2); box-shadow: 0 0 12px rgba(230, 189, 106, 0.3); }
+.trace-msg { margin: 8px 0 0; font-size: 13px; color: var(--emerald); }
+.trace-route { margin-top: 10px; font-size: 13px; max-height: 38vh; overflow-y: auto; }
+.trace-words { margin: 0 0 8px; color: var(--text); }
+.trace-name { border: 0; background: none; padding: 2px 0; color: var(--text); text-align: left; font-size: 13px; }
+.trace-name:hover { color: var(--accent); }
+.trace-name.marked { color: #ff5fae; }
+.trace-name.virtual { font-style: italic; color: var(--muted); }
+.trace-name small { color: var(--muted); font-size: 11px; }
+.trace-route summary { cursor: pointer; }
+.trace-route summary::marker { color: var(--muted); }
+.trace-kids { margin-left: 5px; padding-left: 10px; border-left: 1px solid var(--line); }
+.trace-kids[data-dir]::before { content: attr(data-dir); display: block; font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.trace-node > .trace-name { padding-left: 14px; }
+.trace-list { margin: 0; padding-left: 22px; }
+.trace-list li::marker { color: var(--muted); font-size: 11px; }
+.trace-legend { margin: 8px 0 0; font-size: 11px; color: var(--muted); }
+.trace-route summary .trace-name { display: inline; }
+.trace-sub { margin: 10px 0 2px; font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.6px; }
+.trace-words + .trace-sub { margin-top: 0; }
+.trace-steps > summary { margin-bottom: 6px; font-size: 12px; color: var(--accent); }
+@media (max-width: 799px) {
+  /* Keep the card clear of the focus bar at the top. */
+  .info { max-height: calc(100vh - 200px - var(--safe-top) - var(--safe-bottom)); }
+  .trace-route { max-height: none; }
+}

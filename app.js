@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { initOccult } from './occult.js';
 import { initCosmos } from './cosmos.js';
+import { initTrace } from './trace.js';
 import * as account from './account.js';
 
 const $ = (id) => document.getElementById(id);
@@ -53,6 +54,7 @@ resize();
 let needsRender = true;
 let flyTo = null;
 let occult = null; // occult anatomy layers (occult.js), set up once the panel exists
+let trace = null; // path tracing (trace.js), set up once its data has loaded
 controls.addEventListener('change', () => (needsRender = true));
 // ---------- Keyboard camera ----------
 // Held keys move the camera smoothly; see the shortcuts dialog for the full list.
@@ -104,7 +106,8 @@ renderer.setAnimationLoop((now) => {
   if (stepKeys(dt)) needsRender = true;
   controls.update();
   sinceFrame += dt;
-  const ambient = cosmos.update(dt);
+  const pulsing = trace?.update(dt); // path-tracing pulses
+  const ambient = cosmos.update(dt) || pulsing;
   if (needsRender || flyTo || (ambient && sinceFrame >= 0.015)) {
     stepFly();
     occult?.animate?.(cosmos.time, cosmos.breath);
@@ -254,12 +257,12 @@ function applyVisibility() {
     if (!s.meshes.length) continue;
     const sys = shownBy(s);
     let visible = false, material = null;
-    if (key === selected) {
+    if (key === selected || trace?.marked(key)) {
       visible = true; material = highlight;
     } else if (hidden.has(key)) {
       visible = false;
     } else if (isolated) {
-      if (isolated.has(key)) { visible = true; material = materialFor(colorOf(s, key, sys)); }
+      if (isolated.has(key)) { const c = colorOf(s, key, sys); visible = true; material = trace?.material(key, c) || materialFor(c); }
       else if (sys && state.ghost > 0) { visible = true; material = materialFor(colorOf(s, key, sys), state.ghost); }
     } else if (sys) {
       const op = occult ? occult.opacityFor(sys, opacityOf(sys)) : opacityOf(sys);
@@ -274,6 +277,7 @@ function applyVisibility() {
   restore.hidden = !isolated && hidden.size === 0;
   $('restore-text').textContent = isolated ? `Focused: ${isolatedLabel}` : `${hidden.size} hidden`;
   $('ghost-wrap').hidden = !isolated;
+  trace?.sync();
   needsRender = true;
 }
 
@@ -433,12 +437,14 @@ canvas.addEventListener('pointerup', (e) => {
 function pick(x, y) {
   pointer.set((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1);
   raycaster.setFromCamera(pointer, camera);
-  const occ = occult?.pick(raycaster);
+  const occ = !trace?.routing && occult?.pick(raycaster);
   if (occ) { occult.select(occ.layer, occ.item); return; }
   const hits = raycaster.intersectObject(body, true).filter((h) => h.object.visible && h.object.userData.key);
   // Prefer solid parts, so tapping through faded skin or ghosts picks what's inside.
   const hit = hits.find((h) => h.object.material.opacity >= 0.5) || hits[0];
-  select(hit ? hit.object.userData.key : null);
+  const key = hit ? hit.object.userData.key : null;
+  if (trace?.routing) { trace.routeTo(key); return; } // choosing the second part of a route
+  select(key);
 }
 
 function prettyName(name) {
@@ -471,6 +477,7 @@ function select(key) {
       path.append(b);
     });
   }
+  trace?.card(key);
   applyVisibility();
 }
 
@@ -483,7 +490,7 @@ function isolateGroup(file, group) {
   focusOnKeys(keys);
 }
 
-$('info-close').addEventListener('click', () => { select(null); occult?.deselect(); });
+$('info-close').addEventListener('click', () => { trace?.cancelRoute(); select(null); occult?.deselect(); });
 
 function syncPartColor() {
   if (!selected) return;
@@ -545,21 +552,26 @@ function focusPoint(center, radius, dir = camera.position.clone().sub(controls.t
 }
 // Light up a set of structures (turning their systems on) while everything else fades, then fly to them.
 function showStructures(keys, label) {
+  if (!keys.some((k) => structures.has(k))) return;
+  select(null);
+  showSet(keys, label);
+}
+// The same, keeping the info card as it is. Returns the new focus set.
+function showSet(keys, label, fly = true) {
   keys = keys.filter((k) => structures.has(k));
-  if (!keys.length) return;
   for (const k of keys) {
     const s = structures.get(k);
     if (!s.tags.some((t) => state.enabled.has(t))) state.enabled.add(s.tags[0]);
   }
-  select(null);
   hidden.clear();
-  isolated = new Set(keys);
+  const set = isolated = new Set(keys);
   isolatedLabel = label;
   refresh();
   Promise.all([...new Set(keys.map((k) => structures.get(k).file))].map(loadFile)).then(() => {
     applyVisibility();
-    focusOnKeys(keys);
+    if (fly && isolated === set) focusOnKeys(keys);
   });
+  return set;
 }
 function startFly(target, position) {
   flyTo = { t0: performance.now(), fromT: controls.target.clone(), fromP: camera.position.clone(), target, position };
@@ -594,7 +606,7 @@ window.addEventListener('keydown', (e) => {
     case 'KeyH': $('act-hide').click(); break;
     case 'KeyI': $('act-isolate').click(); break;
     case 'KeyX': $('act-showall').click(); break;
-    case 'Escape': select(null); occult?.deselect(); break;
+    case 'Escape': trace?.cancelRoute(); select(null); occult?.deselect(); break;
     case 'KeyL': togglePanel(); break;
     case 'Slash': {
       const d = $('keys');
@@ -644,6 +656,7 @@ function snapshot() {
     hidden: [...hidden],
     isolated: isolated ? [...isolated] : null,
     isolatedLabel,
+    trace: trace?.snapshot() || null,
     camera: { position: round(camera.position), target: round(controls.target) },
   };
 }
@@ -663,6 +676,7 @@ function restore(snap) {
   occult?.deselect();
   occult?.setLayers(snap.occult || []);
   refresh();
+  if (snap.trace) trace?.restore(snap.trace);
   const c = snap.camera;
   if (c?.position && c?.target) startFly(new THREE.Vector3(...c.target), new THREE.Vector3(...c.position));
 }
@@ -844,6 +858,19 @@ occult = await initOccult({
 }).catch((err) => { console.error('Occult layers failed to load', err); return null; });
 occult?.syncPanel();
 refresh();
+
+initTrace({
+  scene, camera, structures, prettyName, focusOnKeys, focusPoint, applyVisibility,
+  show: showSet,
+  clear: () => { isolated = null; applyVisibility(); },
+  isolated: () => isolated,
+  motion: () => cosmos.settings.motion,
+}).then((t) => {
+  trace = t;
+  if (selected) trace.card(selected);
+  if (new URLSearchParams(location.search).has('debug')) Object.assign(window, { trace, selectPart: select }); // for testing
+})
+  .catch((err) => console.error('Path tracing failed to load', err));
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch((err) => console.warn('Service worker not registered', err));
