@@ -175,14 +175,14 @@ export async function initTrace(ctx) {
   }
   window.addEventListener('resize', sizeLabels);
 
-  function run(mode, a, b, fly = true) {
+  function run(mode, a, b, fly = true, extra = [], label = null) {
     let keys, lbl, words = '', r = null;
     if (mode === 'up') { keys = walk(a, 'up'); lbl = `${ctx.prettyName(NAME(a))}, ${backWords(a).toLowerCase()}`; }
     else if (mode === 'down') { keys = walk(a, 'down'); lbl = `${ctx.prettyName(NAME(a))} and ${branchWord(a)}`; }
     else { r = route(a, b); ({ keys, words } = r); lbl = `${short(a)} to ${short(b)}`; }
     const { edges, entry, dist } = layout(keys);
-    const set = ctx.show([...keys].filter((k) => ctx.structures.has(k)), lbl, fly);
-    current = { mode, a, b, keys, set, edges, entry, dist, mats: new Map(), words, order: r?.order, meet: r?.meet };
+    const set = ctx.show([...keys, ...extra].filter((k) => ctx.structures.has(k)), label || lbl, fly);
+    current = { mode, a, b, keys, set, edges, entry, dist, mats: new Map(), words, order: r?.order, meet: r?.meet, extra };
     mark = mode === 'route' ? b : null;
     drawGaps(edges);
     ctx.applyVisibility();
@@ -453,7 +453,9 @@ export async function initTrace(ctx) {
       phase.value += dt * (isVessel(current.a) ? BLOOD_SPEED : NERVE_SPEED) / WAVE;
       return true;
     },
-    snapshot: () => (current && current.set === ctx.isolated() ? { mode: current.mode, a: current.a, b: current.b || null } : null),
+    snapshot: () => (current && current.set === ctx.isolated() && !current.extra.length ? { mode: current.mode, a: current.a, b: current.b || null } : null),
+    // Traces a part back to its source alongside other parts that stay lit (for the Conditions studies).
+    traceWith(key, extra, label) { if (nodes[key]) run('up', key, null, false, extra, label); },
     restore(t) {
       if (!t || !nodes[t.a] || (t.mode === 'route' && !nodes[t.b])) return;
       cardKey = t.a;

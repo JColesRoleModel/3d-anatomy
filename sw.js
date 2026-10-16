@@ -1,9 +1,9 @@
 // Offline support: app files are network-first so updates show up,
 // models and libraries are cache-first because they are large and rarely change.
-const VERSION = 'v11';
+const VERSION = 'v12';
 const SHELL = `shell-${VERSION}`;
 const ASSETS = `assets-${VERSION}`;
-const PRECACHE = ['./', 'index.html', 'style.css', 'app.js', 'occult.js', 'cosmos.js', 'trace.js', 'account.js', 'firebase-config.js', 'manifest.webmanifest', 'data/catalog.json', 'data/occult.json', 'data/paths.json',
+const PRECACHE = ['./', 'index.html', 'style.css', 'app.js', 'occult.js', 'cosmos.js', 'trace.js', 'conditions.js', 'account.js', 'firebase-config.js', 'manifest.webmanifest', 'data/catalog.json', 'data/occult.json', 'data/paths.json', 'data/conditions.json',
   'icons/brand/tree-gold.png', 'icons/brand/seal.png', 'vendor/fonts/noto-sans-symbols-symbols-500-normal.woff2',
   'vendor/fonts/cormorant-garamond-latin-600-normal.woff2', 'vendor/fonts/cormorant-garamond-latin-700-normal.woff2', 'vendor/fonts/cormorant-garamond-latin-500-italic.woff2',
   'vendor/three.module.js', 'vendor/three.core.js', 'vendor/addons/controls/OrbitControls.js',

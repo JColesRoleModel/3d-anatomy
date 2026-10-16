@@ -5,6 +5,7 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { initOccult } from './occult.js';
 import { initCosmos } from './cosmos.js';
 import { initTrace } from './trace.js';
+import { initConditions } from './conditions.js';
 import * as account from './account.js';
 
 const $ = (id) => document.getElementById(id);
@@ -55,6 +56,7 @@ let needsRender = true;
 let flyTo = null;
 let occult = null; // occult anatomy layers (occult.js), set up once the panel exists
 let trace = null; // path tracing (trace.js), set up once its data has loaded
+let cond = null; // the Conditions studies (conditions.js)
 controls.addEventListener('change', () => (needsRender = true));
 // ---------- Keyboard camera ----------
 // Held keys move the camera smoothly; see the shortcuts dialog for the full list.
@@ -107,7 +109,8 @@ renderer.setAnimationLoop((now) => {
   controls.update();
   sinceFrame += dt;
   const pulsing = trace?.update(dt); // path-tracing pulses
-  const ambient = cosmos.update(dt) || pulsing;
+  const moving = cond?.update(dt); // a condition study raising the arm
+  const ambient = cosmos.update(dt) || pulsing || moving;
   if (needsRender || flyTo || (ambient && sinceFrame >= 0.015)) {
     stepFly();
     occult?.animate?.(cosmos.time, cosmos.breath);
@@ -153,6 +156,7 @@ function save() {
 const hidden = new Set(); // structure keys the user hid
 let isolated = null; // Set of structure keys shown solid while everything else fades, or null
 let isolatedLabel = '';
+const seeThrough = new Map(); // focused parts drawn part-transparent so what's under them shows (Conditions)
 let selected = null;
 
 // A structure shows through a system if that system is on and none of its sub-filters exclude it.
@@ -236,6 +240,7 @@ function loadFile(file) {
     loadingFiles.delete(file);
     updateLoading();
     applyVisibility();
+    cond?.loaded();
   });
   files.set(file, p);
   return p;
@@ -262,7 +267,7 @@ function applyVisibility() {
     } else if (hidden.has(key)) {
       visible = false;
     } else if (isolated) {
-      if (isolated.has(key)) { const c = colorOf(s, key, sys); visible = true; material = trace?.material(key, c) || materialFor(c); }
+      if (isolated.has(key)) { const c = colorOf(s, key, sys); visible = true; material = trace?.material(key, c) || materialFor(c, seeThrough.get(key) ?? 1); }
       else if (sys && state.ghost > 0) { visible = true; material = materialFor(colorOf(s, key, sys), state.ghost); }
     } else if (sys) {
       const op = occult ? occult.opacityFor(sys, opacityOf(sys)) : opacityOf(sys);
@@ -657,11 +662,13 @@ function snapshot() {
     isolated: isolated ? [...isolated] : null,
     isolatedLabel,
     trace: trace?.snapshot() || null,
+    condition: cond?.snapshot() || null,
     camera: { position: round(camera.position), target: round(controls.target) },
   };
 }
 
 function restore(snap) {
+  if (!snap.condition) cond?.close();
   const v = snap.view || {};
   state.enabled = new Set((v.enabled || []).filter((id) => systemsById[id]));
   state.off = new Set(v.off || []);
@@ -677,6 +684,7 @@ function restore(snap) {
   occult?.setLayers(snap.occult || []);
   refresh();
   if (snap.trace) trace?.restore(snap.trace);
+  if (snap.condition) cond?.restore(snap.condition);
   const c = snap.camera;
   if (c?.position && c?.target) startFly(new THREE.Vector3(...c.target), new THREE.Vector3(...c.position));
 }
@@ -849,6 +857,21 @@ $('btn-start-over').addEventListener('click', (e) => {
 $('btn-saves').addEventListener('click', () => { renderSaves(); $('saves').showModal(); syncSaves(); });
 
 // ---------- Go ----------
+cond = await initConditions({
+  structures, loadFile, camera, scene, prettyName, applyVisibility, startFly, seeThrough,
+  show: showSet,
+  clear: () => { isolated = null; applyVisibility(); },
+  isolated: () => isolated,
+  trace: () => trace,
+  render: () => (needsRender = true),
+  motion: () => cosmos.settings.motion,
+  beforeOpen: () => {
+    select(null);
+    occult?.deselect();
+    if (!window.matchMedia('(min-width: 800px)').matches) togglePanel(false);
+  },
+}).catch((err) => { console.error('Conditions failed to load', err); return null; });
+
 occult = await initOccult({
   scene, structures, applyVisibility, focusPoint, showStructures,
   render: () => (needsRender = true),
@@ -868,7 +891,7 @@ initTrace({
 }).then((t) => {
   trace = t;
   if (selected) trace.card(selected);
-  if (new URLSearchParams(location.search).has('debug')) Object.assign(window, { trace, selectPart: select }); // for testing
+  if (new URLSearchParams(location.search).has('debug')) Object.assign(window, { trace, cond, selectPart: select }); // for testing
 })
   .catch((err) => console.error('Path tracing failed to load', err));
 

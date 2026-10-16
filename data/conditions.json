@@ -1,0 +1,172 @@
+{
+  "note": "The Conditions section (conditions.js). Text from /mnt/project-files/research/scapular-winging.md; each claim cites its sources by id.",
+  "conditions": [
+    {
+      "id": "winging",
+      "name": "Scapular winging",
+      "about": "The shoulder blade's inner border or lower tip lifts off the ribs. The kind of winging depends on which muscle is weak, or what else is pushing the shoulder blade out.",
+      "frequency": "In 128 people with winging on one side, the cause was the long thoracic nerve in 54%, the accessory nerve in 30%, bone or joint problems in 9%, voluntary winging in 5% and muscular dystrophy (FSHD) in 4%.",
+      "frequencySources": ["S6"],
+      "illustrative": "No study has measured winging in 3D, so the size of the movement here is illustrative. The normal shoulder follows measured values.",
+      "types": [
+        {
+          "id": "normal", "name": "Normal", "group": "Compare",
+          "plane": "forward",
+          "looks": "As the arm goes up, the shoulder blade turns upward by about 40° and tips back by about 20°. The arm moves about two degrees at the shoulder joint for every one the shoulder blade turns.",
+          "sources": ["S25"]
+        },
+        {
+          "id": "medial", "name": "Medial", "group": "Primary",
+          "plane": "forward",
+          "muscle": "Serratus anterior", "nerve": "Long thoracic nerve (C5–C7)",
+          "nerveKey": "nervous/Long thoracic nerve.r",
+          "muscles": ["muscular/Serratus anterior muscle.r"],
+          "looks": "The shoulder blade sits higher and closer to the spine. Its inner border and lower tip lift off the ribs.",
+          "brought": "Raising the arm forward, or pushing against a wall. With a full palsy, people rarely raise the arm past about 120°.",
+          "causes": ["Stretch or a blow to the nerve, from sport, carrying or a fall", "Surgery, especially removing lymph nodes from the armpit", "Inflammation of the nerve (neuralgic amyotrophy) or a viral illness", "A pinched C7 nerve root"],
+          "outlook": "Most people recover within about two years, but 25% to 57% keep some weakness or winging.",
+          "injuries": [
+            { "near": "muscular/Scalenus medius muscle.r", "label": "Through the middle scalene" },
+            { "near": "skeletal/Second rib.r", "label": "Over the 2nd rib" },
+            { "near": "cardiovascular/Thoracodorsal artery.r", "label": "Crossed by artery branches (crow's foot)" },
+            { "near": "lymphoid/Central axillary nodes.r", "label": "Armpit lymph node surgery" }
+          ],
+          "sources": ["S1", "S2", "S7"]
+        },
+        {
+          "id": "lateral", "name": "Lateral", "group": "Primary",
+          "plane": "side",
+          "muscle": "Trapezius", "nerve": "Spinal accessory nerve (cranial nerve XI)",
+          "nerveKey": "nervous/Accessory nerve (XI).r",
+          "muscles": ["muscular/Descending part of trapezius muscle.r", "muscular/Transverse part of trapezius muscle.r", "muscular/Ascending part of trapezius muscle.r"],
+          "looks": "The shoulder droops. The shoulder blade sits lower and further out, and its upper inner corner flares back.",
+          "brought": "Raising the arm out to the side, which is hard past about 90°. It eases when the arm is raised forward.",
+          "causes": ["Surgery in the side of the neck, most often a lymph node biopsy (well over half of cases)", "Neck dissection, or carotid or jugular vein surgery", "Blows, falls, heavy lifting or sport"],
+          "outlook": "Often worse than a long thoracic palsy, because the nerve is usually cut or crushed.",
+          "caveat": "Sources disagree on which way the lower tip turns, so the app shows only what they agree on: the drop, the outward slide and the flare.",
+          "injuries": [
+            { "near": "lymphoid/Superficial lateral cervical nodes.r", "label": "Side of the neck: node biopsy" },
+            { "near": "muscular/Descending part of trapezius muscle.r", "label": "Where it enters the trapezius" }
+          ],
+          "sources": ["S1", "S2", "S9", "S10", "S12"]
+        },
+        {
+          "id": "rhomboid", "name": "Rhomboid", "group": "Primary",
+          "plane": "side",
+          "muscle": "Rhomboids and levator scapulae", "nerve": "Dorsal scapular nerve (C5)",
+          "nerveKey": "nervous/Dorsal scapular nerve.r",
+          "muscles": ["muscular/Rhomboid major muscle.r", "muscular/Rhomboid minor muscle.r", "muscular/Levator scapulae.r"],
+          "looks": "Usually slight. The shoulder blade slides outward, its lower tip turns outward and its inner border stands out. Some authors count this as lateral winging.",
+          "brought": "Hands on hips, pushing the elbows back against resistance.",
+          "causes": ["Pinching in a thickened middle scalene muscle (the most often reported cause)", "A pinched C5 nerve root", "Shoulder dislocation or overhead sport"],
+          "injuries": [
+            { "near": "muscular/Scalenus medius muscle.r", "label": "Through the middle scalene" },
+            { "near": "cardiovascular/(Deep branch of transverse cervical artery).r", "label": "Wrapped by the dorsal scapular artery" }
+          ],
+          "sources": ["S2", "S4", "S11"]
+        },
+        {
+          "id": "secondary", "name": "Secondary", "group": "Secondary",
+          "plane": "side",
+          "muscle": "Rotator cuff (the muscles are fine; the joint is the problem)",
+          "muscles": ["muscular/Supraspinatus muscle.r", "muscular/Infraspinatus muscle.r", "muscular/Subscapularis muscle.r", "muscular/Teres minor muscle.r"],
+          "looks": "The shoulder joint itself is stiff or painful, so the shoulder blade does extra work. It hikes up, tips forward and turns inward as the arm rises.",
+          "brought": "Raising the arm in any direction.",
+          "causes": ["Frozen shoulder", "Rotator cuff tear or impingement", "An unstable shoulder joint"],
+          "outlook": "In one frozen-shoulder study, about 46° of a 117° arm raise came from the shoulder blade and trunk rather than the joint (worked out from the study's numbers).",
+          "sources": ["S1", "S26", "S28", "S29"]
+        },
+        {
+          "id": "pseudo", "name": "Pseudo", "group": "Pseudo",
+          "plane": "forward",
+          "muscle": "None: the muscles and nerves work",
+          "looks": "Something solid holds the shoulder blade off the ribs. It is there at rest and does not get worse when the arm moves. The bump under the shoulder blade is an example of a bony growth.",
+          "causes": ["A bony growth (osteochondroma) under the shoulder blade or on a rib", "A badly healed fracture of the shoulder blade, collarbone or acromion", "Scoliosis or an unusual rib cage", "An inflamed bursa between the shoulder blade and ribs (snapping scapula)"],
+          "caveat": "Some authors file this under primary winging.",
+          "sources": ["S14", "S5", "S15"]
+        }
+      ],
+      "groups": [
+        { "id": "Primary", "about": "The nerve or the muscle itself. Muscular dystrophy (FSHD) also weakens the serratus, lower trapezius and rhomboids, so its winging can be medial, lateral or mixed.", "sources": ["S3", "S16"] },
+        { "id": "Secondary", "about": "A shoulder joint problem makes the shoulder blade move abnormally.", "sources": ["S1", "S3"] },
+        { "id": "Pseudo", "about": "A structural cause pushes the shoulder blade out.", "sources": ["S14", "S5"] }
+      ],
+      "effects": [
+        {
+          "badge": "documented", "title": "The space under the collarbone narrows as the arm rises",
+          "text": "Raising the arm narrows the space between the collarbone and the first rib, where the subclavian vein, artery and the brachial plexus pass. The vein here is pinched in about half of healthy people with the arm raised, so this is normal and not caused by winging.",
+          "show": ["skeletal/Clavicle.r", "skeletal/First rib.r", "cardiovascular/Right subclavian vein", "cardiovascular/Right subclavian artery", "nervous/Superior trunk of brachial plexus.r", "nervous/Middle trunk of brachial plexus.r", "nervous/Inferior trunk of brachial plexus.r"],
+          "sources": ["S17", "S19"]
+        },
+        {
+          "badge": "documented", "title": "Lymph node surgery can cause winging",
+          "text": "Removing lymph nodes from the armpit can injure the long thoracic nerve: studies found winging in 3.6% to 27% of patients afterwards, and most recovered. A biopsy of the nodes in the side of the neck is the most common cause of accessory nerve injury. The link runs from the surgery to the winging, not the other way round.",
+          "show": ["lymphoid/Central axillary nodes.r", "lymphoid/Apical axillary nodes.r", "lymphoid/Lateral axillary nodes.r", "lymphoid/Anterior axillary nodes.r", "lymphoid/Posterior axillary nodes.r", "lymphoid/Superficial lateral cervical nodes.r", "nervous/Long thoracic nerve.r", "nervous/Accessory nerve (XI).r"],
+          "sources": ["S23", "S24", "S9"]
+        },
+        {
+          "badge": "documented", "title": "Arteries that cross the winging nerves",
+          "text": "Branches of the thoracodorsal and lateral thoracic arteries cross the long thoracic nerve and can press on it. The dorsal scapular artery spirals around the dorsal scapular nerve. Here the vessels affect the nerve, not the other way round.",
+          "show": ["cardiovascular/Thoracodorsal artery.r", "cardiovascular/Lateral thoracic artery.r", "nervous/Long thoracic nerve.r", "cardiovascular/(Deep branch of transverse cervical artery).r", "nervous/Dorsal scapular nerve.r"],
+          "sources": ["S7", "S11"]
+        },
+        {
+          "badge": "weak", "title": "A drooping shoulder may stretch the brachial plexus",
+          "text": "In lateral winging the shoulder droops, which may pull on the brachial plexus and cause pain. This rests on case reports; no one has measured the stretch.",
+          "show": ["nervous/Roots of brachial plexus.r", "nervous/Superior trunk of brachial plexus.r", "nervous/Middle trunk of brachial plexus.r", "nervous/Inferior trunk of brachial plexus.r"],
+          "sources": ["S9", "S13", "S20"]
+        },
+        {
+          "badge": "weak", "title": "A tight pectoralis minor narrows the space below it",
+          "text": "A short pectoralis minor tips the shoulder blade forward and narrows the space under the muscle, where the axillary vessels and the plexus pass. It is proposed as a main cause of nerve-type thoracic outlet syndrome, but it hasn't been studied in winging itself.",
+          "show": ["muscular/Pectoralis minor muscle.r", "cardiovascular/Axillary artery.r", "cardiovascular/Axillary vein.r"],
+          "sources": ["S21", "S27"]
+        },
+        {
+          "badge": "none", "title": "Changes to lymph flow",
+          "text": "No study was found showing that winging changes lymph flow or drainage in the armpit or chest.",
+          "sources": []
+        },
+        {
+          "badge": "none", "title": "Squeezing of arteries or veins",
+          "text": "No study was found showing that winging itself squeezes the subclavian or axillary arteries or veins.",
+          "sources": ["S18", "S19"]
+        }
+      ]
+    }
+  ],
+  "badges": {
+    "documented": "Documented",
+    "weak": "Weak evidence",
+    "none": "Not established"
+  },
+  "sources": {
+    "S1": ["StatPearls: Winging of the Scapula", "https://www.ncbi.nlm.nih.gov/sites/books/NBK541005/"],
+    "S2": ["Martin & Fish 2008, Curr Rev Musculoskelet Med", "https://link.springer.com/article/10.1007/s12178-007-9000-5"],
+    "S3": ["Vetter et al. 2017, Cureus", "https://assets.cureus.com/uploads/review_article/pdf/10077/1612427568-1612427562-20210204-18268-1bm48a.pdf"],
+    "S4": ["Akman et al. 1998, Acta Orthop Traumatol Turc", "https://aott.org.tr/Content/files/sayilar/548/548-5368.pdf"],
+    "S5": ["Tjoumakaris: Scapulothoracic Disorders", "https://pressbooks.pub/frontlinesportsmed/?p=48"],
+    "S6": ["WikiMSK: Scapula Winging", "https://wikimsk.org/wiki/Scapula_Winging"],
+    "S7": ["Wu & Ng 2023, J Hand Surg Glob Online", "https://www.jhsgo.org/article/S2589-5141(22)00175-X/fulltext"],
+    "S9": ["StatPearls: Accessory Nerve Injury", "https://www.statpearls.com/point-of-care/17060"],
+    "S10": ["Aramrattana 2005, Asian J Surg", "https://doaj.org/article/c62498873bab415dbd80087221e90ae9"],
+    "S11": ["StatPearls: Dorsal Scapular Nerve", "https://www.statpearls.com/as/nervous/20673/"],
+    "S12": ["Charopoulos et al. 2010, J Med Case Rep", "https://link.springer.com/article/10.1186/1752-1947-4-158"],
+    "S13": ["Hernandez et al. 2022, Thieme", "https://www.thieme-connect.com/products/ejournals/html/10.1055/s-0042-1748660"],
+    "S14": ["Pawar et al. 2021, J Orthop Case Rep", "https://jocr.co.in/wp/wp-content/uploads/20.-2924-10.13107jocr.2021.v11.i07.2328-82-85.pdf"],
+    "S15": ["Radiopaedia: Scapulothoracic bursitis", "https://radiopaedia.org/articles/scapulothoracic-bursitis?lang=gb"],
+    "S16": ["WikiMSK: Facioscapulohumeral Dystrophy", "https://wikimsk.org/wiki/Facioscapulohumeral_Dystrophy"],
+    "S17": ["Radiopaedia: Costoclavicular space", "https://www.radiopaedia.org/articles/costoclavicular-space?lang=us"],
+    "S18": ["Radiopaedia: Thoracic outlet syndrome", "https://radiopaedia.org/articles/thoracic-outlet-syndrome?lang=gb"],
+    "S19": ["Demondion et al. 2003, Radiology", "https://pubs.rsna.org/doi/10.1148/radiol.2272012111"],
+    "S20": ["Lokman et al. 2024, Cureus", "https://assets.cureus.com/uploads/case_report/pdf/262843/20240612-3153-1dtnb79.pdf"],
+    "S21": ["Pectoralis minor syndrome review, JSES 2022", "https://doaj.org/article/bd33bbdc4242473483b9bd399ef4e608"],
+    "S23": ["Winged scapula after axillary dissection, Support Care Cancer 2014", "https://www.cancer.fr/professionnels-de-sante/veille/nota-bene-cancer/bulletin-n-216/incidence-predictive-factors-and-prognosis-for-winged-scapula-in-breast-cancer-patients-after-axillary-dissection"],
+    "S24": ["Ortí-Asencio et al. 2021, Clin Transl Oncol", "https://link.springer.com/article/10.1007/s12094-021-02612-x"],
+    "S25": ["Ludewig et al. 2009, J Bone Joint Surg Am", "https://drrobertlaprademd.com/wp-content/uploads/2015/07/motion-of-the-shoulder-complex-during-multiplanar-humeral-elevation-2009.pdf"],
+    "S26": ["Ludewig & Cook 2000, Phys Ther", "https://www.citedrive.com/en/discovery/alterations-in-shoulder-kinematics-and-associated-muscle-activity-in-people-with-symptoms-of-shoulder-impingement"],
+    "S27": ["Borstad & Ludewig 2005, JOSPT", "https://experts.umn.edu/en/publications/the-effect-of-long-versus-short-pectoralis-minor-resting-length-o/"],
+    "S28": ["Ludewig & Reynolds 2009, JOSPT", "https://experts.umn.edu/en/publications/the-association-of-scapular-kinematics-and-glenohumeral-joint-pat-2/"],
+    "S29": ["Rundquist et al. 2003, Arch Phys Med Rehabil", "https://iro.uiowa.edu/esploro/outputs/journalArticle/Shoulder-kinematics-in-subjects-with-frozen/9984040472302771"]
+  }
+}
