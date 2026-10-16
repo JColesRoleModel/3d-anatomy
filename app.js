@@ -613,18 +613,107 @@ window.addEventListener('blur', () => held.clear());
 $('btn-keys').addEventListener('click', () => $('keys').showModal());
 
 // ---------- Sky & art settings ----------
-const syncStill = () => {
-  document.body.classList.toggle('still', !cosmos.settings.motion);
-  $('set-wish').disabled = !(cosmos.settings.sky && cosmos.settings.motion);
-};
+const syncStill = () => document.body.classList.toggle('still', !cosmos.settings.motion);
 for (const key of ['sky', 'art', 'motion']) {
   const box = $(`set-${key}`);
   box.checked = cosmos.settings[key];
   box.addEventListener('change', () => { cosmos.set(key, box.checked); syncStill(); needsRender = true; });
 }
-$('set-wish').addEventListener('click', () => { cosmos.event(); $('scene').close(); });
 $('btn-scene').addEventListener('click', () => $('scene').showModal());
 syncStill();
+
+// ---------- Saved views and starting over ----------
+// A saved view is everything needed to come back to what's on screen: the view state, the occult layers, what's
+// hidden or focused, and the camera. They're kept on this device.
+const SAVES_KEY = 'tolnri.saves.v1';
+let saves = [];
+try { saves = JSON.parse(localStorage.getItem(SAVES_KEY)) || []; } catch {}
+const storeSaves = () => { try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves)); return true; } catch { return false; } };
+const round = (v) => v.toArray().map((x) => Math.round(x * 1e4) / 1e4);
+
+function snapshot() {
+  return {
+    view: { enabled: [...state.enabled], off: [...state.off], opacity: { ...state.opacity }, ghost: state.ghost, colors: JSON.parse(JSON.stringify(state.colors)) },
+    occult: occult?.layers || [],
+    hidden: [...hidden],
+    isolated: isolated ? [...isolated] : null,
+    isolatedLabel,
+    camera: { position: round(camera.position), target: round(controls.target) },
+  };
+}
+
+function restore(snap) {
+  const v = snap.view || {};
+  state.enabled = new Set((v.enabled || []).filter((id) => systemsById[id]));
+  state.off = new Set(v.off || []);
+  state.opacity = { ...(v.opacity || {}) };
+  state.ghost = typeof v.ghost === 'number' ? v.ghost : 0.15;
+  state.colors = { sys: {}, opt: {}, part: {}, ...(v.colors || {}) };
+  hidden.clear();
+  for (const k of snap.hidden || []) if (structures.has(k)) hidden.add(k);
+  isolated = snap.isolated ? new Set(snap.isolated.filter((k) => structures.has(k))) : null;
+  isolatedLabel = snap.isolatedLabel || '';
+  select(null);
+  occult?.deselect();
+  occult?.setLayers(snap.occult || []);
+  refresh();
+  const c = snap.camera;
+  if (c?.position && c?.target) startFly(new THREE.Vector3(...c.target), new THREE.Vector3(...c.position));
+}
+
+const when = (t) => new Date(t).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+function renderSaves() {
+  const list = $('save-list');
+  list.replaceChildren();
+  for (const sv of [...saves].sort((a, b) => b.updated - a.updated)) {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="save-text"><span class="save-name"></span><span class="save-when"></span></span><button data-open>Open</button><button data-update title="Save what\'s showing now into this view">Update</button><button class="save-del" data-del aria-label="Delete">✕</button>';
+    li.querySelector('.save-name').textContent = sv.name;
+    li.querySelector('.save-when').textContent = when(sv.updated);
+    li.querySelector('[data-del]').setAttribute('aria-label', `Delete ${sv.name}`);
+    li.querySelector('[data-open]').addEventListener('click', () => { restore(sv.data); $('saves').close(); });
+    li.querySelector('[data-update]').addEventListener('click', () => {
+      Object.assign(sv, { data: snapshot(), updated: Date.now() });
+      storeSaves(); renderSaves();
+    });
+    li.querySelector('[data-del]').addEventListener('click', () => {
+      if (!confirm(`Delete the saved view "${sv.name}"?`)) return;
+      saves = saves.filter((x) => x !== sv);
+      storeSaves(); renderSaves();
+    });
+    list.append(li);
+  }
+  $('save-empty').hidden = saves.length > 0;
+}
+
+$('save-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = $('save-name');
+  const name = input.value.trim() || `View ${saves.length + 1}`;
+  const now = Date.now();
+  saves.push({ id: `${now.toString(36)}${Math.random().toString(36).slice(2, 7)}`, name, created: now, updated: now, data: snapshot() });
+  if (!storeSaves()) { saves.pop(); alert("Couldn't save: this browser's storage is full or turned off."); return; }
+  input.value = '';
+  renderSaves();
+});
+
+// Reset everything: forget the remembered view, occult layers and sky settings, then start again as on a first
+// visit. Saved views are kept. The button asks for a second tap first.
+const RESET_KEYS = [STATE_KEY, 'anatomy.occult.v1', 'tolnri.scene.v1'];
+let resetArmed = null;
+$('btn-start-over').addEventListener('click', (e) => {
+  const btn = e.currentTarget;
+  if (!resetArmed) {
+    btn.classList.add('confirm');
+    btn.textContent = 'Tap again to reset everything';
+    resetArmed = setTimeout(() => { resetArmed = null; btn.classList.remove('confirm'); btn.textContent = 'Reset everything'; }, 4000);
+    return;
+  }
+  try { for (const k of RESET_KEYS) localStorage.removeItem(k); } catch {}
+  location.reload();
+});
+
+$('btn-saves').addEventListener('click', () => { renderSaves(); $('saves').showModal(); });
 
 // ---------- Go ----------
 occult = await initOccult({

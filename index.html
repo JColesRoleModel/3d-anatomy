@@ -36,7 +36,8 @@
       </div>
     </div>
     <div class="topbar-actions">
-      <button id="btn-scene" class="icon-btn" title="Sky and art" aria-label="Sky and art settings">✦</button>
+      <button id="btn-scene" class="icon-btn" title="Sky and art" aria-label="Sky and art settings"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 3.2 2.6 8.6 12 14l9.4-5.4z" fill="currentColor" fill-opacity="0.22"/><path d="M12 3.2 2.6 8.6 12 14l9.4-5.4z M2.6 12.7 12 18.1l9.4-5.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg></button>
+      <button id="btn-saves" class="icon-btn" title="Saved views" aria-label="Saved views"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M6.5 3.5h11v17L12 16.4l-5.5 4.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
       <button id="btn-keys" class="icon-btn desktop-only" title="Keyboard controls (?)" aria-label="Keyboard controls">⌨</button>
       <button id="btn-reset" class="icon-btn" title="Reset view (R)" aria-label="Reset view">⟲</button>
       <button id="btn-about" class="icon-btn" title="About" aria-label="About">i</button>
@@ -104,7 +105,8 @@
     </div>
     <p>Tap a system to show or hide it. Open <b>Layers</b> (or the ▾ next to a system) for sub-filters like spine regions, muscle depth and cranial nerves, plus an opacity slider and colour for each system. Tap the small circle next to any sub-filter, or the colour swatch in a part's info card, to give it its own colour. In a part's info card, tap any group name, such as Cranial nerves, to focus on the whole group while everything else fades. Drag to rotate, pinch or scroll to zoom, and two-finger drag to pan. Tap any structure to see its name. On a computer, press <kbd>?</kbd> for keyboard controls.</p>
     <p>The <b>Occult anatomy</b> layers at the bottom of the Layers panel show the chakras, elements and prana vayus, the pineal–pituitary–thalamus trinity, the hand map and mudras, the Tree of Life, the nadis and electric / magnetic polarity. Tap a symbol on the body, or a name in the panel, to read it. Values marked <span style="color:#e8b04a">*</span> are incomplete, unsure or conflicting on the source boards.</p>
-    <p>The night sky breathes on a slow nine-second cycle. Shooting stars cross it every few seconds, and every half minute or so something rarer happens: a meteor shower, a lightning storm, a comet, a nova or an aurora surge. Around the body stand the pieces of the <i>Secret of the Ages</i> poster in 3D: the pillars, the emerald cross, the Tree of Life, the crown of rays, the star of David as a turning star tetrahedron, the zodiac wheel and ring, the Aquarian jar, the bag of magic dust, the pyramid, and Saturn with its hexagon storm. The emerald tablet and the caduceus drift through the background. The art fades away when you zoom in to study. Tap <b>✦</b> to turn the sky, the art or the motion off.</p>
+    <p>The night sky breathes on a slow nine-second cycle. Shooting stars cross it every few seconds, and every half minute or so something rarer happens: a meteor shower, a lightning storm, a comet, a nova or an aurora surge. Around the body stand the pieces of the <i>Secret of the Ages</i> poster in 3D: the pillars with the sun above Jachin and the moon above Boaz, the emerald cross, the Tree of Life, the crown of twelve rays for the twelve cranial nerves, the star of David as a turning star tetrahedron, the zodiac wheel and ring, and at the star's corners the Aquarian jar, the bag of magic dust, the caduceus and the emerald tablet. The art fades away when you zoom in to study. The layers button at the top turns the sky, the art or the motion off.</p>
+    <p>The bookmark button keeps <b>saved views</b>: save what's showing and come back to it later, or reset everything to how the app first opens.</p>
     <p class="small">3D models from <a href="https://www.z-anatomy.com" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derived from BodyParts3D, © The Database Center for Life Science (CC BY-SA 2.1 Japan). Converted and simplified for the web. This app's models are shared under the same CC BY-SA license. Zodiac, planet and alchemy glyphs use Noto Sans Symbols, and headings use Cormorant Garamond (both SIL Open Font License). The sky and the 3D art are drawn in code for this app. The emerald tablet carries the opening of the first of the Emerald Tablets of Thoth, as translated by Doreal.</p>
     <form method="dialog"><button>Close</button></form>
   </dialog>
@@ -114,7 +116,22 @@
     <label class="switch"><input type="checkbox" id="set-sky"><span>Night sky, stars and sky events</span></label>
     <label class="switch"><input type="checkbox" id="set-art"><span>Sacred art around the body</span></label>
     <label class="switch"><input type="checkbox" id="set-motion"><span>Motion (off keeps everything still)</span></label>
-    <button id="set-wish" class="wish" type="button">✧ Call a sky event now</button>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+
+  <dialog id="saves">
+    <h2>Saved views</h2>
+    <p class="small">Saves everything that's showing: the systems and layers, their filters, colours and opacity, what's hidden or focused, and where the camera is. Open a saved view any time to go straight back to it.</p>
+    <form id="save-form" class="save-form">
+      <input id="save-name" type="text" maxlength="60" placeholder="Name this view" aria-label="Name for this view" autocomplete="off">
+      <button type="submit">Save</button>
+    </form>
+    <ul id="save-list" class="save-list"></ul>
+    <p id="save-empty" class="small">Nothing saved yet.</p>
+    <div class="start-over">
+      <button id="btn-start-over" type="button">Reset everything</button>
+      <p class="small">Turns every system, layer, filter, colour and sky setting back to how the app first opens. Your saved views are kept.</p>
+    </div>
     <form method="dialog"><button>Close</button></form>
   </dialog>
 

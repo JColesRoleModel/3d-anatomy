@@ -360,6 +360,18 @@ export async function initOccult(api) {
       return `Polarity: ${p.value} (${row.title.toLowerCase()}, ${p.surface})`;
     },
     syncPanel,
+    // The layers that are on, and turning a whole set on at once (for saved views).
+    get layers() { return [...enabled]; },
+    setLayers(ids) {
+      const want = new Set(ids.filter((id) => byId[id]));
+      if (current && !want.has(current.layer)) deselect();
+      enabled = want;
+      for (const id of Object.keys(groups)) groups[id].visible = enabled.has(id);
+      save();
+      syncPanel();
+      api.applyVisibility();
+      api.render();
+    },
   };
 }
 

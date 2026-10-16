@@ -73,7 +73,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
   transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
 }
 .icon-btn:hover { border-color: rgba(230, 189, 106, 0.6); box-shadow: 0 0 14px rgba(230, 189, 106, 0.35); color: #fff; }
-#btn-scene { color: var(--accent); font-size: 18px; }
+#btn-scene { color: var(--accent); }
+.icon-btn svg { display: block; }
 
 .systems {
   position: fixed; left: 0; right: 0; bottom: 0;
@@ -234,8 +235,26 @@ dialog h2 { margin-top: 0; font: 700 26px/1.15 var(--serif); color: var(--cream)
 .switch input:checked { background: linear-gradient(90deg, var(--violet), var(--accent)); box-shadow: 0 0 12px rgba(230, 189, 106, 0.45); }
 .switch input:checked::after { transform: translateX(18px); }
 .switch input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-button.wish { display: block; width: 100%; margin: 12px 0 14px; padding: 10px; border-radius: 12px; font: 600 17px/1 var(--serif); letter-spacing: 0.4px; color: var(--cream); }
-button.wish:disabled { opacity: 0.4; cursor: default; }
+#saves { width: min(440px, calc(100vw - 32px)); box-sizing: border-box; }
+.save-form { display: flex; gap: 8px; margin: 14px 0 10px; }
+.save-form button { flex: none; }
+.save-form input {
+  flex: 1; min-width: 0; padding: 9px 12px; border-radius: 10px; font: inherit; font-size: 15px; color: var(--cream);
+  border: 1px solid var(--line); background: rgba(255, 255, 255, 0.06);
+}
+.save-form input:focus { outline: none; border-color: rgba(230, 189, 106, 0.6); }
+.save-list { list-style: none; margin: 0; padding: 0; }
+.save-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 10px 0; border-top: 1px solid var(--line); }
+.save-list .save-text { flex: 1 1 100%; min-width: 0; }
+.save-list .save-del { margin-left: auto; }
+.save-list .save-name { display: block; color: var(--cream); font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.save-list .save-when { display: block; font-size: 12px; color: var(--muted); }
+.save-list button { padding: 6px 10px; font-size: 13px; }
+.save-list button.save-del { border: 0; background: none; color: var(--muted); padding: 6px; }
+.save-list button.save-del:hover { color: #ff8a8a; box-shadow: none; }
+.start-over { margin: 16px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+.start-over p { margin: 6px 0 0; }
+#btn-start-over.confirm { border-color: rgba(255, 120, 120, 0.7); color: #ffb3b3; }
 dialog .small { font-size: 13px; color: var(--muted); }
 dialog a { color: var(--accent); }
 [hidden] { display: none !important; }

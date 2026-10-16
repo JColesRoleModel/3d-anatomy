@@ -1,10 +1,9 @@
 // The cosmic stage around the body. A breathing night sky (aurora and nebula from the two Gunna covers Brian
 // shared) full of twinkling stars, with shooting stars and the odd random sky event: a meteor shower, a lightning
 // storm, a comet, a nova or an aurora surge. Around the body sit 3D versions of the art on Brian's
-// "Secret of the Ages" poster: the pillars, the emerald cross, the Tree of Life, the crown of rays, the star of
-// David as a star tetrahedron, the pyramid with its shining capstone, Saturn with its hexagon storm, the
-// Aquarian jar and the bag of magic dust, plus a zodiac wheel and orbiting zodiac ring like the covers.
-// The emerald tablet and the caduceus drift through the background.
+// "Secret of the Ages" poster: the pillars with a sun and a moon above them, the emerald cross, the Tree of Life,
+// the crown of twelve rays, the star of David as a star tetrahedron, the Aquarian jar and the bag of magic dust,
+// the emerald tablet and the caduceus, plus a zodiac wheel and orbiting zodiac ring like the covers.
 // Everything is drawn in code (nothing is copied from stock art), none of it can be tapped, and the pieces near
 // the body fade away when you zoom in to study.
 import * as THREE from 'three';
@@ -655,8 +654,9 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
     const merged = mergeGeometries(parts.map((g) => (g.index ? g.toNonIndexed() : g)).map((g) => { g.deleteAttribute('uv'); return g; }));
     return new THREE.Mesh(merged, etherMat(color, opacity));
   }
-  const jachin = pillar(0xff9fae, 2.3, 0.075, 0.9); jachin.position.set(-1.18, 0, -0.28);
-  const boaz = pillar(0x9fb0ff, 2.3, 0.075, 0.9); boaz.position.set(1.18, 0, -0.28);
+  const PILLAR_H = 2.0; // low enough that the sun and moon above them fit in the opening view
+  const jachin = pillar(0xff9fae, PILLAR_H, 0.075, 0.9); jachin.position.set(-1.18, 0, -0.28);
+  const boaz = pillar(0x9fb0ff, PILLAR_H, 0.075, 0.9); boaz.position.set(1.18, 0, -0.28);
   const middle = pillar(0xa056ee, 2.45, 0.08, 0.32); middle.position.set(0, 0, -1.05);
   const pillars = new THREE.Group(); pillars.add(jachin, boaz, middle);
   addNear(pillars, 0.9, 2.0);
@@ -771,31 +771,31 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
     const band = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.077, 0.032, 48, 1, true), g); group.add(band);
     for (const [y, r] of [[-0.016, 0.077], [0.016, 0.072]]) { const t = new THREE.Mesh(new THREE.TorusGeometry(r, 0.0035, 8, 48), g); t.rotation.x = Math.PI / 2; t.position.y = y; group.add(t); }
     const jewelColors = [0xe0245e, 0x2f6bff, 0x22d38a];
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2;
+    // Twelve points, one for each cranial nerve, each with a jewel below and a pearl on top.
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
       const c = jewelColors[i % 3];
-      const j = new THREE.Mesh(new THREE.SphereGeometry(0.0075, 12, 8), metal(c, c, 0.15)); j.position.set(Math.sin(a) * 0.077, 0, Math.cos(a) * 0.077); group.add(j);
-      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.011, 0.056, 4), g);
+      const j = new THREE.Mesh(new THREE.SphereGeometry(0.0065, 12, 8), metal(c, c, 0.15)); j.position.set(Math.sin(a) * 0.077, 0, Math.cos(a) * 0.077); group.add(j);
+      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.0095, 0.056, 4), g);
       spike.position.set(Math.sin(a) * 0.071, 0.016 + 0.028, Math.cos(a) * 0.071); spike.rotation.set(Math.cos(a) * 0.18, 0, -Math.sin(a) * 0.18); group.add(spike);
-      const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 10, 8), metal(0xffffff, 0x887766, 0.2)); pearl.position.set(Math.sin(a) * 0.076, 0.075, Math.cos(a) * 0.076); group.add(pearl);
-      const b = a + Math.PI / 8;
-      const small = new THREE.Mesh(new THREE.ConeGeometry(0.008, 0.026, 4), g); small.position.set(Math.sin(b) * 0.071, 0.016 + 0.013, Math.cos(b) * 0.071); group.add(small);
+      const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.005, 10, 8), metal(0xffffff, 0x887766, 0.2)); pearl.position.set(Math.sin(a) * 0.076, 0.075, Math.cos(a) * 0.076); group.add(pearl);
     }
-    // Rays fanning upward like the poster's crown; they always face you, like a halo.
+    // Twelve rays for the twelve cranial nerves, fanning upward six on each side as on the poster's crown;
+    // they always face you, like a halo.
     const rays = new THREE.Group();
     const rayGeo = (len, w) => { const s = new THREE.Shape(); s.moveTo(-w, 0); s.lineTo(0, len); s.lineTo(w, 0); s.lineTo(-w, 0); return new THREE.ShapeGeometry(s); };
     const rayMats = [];
-    for (let i = 0; i < 17; i++) {
-      const ang = -1.35 + (i / 16) * 2.7, long = i % 2 === 0;
+    for (let i = 0; i < 12; i++) {
+      const ang = -1.3 + (i / 11) * 2.6, len = 0.4 - 0.08 * Math.abs(ang) / 1.3;
       const m = new THREE.ShaderMaterial({
-        uniforms: { ...U, uLen: { value: long ? 0.34 : 0.23 }, uPhase: { value: i * 1.7 }, uFade: { value: 1 } },
+        uniforms: { ...U, uLen: { value: len }, uPhase: { value: i * 1.7 }, uFade: { value: 1 } },
         vertexShader: 'varying float vY; void main(){ vY = position.y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
         fragmentShader: /* glsl */`uniform float uLen, uPhase, uTime, uBreath, uFade; varying float vY;
-          void main(){ float k = vY / uLen; float a = (1.0 - k) * (0.55 + 0.35 * sin(uTime * 1.3 + uPhase)) * (0.7 + 0.5 * uBreath) * uFade; gl_FragColor = vec4(vec3(1.0, 0.82, 0.45) * a, a); }`,
+          void main(){ float k = vY / uLen; float a = pow(1.0 - k, 0.7) * (0.8 + 0.2 * sin(uTime * 1.3 + uPhase)) * (0.85 + 0.3 * uBreath) * uFade; gl_FragColor = vec4(mix(vec3(1.0, 0.72, 0.3), vec3(1.0, 0.9, 0.6), k) * a, a); }`,
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
       });
       rayMats.push(m);
-      const ray = new THREE.Mesh(rayGeo(long ? 0.34 : 0.23, long ? 0.011 : 0.008), m);
+      const ray = new THREE.Mesh(rayGeo(len, 0.013), m);
       ray.position.y = 0.0; ray.rotation.z = -ang;
       rays.add(ray);
     }
@@ -840,82 +840,66 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
   })();
   addNear(merkaba, 1.5, 2.6);
 
-  // The pyramid from the poster's background, its capstone shining.
-  const pyramid = (() => {
+  // A small sun above Jachin (the rose pillar, on the body's right) and a small moon above Boaz (the blue pillar,
+  // on the left). The moon is lit from the sun's side, so it shows as a half moon.
+  const sun = (() => {
     const group = new THREE.Group();
-    const geo = new THREE.ConeGeometry(5.3, 5.2, 4, 1, true); geo.rotateY(Math.PI / 4);
-    const faces = new THREE.Mesh(geo, new THREE.ShaderMaterial({
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.075, 48, 32), new THREE.ShaderMaterial({
       uniforms: { ...U, uFade: { value: 1 } },
-      vertexShader: 'varying float vY; varying vec3 vW; void main(){ vY = position.y; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
-      fragmentShader: /* glsl */`uniform float uTime, uBreath, uFade; varying float vY; varying vec3 vW;
-        void main(){ float k = (vY + 2.6) / 5.2; vec3 c = mix(vec3(0.05,0.04,0.12), vec3(0.22,0.17,0.32), k) + vec3(1.0,0.8,0.45) * pow(k, 9.0) * (0.6 + 0.4 * uBreath);
-          float lines = smoothstep(0.92, 1.0, abs(sin(vW.y * 6.0))) * 0.05; gl_FragColor = vec4(c + lines, 0.82 * uFade); }`,
-      transparent: true, depthWrite: false,
+      vertexShader: 'varying vec3 vN; varying vec3 vP; varying vec3 vW; void main(){ vP = position; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; vN = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * viewMatrix * w; }',
+      fragmentShader: /* glsl */`uniform float uTime, uBreath, uFade; varying vec3 vN; varying vec3 vP; varying vec3 vW;
+        void main(){
+          float ndv = abs(dot(normalize(vN), normalize(cameraPosition - vW)));
+          vec3 q = normalize(vP) * 9.0;
+          float gran = sin(q.x * 3.1 + uTime * 0.9) * sin(q.y * 2.7 - uTime * 0.7) * sin(q.z * 3.3 + uTime * 0.5);
+          vec3 c = mix(vec3(1.0, 0.45, 0.08), vec3(1.0, 0.86, 0.45), pow(ndv, 0.6)) * (0.9 + 0.12 * gran + 0.15 * uBreath);
+          gl_FragColor = vec4(c * uFade, uFade); }`,
+      transparent: true,
     }));
-    group.add(faces);
-    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: 0xd8b26a, transparent: true, opacity: 0.55 }));
-    group.add(edges);
-    const cap = glowSprite(0xfff0c8, 3.0, 0.9, burstTex); cap.position.y = 2.6; group.add(cap);
-    const capGlow = glowSprite(0xffcf70, 1.4, 0.8); capGlow.position.y = 2.6; group.add(capGlow);
-    group.position.set(0, 2.6, -15);
-    group.userData = { cap };
+    group.add(ball);
+    const rays = glowSprite(0xffd890, 0.62, 0.75, burstTex); group.add(rays);
+    const glow = glowSprite(0xffb347, 0.42, 0.85); group.add(glow);
+    group.position.set(-1.18, PILLAR_H + 0.15, -0.28);
+    group.userData = { rays, glow };
     return group;
   })();
-  addNear(pyramid, 0.5, 1.6, 0.3); // stays as a faint backdrop up close
-
-  // Saturn, with the hexagon storm at its north pole tipped toward you.
-  const saturn = (() => {
-    const W = 1024, H = 512;
-    const tex = canvasTexture(W, H, (g) => {
-      const img = g.createImageData(W, H), d = img.data;
-      for (let y = 0; y < H; y++) {
-        const lat = (0.5 - y / H) * Math.PI;
-        for (let x = 0; x < W; x++) {
-          const lon = (x / W) * Math.PI * 2;
-          const band = 0.5 + 0.5 * Math.sin(lat * 22 + Math.sin(lat * 7 + lon * 0.5) * 0.6);
-          let r = 0.82 - 0.18 * band, gg = 0.7 - 0.15 * band, b = 0.55 + 0.12 * band;
-          if (lat > 1.0) { // polar haze, teal like the photo
-            const k = smooth(1.0, 1.15, lat);
-            r = r * (1 - k) + 0.32 * k; gg = gg * (1 - k) + 0.62 * k; b = b * (1 - k) + 0.62 * k;
-            const rho = Math.PI / 2 - lat; // angular distance from the pole
-            const seg = ((lon % (Math.PI / 3)) + Math.PI / 3) % (Math.PI / 3) - Math.PI / 6;
-            const hexR = 0.24 / Math.cos(seg);
-            if (rho < hexR) {
-              const swirl = 0.5 + 0.5 * Math.sin(rho * 60 + lon * 3);
-              r = 0.36 + 0.2 * swirl; gg = 0.32 + 0.1 * swirl; b = 0.82 + 0.1 * swirl;
-              if (rho > hexR - 0.02) { r = 0.75; gg = 0.6; b = 0.95; }
-              if (rho < 0.05) { const e = rho / 0.05; r = 0.3 + 0.3 * e; gg = 0.12 + 0.2 * e; b = 0.45 + 0.4 * e; }
-            }
-          }
-          const i = (y * W + x) * 4;
-          d[i] = r * 255; d[i + 1] = gg * 255; d[i + 2] = b * 255; d[i + 3] = 255;
-        }
+  addNear(sun, 0.9, 2.0);
+  const moon = (() => {
+    const tex = canvasTexture(512, 256, (g) => {
+      const rnd = seeded(11);
+      g.fillStyle = '#d9dbe6'; g.fillRect(0, 0, 512, 256);
+      for (let i = 0; i < 9; i++) { // maria
+        g.fillStyle = `rgba(110,116,140,${0.25 + rnd() * 0.25})`;
+        g.beginPath(); g.ellipse(rnd() * 512, 60 + rnd() * 140, 30 + rnd() * 50, 20 + rnd() * 35, rnd() * 3, 0, Math.PI * 2); g.fill();
       }
-      g.putImageData(img, 0, 0);
+      for (let i = 0; i < 70; i++) { // craters
+        const x = rnd() * 512, y = 20 + rnd() * 216, r = 2 + rnd() * 9;
+        g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.stroke();
+        g.fillStyle = 'rgba(90,95,120,0.25)'; g.beginPath(); g.arc(x + r * 0.2, y + r * 0.2, r * 0.8, 0, Math.PI * 2); g.fill();
+      }
     });
     const group = new THREE.Group();
-    const planet = new THREE.Mesh(new THREE.SphereGeometry(1.1, 64, 32), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, metalness: 0, emissive: 0x1a1430 }));
-    const ringGeo = new THREE.RingGeometry(1.45, 2.55, 160, 1);
-    const ringMesh = new THREE.Mesh(ringGeo, new THREE.ShaderMaterial({
-      vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-      fragmentShader: /* glsl */`varying vec3 vP;
-        void main(){ float r = length(vP.xy); float k = (r - 1.45) / 1.1;
-          float bands = 0.55 + 0.25 * sin(r * 40.0) + 0.2 * sin(r * 97.0);
-          float gap = smoothstep(0.02, 0.0, abs(k - 0.62) - 0.03);
-          float a = bands * (1.0 - gap) * smoothstep(0.0, 0.05, k) * smoothstep(1.0, 0.92, k) * 0.75;
-          gl_FragColor = vec4(mix(vec3(0.85,0.72,0.55), vec3(0.75,0.68,0.9), k) * a, a); }`,
-      transparent: true, depthWrite: false, side: THREE.DoubleSide,
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.068, 48, 32), new THREE.ShaderMaterial({
+      uniforms: { ...U, uMap: { value: tex }, uFade: { value: 1 }, uSun: { value: new THREE.Vector3() } },
+      vertexShader: 'varying vec3 vN; varying vec3 vW; varying vec2 vUv; void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; vN = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * viewMatrix * w; }',
+      fragmentShader: /* glsl */`uniform sampler2D uMap; uniform vec3 uSun; uniform float uBreath, uFade; varying vec3 vN; varying vec3 vW; varying vec2 vUv;
+        void main(){
+          vec3 n = normalize(vN);
+          float lit = smoothstep(-0.08, 0.25, dot(n, normalize(uSun - vW)));
+          float rim = pow(1.0 - abs(dot(n, normalize(cameraPosition - vW))), 3.0);
+          vec3 tex = texture2D(uMap, vUv).rgb;
+          vec3 c = tex * (0.07 + 1.05 * lit) * vec3(0.95, 0.97, 1.06) + vec3(0.55, 0.62, 0.95) * rim * 0.35 * (0.8 + 0.4 * uBreath);
+          gl_FragColor = vec4(c * uFade, uFade); }`,
+      transparent: true,
     }));
-    ringMesh.rotation.x = Math.PI / 2;
-    const tilt = new THREE.Group();
-    tilt.add(planet, ringMesh);
-    tilt.rotation.set(1.0, 0, 0.32);
-    group.add(tilt);
-    group.position.set(-7.2, 3.3, -13);
-    group.userData = { planet };
+    group.add(ball);
+    const glow = glowSprite(0xb9c8ff, 0.36, 0.45); group.add(glow);
+    group.position.set(1.18, PILLAR_H + 0.15, -0.28);
+    group.userData = { ball, glow };
+    ball.material.uniforms.uSun.value.copy(sun.position);
     return group;
   })();
-  art.add(saturn);
+  addNear(moon, 0.9, 2.0);
 
   // The Aquarian jar, tipped, pouring a stream of light away from the body.
   const jar = (() => {
@@ -1015,7 +999,7 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
   })();
   addNear(bag, 0.9, 1.8);
 
-  // ---------- Drifting through the background ----------
+  // ---------- The emerald tablet and the caduceus ----------
   // The emerald tablet's engraving (drawn again once its fonts have loaded).
   function drawTablet(g, W, Hh) {
     g.clearRect(0, 0, W, Hh);
@@ -1042,12 +1026,12 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
     const geo = new THREE.ExtrudeGeometry(s, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.008, bevelSegments: 3, curveSegments: 24 });
     geo.translate(0, -h / 2, -0.0175);
     const gem = new THREE.Mesh(geo, new THREE.ShaderMaterial({
-      uniforms: { ...U },
+      uniforms: { ...U, uFade: { value: 1 } },
       vertexShader: 'varying vec3 vN; varying vec3 vV; void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vN = normalize(mat3(modelMatrix) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }',
-      fragmentShader: /* glsl */`uniform float uBreath; varying vec3 vN; varying vec3 vV;
+      fragmentShader: /* glsl */`uniform float uBreath, uFade; varying vec3 vN; varying vec3 vV;
         void main(){ float ndv = abs(dot(normalize(vN), normalize(vV))); float f = pow(1.0 - ndv, 2.0);
           vec3 c = mix(vec3(0.02, 0.24, 0.13), vec3(0.3, 1.0, 0.62), f) + vec3(0.1, 0.5, 0.3) * (0.3 + 0.3 * uBreath) + vec3(0.85, 1.0, 0.9) * pow(ndv, 40.0) * 0.4;
-          gl_FragColor = vec4(c, 0.86); }`,
+          gl_FragColor = vec4(c, 0.86 * uFade); }`,
       transparent: true,
     }));
     const text = canvasTexture(512, 712, drawTablet);
@@ -1058,7 +1042,11 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
     group.userData.text = text;
     return group;
   })();
-  art.add(tablet);
+  // It floats at the upper corner of the downward (blue) tetrahedron on the body's left, above the bag of magic dust,
+  // at about the bag's size: Thoth is a lunar god, so it sits on the moon's side.
+  tablet.scale.setScalar(0.55);
+  tablet.position.set(0.86, 1.36, 0.12);
+  addNear(tablet, 0.9, 1.8);
 
   // The caduceus: a golden staff (sushumna), two serpents (ida in silver-blue, pingala in red-gold) and wings.
   const caduceus = (() => {
@@ -1100,7 +1088,10 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
     }
     return group;
   })();
-  art.add(caduceus);
+  // The caduceus floats at the other upper corner, on the body's right above the Aquarian jar, at about the jar's size.
+  caduceus.scale.setScalar(0.3);
+  caduceus.position.set(-0.88, 1.36, 0.06);
+  addNear(caduceus, 0.9, 1.8);
 
   // ---------- Fonts, then the drawings that need them ----------
   // The faces are declared in style.css; ask for them, then redraw the wheel, the ring band and the tablet.
@@ -1119,13 +1110,6 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
 
   // ---------- Each frame ----------
   const tmpV = new THREE.Vector3(), tmpQ = new THREE.Quaternion();
-  // Wandering paths: slow, never through the body, mostly behind it.
-  // The path is a slow figure of eight: out at the sides it comes nearer, and it only crosses behind the body far back.
-  const wander = (t, a, b, p) => {
-    const th = t * a + p;
-    return new THREE.Vector3(Math.sin(th) * 2.5, 1.2 + Math.sin(t * b + p * 1.7) * 0.7, -3.1 - Math.cos(2 * th) * 1.2);
-  };
-
   function apply() {
     const showSky = settings.sky, showArt = settings.art;
     // Anything still crossing the sky finishes at once when the sky or the motion is turned off.
@@ -1171,9 +1155,10 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
       merkaba.userData.a.rotation.y = time * 0.05;
       merkaba.userData.b.rotation.y = -time * 0.05;
       merkaba.scale.setScalar(1 + 0.015 * breath);
-      pyramid.userData.cap.material.rotation = time * 0.03;
-      pyramid.userData.cap.scale.setScalar(2.6 + 0.8 * breath);
-      saturn.userData.planet.rotation.y = time * 0.04;
+      sun.userData.rays.material.rotation = time * 0.05;
+      sun.userData.rays.scale.setScalar(0.62 + 0.08 * breath);
+      sun.userData.glow.scale.setScalar(0.42 + 0.06 * breath);
+      moon.userData.ball.rotation.y = time * 0.03;
       // Jar: bob, then aim the stream from its mouth.
       const { holder, pivot, water, mouth, group: jarBody } = jar.userData;
       holder.position.y = 0.7 + Math.sin(time * 0.7) * 0.02;
@@ -1185,10 +1170,10 @@ export function initCosmos({ scene, camera, renderer, controls, hemi }) {
       bagBody.position.y = 0.5 + Math.sin(time * 0.6 + 1) * 0.015;
       bagBody.rotation.y = Math.sin(time * 0.3) * 0.4;
       dust.material.uniforms.uTop.value.copy(bagBody.position).add(tmpV.set(0, 0.19, 0));
-      tablet.position.copy(wander(time, 0.031, 0.047, 0.4));
-      tablet.rotation.set(Math.sin(time * 0.07) * 0.18, Math.sin(time * 0.11) * 0.7 + 0.2, Math.sin(time * 0.05) * 0.1);
-      caduceus.position.copy(wander(time, 0.027, 0.039, 2.2));
-      caduceus.rotation.set(Math.sin(time * 0.06) * 0.12, time * 0.18, Math.sin(time * 0.09) * 0.15);
+      tablet.position.y = 1.36 + Math.sin(time * 0.65 + 2) * 0.015;
+      tablet.rotation.set(Math.sin(time * 0.4) * 0.05, Math.sin(time * 0.3) * 0.45, Math.sin(time * 0.35) * 0.04);
+      caduceus.position.y = 1.36 + Math.sin(time * 0.7 + 3) * 0.015;
+      caduceus.rotation.set(Math.sin(time * 0.5) * 0.05, time * 0.25, 0);
     }
     const ret = moving || needsFrame;
     needsFrame = false;
