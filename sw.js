@@ -1,6 +1,6 @@
 // Offline support: app files are network-first so updates show up,
 // models and libraries are cache-first because they are large and rarely change.
-const VERSION = 'v7';
+const VERSION = 'v8';
 const SHELL = `shell-${VERSION}`;
 const ASSETS = `assets-${VERSION}`;
 const PRECACHE = ['./', 'index.html', 'style.css', 'app.js', 'occult.js', 'cosmos.js', 'manifest.webmanifest', 'data/catalog.json', 'data/occult.json',
