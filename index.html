@@ -122,6 +122,29 @@
   <dialog id="saves">
     <h2>Saved views</h2>
     <p class="small">Saves everything that's showing: the systems and layers, their filters, colours and opacity, what's hidden or focused, and where the camera is. Open a saved view any time to go straight back to it.</p>
+    <div id="account" class="account" hidden>
+      <div id="acct-out">
+        <p class="small">Sign in to keep your saved views in your account, so they're on every device you use.</p>
+        <div class="acct-row">
+          <button id="acct-google" type="button">Sign in with Google</button>
+          <button id="acct-email-toggle" type="button" class="link-btn">Use email instead</button>
+        </div>
+        <form id="acct-email-form" class="acct-email" hidden>
+          <input id="acct-email" type="email" autocomplete="email" placeholder="Email" aria-label="Email">
+          <input id="acct-password" type="password" autocomplete="current-password" placeholder="Password (6 or more characters)" aria-label="Password">
+          <div class="acct-row">
+            <button id="acct-signin" type="submit">Sign in</button>
+            <button id="acct-create" type="button">Create account</button>
+            <button id="acct-forgot" type="button" class="link-btn">Forgot password?</button>
+          </div>
+        </form>
+      </div>
+      <div id="acct-in" class="acct-row" hidden>
+        <span class="acct-who">Signed in as <b id="acct-who"></b></span>
+        <button id="acct-signout" type="button">Sign out</button>
+      </div>
+      <p id="acct-msg" class="small acct-msg" role="status" aria-live="polite"></p>
+    </div>
     <form id="save-form" class="save-form">
       <input id="save-name" type="text" maxlength="60" placeholder="Name this view" aria-label="Name for this view" autocomplete="off">
       <button type="submit">Save</button>

@@ -252,6 +252,23 @@ dialog h2 { margin-top: 0; font: 700 26px/1.15 var(--serif); color: var(--cream)
 .save-list button { padding: 6px 10px; font-size: 13px; }
 .save-list button.save-del { border: 0; background: none; color: var(--muted); padding: 6px; }
 .save-list button.save-del:hover { color: #ff8a8a; box-shadow: none; }
+dialog button:disabled { opacity: 0.5; cursor: default; }
+.account { margin: 12px 0 4px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(246, 227, 180, 0.04); }
+.account p { margin: 0 0 10px; }
+.acct-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.acct-who { flex: 1 1 auto; min-width: 0; font-size: 14px; overflow-wrap: anywhere; }
+.acct-who b { color: var(--cream); font-weight: 600; }
+.acct-email { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.acct-email input {
+  padding: 9px 12px; border-radius: 10px; font: inherit; font-size: 15px; color: var(--cream);
+  border: 1px solid var(--line); background: rgba(255, 255, 255, 0.06);
+}
+.acct-email input:focus { outline: none; border-color: rgba(230, 189, 106, 0.6); }
+dialog button.link-btn { border: 0; background: none; color: var(--accent); padding: 6px 4px; }
+dialog button.link-btn:hover { box-shadow: none; text-decoration: underline; }
+.account .acct-msg { margin: 8px 0 0; }
+.account .acct-msg:empty { display: none; }
+.account .acct-msg.err { color: #ffb3b3; }
 .start-over { margin: 16px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
 .start-over p { margin: 6px 0 0; }
 #btn-start-over.confirm { border-color: rgba(255, 120, 120, 0.7); color: #ffb3b3; }

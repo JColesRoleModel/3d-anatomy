@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { initOccult } from './occult.js';
 import { initCosmos } from './cosmos.js';
+import * as account from './account.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -624,11 +625,16 @@ syncStill();
 
 // ---------- Saved views and starting over ----------
 // A saved view is everything needed to come back to what's on screen: the view state, the occult layers, what's
-// hidden or focused, and the camera. They're kept on this device.
+// hidden or focused, and the camera. They're kept on this device and, for someone signed in, in their account too.
 const SAVES_KEY = 'tolnri.saves.v1';
-let saves = [];
+const DELETED_KEY = 'tolnri.saves.deleted.v1'; // views deleted while offline, still to delete from the account
+const ACCOUNT_KEY = 'tolnri.account.v1'; // '1' while someone is signed in on this device
+let saves = [], pendingDeletes = [];
 try { saves = JSON.parse(localStorage.getItem(SAVES_KEY)) || []; } catch {}
-const storeSaves = () => { try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves)); return true; } catch { return false; } };
+try { pendingDeletes = JSON.parse(localStorage.getItem(DELETED_KEY)) || []; } catch {}
+const storeSaves = () => {
+  try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves)); localStorage.setItem(DELETED_KEY, JSON.stringify(pendingDeletes)); return true; } catch { return false; }
+};
 const round = (v) => v.toArray().map((x) => Math.round(x * 1e4) / 1e4);
 
 function snapshot() {
@@ -674,12 +680,14 @@ function renderSaves() {
     li.querySelector('[data-open]').addEventListener('click', () => { restore(sv.data); $('saves').close(); });
     li.querySelector('[data-update]').addEventListener('click', () => {
       Object.assign(sv, { data: snapshot(), updated: Date.now() });
-      storeSaves(); renderSaves();
+      changed(sv);
     });
     li.querySelector('[data-del]').addEventListener('click', () => {
       if (!confirm(`Delete the saved view "${sv.name}"?`)) return;
       saves = saves.filter((x) => x !== sv);
+      if (sv.owner) pendingDeletes.push({ id: sv.id, owner: sv.owner });
       storeSaves(); renderSaves();
+      pushDeletes();
     });
     list.append(li);
   }
@@ -691,11 +699,122 @@ $('save-form').addEventListener('submit', (e) => {
   const input = $('save-name');
   const name = input.value.trim() || `View ${saves.length + 1}`;
   const now = Date.now();
-  saves.push({ id: `${now.toString(36)}${Math.random().toString(36).slice(2, 7)}`, name, created: now, updated: now, data: snapshot() });
+  const sv = { id: `${now.toString(36)}${Math.random().toString(36).slice(2, 7)}`, name, created: now, updated: now, data: snapshot() };
+  saves.push(sv);
   if (!storeSaves()) { saves.pop(); alert("Couldn't save: this browser's storage is full or turned off."); return; }
   input.value = '';
-  renderSaves();
+  changed(sv);
 });
+
+// ---------- Accounts ----------
+// Signed in, every view belongs to the account (its owner) and is sent up as soon as it changes. A view that
+// couldn't be sent (offline) is marked dirty and goes up at the next sync. Signing out takes the account's views off
+// this device; views saved while signed out stay here, and join the account at the next sign-in.
+let user = null, syncing = null;
+const acctMsg = (text = '', err = false) => { $('acct-msg').textContent = text; $('acct-msg').classList.toggle('err', err); };
+
+function changed(sv) {
+  if (user) { sv.owner = user.uid; sv.dirty = true; }
+  storeSaves(); renderSaves();
+  if (!user) return;
+  const uid = user.uid;
+  account.put(uid, sv).then(() => {
+    if (sv.owner === uid && saves.includes(sv)) { delete sv.dirty; storeSaves(); }
+  }).catch((err) => acctMsg(`Saved on this device; it will reach your account when it can. (${account.message(err)})`, true));
+}
+
+async function pushDeletes() {
+  if (!user) return;
+  const uid = user.uid;
+  for (const d of pendingDeletes.filter((x) => x.owner === uid)) {
+    try { await account.remove(uid, d.id); } catch (err) { acctMsg(`Couldn't delete from your account yet. (${account.message(err)})`, true); return; }
+    pendingDeletes = pendingDeletes.filter((x) => x !== d);
+    storeSaves();
+  }
+}
+
+// Brings this device and the account into line: newest copy of each view wins, views deleted elsewhere go, and
+// views made on this device go up.
+function syncSaves() {
+  if (!user) return Promise.resolve();
+  syncing ??= (async () => {
+    const uid = user.uid;
+    try {
+      await pushDeletes();
+      const before = new Map(saves.map((sv) => [sv.id, sv]));
+      const remote = new Map((await account.list(uid)).map((r) => [r.id, r]));
+      const merged = new Map();
+      for (const sv of before.values()) {
+        if (sv.owner && sv.owner !== uid) continue; // another account's view
+        const r = remote.get(sv.id);
+        if (r && r.updated >= sv.updated) merged.set(sv.id, { ...r, owner: uid });
+        else if (r || !sv.owner || sv.dirty) {
+          const up = { ...sv, owner: uid };
+          await account.put(uid, up);
+          delete up.dirty;
+          merged.set(sv.id, up);
+        } // else: it was in the account and has been deleted on another device
+      }
+      for (const r of remote.values()) if (!merged.has(r.id) && !before.has(r.id)) merged.set(r.id, { ...r, owner: uid });
+      if (user?.uid !== uid) return;
+      // Keep anything saved, changed or deleted here while this ran.
+      for (const sv of saves) {
+        const was = before.get(sv.id);
+        if (!was || sv.updated > was.updated) merged.set(sv.id, sv);
+      }
+      for (const id of before.keys()) if (!saves.some((sv) => sv.id === id)) merged.delete(id);
+      saves = [...merged.values()];
+      storeSaves(); renderSaves();
+      acctMsg('');
+    } catch (err) {
+      acctMsg(`Couldn't sync with your account. (${account.message(err)})`, true);
+    }
+  })().finally(() => { syncing = null; });
+  return syncing;
+}
+
+function renderAccount() {
+  $('account').hidden = !account.config;
+  $('acct-out').hidden = !!user;
+  $('acct-in').hidden = !user;
+  if (user) $('acct-who').textContent = user.email || user.displayName || 'your account';
+}
+
+function onUser(u) {
+  const was = user;
+  user = u;
+  if (u) {
+    try { localStorage.setItem(ACCOUNT_KEY, '1'); } catch {}
+    $('acct-email-form').hidden = true;
+    syncSaves();
+  } else {
+    try { localStorage.removeItem(ACCOUNT_KEY); } catch {}
+    if (was) { saves = saves.filter((sv) => !sv.owner); pendingDeletes = pendingDeletes.filter((d) => d.owner !== was.uid); storeSaves(); }
+  }
+  renderAccount(); renderSaves();
+}
+
+// Runs a sign-in step with the buttons disabled, showing what went wrong in plain words.
+async function busy(fn, doing) {
+  const buttons = [...$('account').querySelectorAll('button')];
+  buttons.forEach((b) => (b.disabled = true));
+  acctMsg(doing);
+  try { await account.start(onUser); await fn(); acctMsg(''); return true; }
+  catch (err) { if (account.QUIET.has(err?.code)) acctMsg(''); else acctMsg(account.message(err), true); return false; }
+  finally { buttons.forEach((b) => (b.disabled = false)); }
+}
+const emailValue = () => $('acct-email').value.trim();
+$('acct-google').addEventListener('click', () => busy(() => account.signInGoogle(), 'Opening Google sign-in…'));
+$('acct-email-toggle').addEventListener('click', () => { $('acct-email-form').hidden = false; $('acct-email').focus(); });
+$('acct-email-form').addEventListener('submit', (e) => { e.preventDefault(); busy(() => account.signInEmail(emailValue(), $('acct-password').value), 'Signing in…'); });
+$('acct-create').addEventListener('click', () => busy(() => account.createAccount(emailValue(), $('acct-password').value), 'Creating your account…'));
+$('acct-forgot').addEventListener('click', async () => {
+  if (await busy(() => account.resetPassword(emailValue()), 'Sending…')) acctMsg(`If there's an account for ${emailValue()}, a reset link is on its way there.`);
+});
+$('acct-signout').addEventListener('click', () => busy(() => account.signOut(), 'Signing out…'));
+window.addEventListener('online', () => { pushDeletes(); syncSaves(); });
+renderAccount();
+if (account.config && localStorage.getItem(ACCOUNT_KEY) === '1') account.start(onUser).catch((err) => acctMsg(account.message(err), true));
 
 // Reset everything: forget the remembered view, occult layers and sky settings, then start again as on a first
 // visit. Saved views are kept. The button asks for a second tap first.
@@ -713,7 +832,7 @@ $('btn-start-over').addEventListener('click', (e) => {
   location.reload();
 });
 
-$('btn-saves').addEventListener('click', () => { renderSaves(); $('saves').showModal(); });
+$('btn-saves').addEventListener('click', () => { renderSaves(); $('saves').showModal(); syncSaves(); });
 
 // ---------- Go ----------
 occult = await initOccult({
