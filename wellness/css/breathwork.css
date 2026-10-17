@@ -3,7 +3,7 @@
 
 .breath-app .screen {
   /* Slightly different inner gradient but same basic card as other pages */
-  background: radial-gradient(circle at top, rgba(76,154,197,0.14), rgba(3,4,7,0.98));
+  background: radial-gradient(circle at top, rgba(167, 123, 255,0.14), rgba(11, 10, 31,0.98));
 }
 
 /* Layout wrapper inside the screen */
@@ -301,7 +301,7 @@
   margin-top: 10px;
   border-radius: var(--radius-md);
   padding: 10px 11px 11px;
-  background: radial-gradient(circle at top, rgba(76,154,197,0.2), rgba(9,10,16,0.98));
+  background: radial-gradient(circle at top, rgba(167, 123, 255,0.2), rgba(9,10,16,0.98));
   border: 1px solid rgba(255,255,255,0.12);
   box-shadow: 0 8px 18px rgba(0,0,0,0.7);
   font-size: 0.78rem;

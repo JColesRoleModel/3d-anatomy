@@ -51,7 +51,7 @@ The movement is illustrative. The collarbone, shoulder blade and arm move as rig
 
 ## Wellness practice
 
-`wellness/` is the Tree of Life NRI 1.1 practice app (innervation routines, neuro-ocular eye work, breathwork, mudras and practice stats), copied from JColesRoleModel/TreeofLifeNRI1.1 and served at `/3d-anatomy/wellness/`. It keeps its own look, its own service worker and its own Firebase project (`treeoflifenri`) for stats backup. The lotus button in the anatomy header opens it, and its menu links back. Each app's service worker only clears its own caches.
+`wellness/` is the Tree of Life NRI 1.1 practice app (innervation routines, neuro-ocular eye work, breathwork, mudras and practice stats), copied from JColesRoleModel/TreeofLifeNRI1.1 (which stays as it was) and served at `/3d-anatomy/wellness/`. It is restyled to match the 3D site (`wellness/css/hub.css`, loaded last on every page): the same top bar and tree logo, and a bottom row of section chips with 3D Anatomy pinned at the left. Both sites share one installable app (`manifest.webmanifest`) and the lightning tree icon. It keeps its own service worker and its own Firebase project (`treeoflifenri`) for stats backup. The lotus button in the anatomy header opens it, and its menu links back. Each app's service worker only clears its own caches.
 
 ## How it's built
 - Plain HTML, CSS and JavaScript with [three.js](https://threejs.org) (bundled in `vendor/`). No build step: GitHub Pages serves the files as they are.

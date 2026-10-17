@@ -4,60 +4,37 @@
 <head>
   <meta charset="utf-8">
   <title>Tree of Life · Upper Body Innervation</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <!-- Use the same font family as the rest of the app -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
   <!-- Shared stylesheet for consistent design -->
   <link rel="stylesheet" href="css/legs_style.css">
   <link rel="stylesheet" href="css/footer-nav.css">
   <link rel="stylesheet" href="css/completion-modal.css">
+  <link rel="stylesheet" href="css/hub.css">
   <!-- Favicon for the site icon -->
-  <link rel="icon" type="image/png" href="assets/logo/tolnrilogo.webp">
+  <link rel="icon" type="image/png" href="../icons/icon-192.png">
   <!-- Installable app (PWA) -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0F0F0F">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b0a1f">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="ToL NRI">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/logo/icon-180.png">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tree of Life">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
   <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
 </head>
 
 <body>
   <div class="app-frame">
-    <header class="brand-header">
-      <div class="brand-mark">
-        <div class="brand-presenter-block">
-          <div class="presented-label">presented by:</div>
-          <div class="presented-name">Brian O'Kelly</div>
-        </div>
-        <a href="index.html" class="brand-logo-link">
-          <img src="assets/logo/tolnrilogo.webp" alt="Tree of Life logo" class="brand-logo-image">
-        </a>
-        <div class="brand-text">
-          <div class="brand-title">TREE OF LIFE</div>
-          <div class="brand-subtitle">Neurological Research Institute</div>
-        </div>
-        <div class="header-actions">
-          <div class="menu-dropdown">
-            <button class="menu-button" type="button" aria-label="Menu">☰</button>
-            <div class="menu-panel">
-              <a href="index.html">🏠 Home</a>
-              <a href="random.html">🔀 Random</a>
-              <a href="eyes.html">👁️ Eyes</a>
-              <a href="breathwork.html">🫁 Breathwork</a>
-              <a href="lower.html">🦶 Lower Body</a>
-              <a href="upper.html">💪 Upper Body</a>
-              <a href="head.html">🧠 Head</a>
-              <a href="mudras.html">🤲 Mudras</a>
-                <a href="../">🧬 3D Anatomy</a>
-              <button type="button" data-menu-stats>📊 Stats</button>
-              <a href="mailto:TreeOfLifeNRI@yahoo.com">📱 Contact</a>
-            </div>
-          </div>
-        </div>
+    <header class="hub-top">
+      <a class="brand" href="index.html" aria-label="Wellness home">
+        <img class="brand-logo" src="../icons/brand/tree-of-life.webp" alt="" width="160" height="172">
+        <div class="brand-text"><div class="brand-name">Tree of Life:</div><div class="brand-sub">Neurological Research Institute</div></div>
+      </a>
+      <div class="hub-actions">
+        <span id="hub-login-slot"></span>
+        <a href="#" id="footer-stats" class="icon-btn" title="Your practice stats" aria-label="Your practice stats"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 19.5V12M10 19.5V6M15 19.5v-9M20 19.5V9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></a>
+        <a href="other.html" class="icon-btn" title="About, FAQ and contact" aria-label="About, FAQ and contact">i</a>
       </div>
     </header>
 
@@ -155,13 +132,17 @@
       </section>
     </main>
 
-    <footer class="app-footer">
-      <nav class="footer-nav">
-        <a href="random.html">🔀 Random</a>
-        <a href="#" id="footer-stats">📊 Stats</a>
-        <a href="index.html">☰ Home</a>
-      </nav>
-    </footer>
+    <nav class="hub-bar" aria-label="Sections">
+      <a class="chip chip-anatomy" href="../" title="Back to the 3D anatomy"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="4.6" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 9.2h14M12 9.2v6.3M12 15.5l-3.2 5.6M12 15.5l3.2 5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>3D Anatomy</a>
+      <a class="chip" href="index.html" style="--c:#e6bd6a"><span class="dot"></span>Home</a>
+      <a class="chip" href="eyes.html" style="--c:#7fd3ff"><span class="dot"></span>Eyes</a>
+      <a class="chip" href="breathwork.html" style="--c:#9fe3c0"><span class="dot"></span>Breath</a>
+      <a class="chip" href="mudras.html" style="--c:#ffb36b"><span class="dot"></span>Mudras</a>
+      <a class="chip" href="lower.html" style="--c:#a77bff"><span class="dot"></span>Lower body</a>
+      <a class="chip" href="upper.html" style="--c:#ff8fa8" aria-current="page"><span class="dot"></span>Upper body</a>
+      <a class="chip" href="head.html" style="--c:#d9b8ff"><span class="dot"></span>Head</a>
+      <a class="chip" href="random.html" style="--c:#f6e3b4"><span class="dot"></span>Random</a>
+    </nav>
   </div>
 
   <audio id="audio-beep" preload="auto"></audio>

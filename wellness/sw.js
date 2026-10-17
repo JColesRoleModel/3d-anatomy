@@ -1,5 +1,5 @@
 // Lives inside the anatomy site, which shares this origin's caches, so only touch caches named for this app.
-const CACHE_NAME = 'tolnri-wellness-v1';
+const CACHE_NAME = 'tolnri-wellness-v2';
 const PAGES = [
   './',
   './index.html',

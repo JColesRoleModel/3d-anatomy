@@ -6,8 +6,8 @@
     z-index: 10000;
     width: 44px;
     height: 44px;
-    background: linear-gradient(135deg, rgba(194, 135, 63, 0.2), rgba(194, 135, 63, 0.1));
-    border: 1px solid rgba(194, 135, 63, 0.4);
+    background: linear-gradient(135deg, rgba(230, 189, 106, 0.2), rgba(230, 189, 106, 0.1));
+    border: 1px solid rgba(230, 189, 106, 0.4);
     border-radius: 8px;
     cursor: pointer;
     display: flex;
@@ -19,8 +19,8 @@
 }
 
 .hamburger-btn:hover {
-    background: linear-gradient(135deg, rgba(194, 135, 63, 0.35), rgba(194, 135, 63, 0.25));
-    border-color: #C2873F;
+    background: linear-gradient(135deg, rgba(230, 189, 106, 0.35), rgba(230, 189, 106, 0.25));
+    border-color: #e6bd6a;
     transform: scale(1.05);
 }
 
@@ -71,8 +71,8 @@
     right: -320px;
     width: 300px;
     height: 100vh;
-    background: linear-gradient(180deg, #1D1A3A 0%, #0F0F0F 100%);
-    border-left: 1px solid rgba(194, 135, 63, 0.3);
+    background: linear-gradient(180deg, #1D1A3A 0%, #0b0a1f 100%);
+    border-left: 1px solid rgba(230, 189, 106, 0.3);
     z-index: 9999;
     padding: 80px 20px 20px;
     overflow-y: auto;
@@ -87,11 +87,11 @@
 .menu-header {
     margin-bottom: 30px;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgba(194, 135, 63, 0.2);
+    border-bottom: 1px solid rgba(230, 189, 106, 0.2);
 }
 
 .menu-header h2 {
-    color: #C2873F;
+    color: #e6bd6a;
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0;
@@ -119,15 +119,15 @@
 }
 
 .menu-nav a:hover {
-    background: rgba(194, 135, 63, 0.15);
-    color: #C2873F;
+    background: rgba(230, 189, 106, 0.15);
+    color: #e6bd6a;
     transform: translateX(4px);
 }
 
 .menu-nav a.active {
-    background: rgba(194, 135, 63, 0.2);
-    color: #C2873F;
-    border-left: 3px solid #C2873F;
+    background: rgba(230, 189, 106, 0.2);
+    color: #e6bd6a;
+    border-left: 3px solid #e6bd6a;
 }
 
 /* Menu scrollbar */
@@ -136,10 +136,10 @@
 }
 
 .slide-menu::-webkit-scrollbar-track {
-    background: rgba(15, 15, 15, 0.5);
+    background: rgba(11, 10, 31, 0.5);
 }
 
 .slide-menu::-webkit-scrollbar-thumb {
-    background: rgba(194, 135, 63, 0.4);
+    background: rgba(230, 189, 106, 0.4);
     border-radius: 3px;
 }

@@ -1,0 +1,163 @@
+/* The Tree of Life hub look, shared with the 3D anatomy site: night-sky glass, Cormorant headings, gold and cream,
+   a top bar with the tree logo and a row of chips along the bottom. Loaded last, so it wins over the older sheets. */
+@font-face { font-family: 'Cormorant Garamond'; font-weight: 600; font-display: swap; src: url(../../vendor/fonts/cormorant-garamond-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-weight: 700; font-display: swap; src: url(../../vendor/fonts/cormorant-garamond-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 500; font-display: swap; src: url(../../vendor/fonts/cormorant-garamond-latin-500-italic.woff2) format('woff2'); }
+
+:root {
+  --bg: #0b0a1f;
+  --panel: rgba(17, 14, 40, 0.72);
+  --panel-solid: #141030;
+  --line: rgba(246, 227, 180, 0.14);
+  --text: #f4efe3;
+  --muted: #aca6c6;
+  --accent: #e6bd6a;
+  --gold: #e6bd6a;
+  --cream: #f6e3b4;
+  --violet: #a77bff;
+  --serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --glass: blur(14px) saturate(150%);
+  --glow: 0 0 0 1px rgba(246, 227, 180, 0.05), 0 8px 32px rgba(5, 3, 20, 0.55), 0 0 24px rgba(167, 123, 255, 0.12);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --bar-h: 64px;
+}
+
+html, body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The sky: a slow breathing glow of violet and emerald over the stars, on the same nine-second cycle as the 3D site. */
+body::before, body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+body::before {
+  background: url('../assets/backgrounds/stars-simple.webp') center/cover;
+  opacity: 0.55;
+}
+body::after {
+  background:
+    radial-gradient(60% 40% at 15% 10%, rgba(167, 123, 255, 0.28), transparent 70%),
+    radial-gradient(55% 35% at 90% 30%, rgba(63, 224, 143, 0.14), transparent 70%),
+    radial-gradient(70% 45% at 50% 100%, rgba(230, 189, 106, 0.12), transparent 70%);
+  animation: hub-breathe 9s ease-in-out infinite;
+}
+@keyframes hub-breathe { 0%, 100% { opacity: 0.65; } 50% { opacity: 1; } }
+
+/* ---------- Top bar ---------- */
+.brand-header, .app-footer, .menu-dropdown { display: none !important; }
+.hub-top {
+  position: sticky; top: 0; z-index: 1200;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: calc(var(--safe-top) + 10px) 14px 10px;
+  background: linear-gradient(rgba(11, 10, 31, 0.92), rgba(11, 10, 31, 0.55) 70%, transparent);
+}
+.hub-top .brand { display: flex; align-items: center; gap: 10px; min-width: 0; text-decoration: none; color: inherit; }
+.hub-top .brand-logo {
+  width: 46px; height: auto; flex: none; max-width: none;
+  filter: drop-shadow(0 0 10px rgba(230, 189, 106, 0.45)); animation: hub-logo 9s ease-in-out infinite;
+}
+@keyframes hub-logo {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(230, 189, 106, 0.3)); }
+  50% { filter: drop-shadow(0 0 16px rgba(230, 189, 106, 0.7)); }
+}
+.hub-top .brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1; flex: initial; }
+.hub-top .brand-name {
+  font: 700 27px/1 var(--serif); letter-spacing: 0.3px; color: var(--cream); text-transform: none;
+  text-shadow: 0 1px 6px rgba(5, 3, 20, 0.9), 0 0 16px rgba(230, 189, 106, 0.45);
+}
+.hub-top .brand-sub {
+  margin-top: 4px; padding-top: 4px; border-top: 1.5px solid #d6aa5a;
+  font: 700 13px/1.1 var(--serif); letter-spacing: 1.2px; text-transform: uppercase; color: var(--cream);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hub-actions { display: flex; gap: 8px; flex: none; align-items: center; }
+.icon-btn {
+  width: 36px; height: 36px; border-radius: 50%; flex: none;
+  border: 1px solid var(--line); background: var(--panel); color: var(--cream);
+  backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+  display: grid; place-items: center; font: 600 16px/1 var(--serif); text-decoration: none;
+  transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+}
+.icon-btn:hover, .hub-login:hover { border-color: rgba(230, 189, 106, 0.6); box-shadow: 0 0 14px rgba(230, 189, 106, 0.35); color: #fff; }
+.icon-btn svg { display: block; }
+.hub-login {
+  height: 36px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center;
+  border: 1px solid var(--line); background: var(--panel); color: var(--cream);
+  backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+  font-size: 13px; text-decoration: none; white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .hub-top .brand-name { font-size: 21px; }
+  .hub-top .brand-logo { width: 36px; }
+  .hub-top .brand { gap: 8px; }
+  .hub-top .brand-sub { font-size: 10px; letter-spacing: 0.6px; white-space: normal; }
+}
+
+/* ---------- Bottom bar: one chip per section, like the body systems on the 3D site ---------- */
+.hub-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1300;
+  padding: 10px 12px calc(var(--safe-bottom) + 12px);
+  display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+  justify-content: safe center;
+  background: linear-gradient(transparent, rgba(11, 10, 31, 0.92) 45%);
+}
+.hub-bar::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel);
+  backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+  color: var(--muted); white-space: nowrap; text-decoration: none; font-size: 15px;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.chip:hover { color: var(--text); }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); opacity: 0.4; }
+.chip[aria-current="page"] {
+  color: var(--text); border-color: color-mix(in srgb, var(--c) 70%, transparent);
+  background: color-mix(in srgb, var(--c) 18%, var(--panel-solid));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--c) 35%, transparent);
+}
+.chip[aria-current="page"] .dot { opacity: 1; box-shadow: 0 0 8px var(--c); }
+.chip-anatomy { /* always in reach: it stays pinned at the left while the other chips scroll */
+  position: sticky; left: 0; z-index: 1; color: var(--cream); border-color: rgba(230, 189, 106, 0.45);
+  background: var(--panel-solid); box-shadow: -14px 0 0 2px rgba(11, 10, 31, 0.97), 8px 0 12px -4px rgba(11, 10, 31, 0.95);
+}
+.chip-anatomy svg { flex: none; color: var(--accent); }
+
+/* ---------- Page body ---------- */
+.app-frame { max-width: 640px; }
+.app-main { padding: 6px 10px calc(var(--bar-h) + var(--safe-bottom) + 14px); }
+.screen {
+  border-radius: 20px;
+  padding: 16px 16px 28px;
+  background: var(--panel);
+  backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
+  border: 1px solid var(--line);
+  box-shadow: var(--glow);
+}
+.screen-title, h1.screen-title {
+  font: 700 28px/1.1 var(--serif); letter-spacing: 0.3px; text-transform: none;
+  color: var(--cream); text-shadow: 0 0 16px rgba(230, 189, 106, 0.35);
+}
+.screen-tagline { color: var(--muted); font-size: 14px; }
+.hub-presenter { margin: 2px 0 12px; font: italic 500 17px/1.2 var(--serif); color: var(--accent); }
+
+.routine-card {
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(246, 227, 180, 0.06), rgba(17, 14, 40, 0.6));
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 20px rgba(5, 3, 20, 0.45);
+}
+.routine-card:hover { border-color: rgba(230, 189, 106, 0.55); box-shadow: 0 0 18px rgba(230, 189, 106, 0.2); }
+.routine-name {
+  font: 700 15px/1.2 var(--serif); letter-spacing: 1.6px; text-transform: uppercase; color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after, .hub-top .brand-logo { animation: none; }
+}
+.home-top-row { flex-direction: column; align-items: flex-start; gap: 0; }
+.mini-heading { font: 700 22px/1.15 var(--serif); color: var(--cream); letter-spacing: 0.2px; }

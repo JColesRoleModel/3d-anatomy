@@ -9,11 +9,11 @@
     z-index: 1300;
     /* Mostly solid so it reads clearly over the page, with a soft blur of what's behind it */
     background:
-        radial-gradient(circle at top, rgba(76, 154, 197, 0.18), transparent 70%),
-        rgba(10, 10, 14, 0.88);
+        radial-gradient(circle at top, rgba(167, 123, 255, 0.18), transparent 70%),
+        rgba(11, 10, 31, 0.88);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
-    border: 1px solid rgba(194, 135, 63, 0.45);
+    border: 1px solid rgba(230, 189, 106, 0.45);
     padding: 10px 14px;
     margin-top: auto;
     border-radius: 18px;
@@ -31,7 +31,7 @@
 }
 
 .footer-nav a {
-    color: #c2873f;
+    color: #e6bd6a;
     text-decoration: none;
     font-size: 0.85rem;
     font-weight: 600;
@@ -43,7 +43,7 @@
 }
 
 .footer-nav a:hover {
-    color: #C2873F;
+    color: #e6bd6a;
 }
 
 .footer-nav a::after {
@@ -53,7 +53,7 @@
     left: 0;
     width: 0;
     height: 2px;
-    background: #C2873F;
+    background: #e6bd6a;
     transition: width 0.3s ease;
 }
 

@@ -151,7 +151,7 @@ async function deleteCloudRecords(localIds) {
 }
 
 // -------------------------
-// Login button in the bottom menu
+// Login button in the top bar
 // -------------------------
 
 const STATUS_LABELS = {
@@ -171,13 +171,14 @@ function setStatus(status) {
 }
 
 function addLoginLink() {
-  const nav = document.querySelector(".footer-nav");
-  if (!nav || nav.querySelector("#footer-login")) return;
+  // The sign-in pill sits in the top bar, next to the stats button.
+  const slot = document.getElementById("hub-login-slot");
+  if (!slot || document.getElementById("footer-login")) return;
   loginLink = document.createElement("a");
   loginLink.href = "#";
   loginLink.id = "footer-login";
-  const home = [...nav.querySelectorAll("a")].find(a => /index\.html$/.test(a.getAttribute("href") || ""));
-  nav.insertBefore(loginLink, home || null);
+  loginLink.className = "hub-login";
+  slot.replaceWith(loginLink);
   loginLink.addEventListener("click", handleLoginClick);
   setStatus("signedOut");
 }

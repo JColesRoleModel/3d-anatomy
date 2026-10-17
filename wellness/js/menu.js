@@ -43,7 +43,15 @@
     }
   }
 
+  // Bring the current page's chip into view in the bottom bar.
+  function showCurrentChip() {
+    const chip = document.querySelector('.hub-bar [aria-current="page"]');
+    const bar = chip?.parentElement;
+    if (bar && bar.scrollWidth > bar.clientWidth) bar.scrollLeft = chip.offsetLeft - (bar.clientWidth - chip.offsetWidth) / 2 - 60; // a little right of centre, past the pinned 3D Anatomy chip
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+    showCurrentChip();
     initMenuDropdown();
     initFooterStats();
   });
