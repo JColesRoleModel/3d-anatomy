@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Random Routine - Innervation Atlas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <parameter name="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet" href="css/legs_style.css">
+        <link rel="stylesheet" href="css/footer-nav.css">
+  <!-- Installable app (PWA) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0F0F0F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="ToL NRI">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/logo/icon-180.png">
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+</head>
+
+<body>
+    <div class="app-frame">
+        <header class="brand-header">
+            <div class="brand-mark">
+                <div class="brand-presenter-block">
+                    <div class="presented-label">presented by:</div>
+                    <div class="presented-name">Brian O'Kelly</div>
+                </div>
+                <a href="index.html" class="brand-logo-link">
+                    <img src="assets/logo/tolnrilogo.webp" alt="Tree of Life logo" class="brand-logo-image">
+                </a>
+                <div class="brand-text">
+                    <div class="brand-title">TREE OF LIFE</div>
+                    <div class="brand-subtitle">Neurological Research Institute</div>
+                </div>
+                <div class="header-actions">
+                    <div class="menu-dropdown">
+                        <button class="menu-button" type="button" aria-label="Menu">☰</button>
+                        <div class="menu-panel">
+                            <a href="index.html">🏠 Home</a>
+                            <a href="random.html">🔀 Random</a>
+                            <a href="eyes.html">👁️ Eyes</a>
+                            <a href="breathwork.html">🫁 Breathwork</a>
+                            <a href="lower.html">🦶 Lower Body</a>
+                            <a href="upper.html">💪 Upper Body</a>
+                            <a href="head.html">🧠 Head</a>
+                            <a href="mudras.html">🤲 Mudras</a>
+                <a href="../">🧬 3D Anatomy</a>
+                            <button type="button" data-menu-stats>📊 Stats</button>
+                            <a href="mailto:TreeOfLifeNRI@yahoo.com">📱 Contact</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="app-main">
+            <section class="screen screen-active">
+                <h1 class="screen-title">🔀 Random Routine</h1>
+                <p class="screen-tagline">Let fate choose your practice - every routine is an adventure</p>
+
+                <div class="random-grid">
+                    <button class="random-card" data-type="all">
+                        <span class="random-icon">🌟</span>
+                        <span class="random-label">Random of ALL</span>
+                    </button>
+
+                    <button class="random-card" data-type="eyes">
+                        <span class="random-icon">👁️</span>
+                        <span class="random-label">Random Eye Routine</span>
+                    </button>
+
+                    <button class="random-card" data-type="breath">
+                        <span class="random-icon">🫁</span>
+                        <span class="random-label">Random Breath Pattern</span>
+                    </button>
+
+                    <button class="random-card" data-type="lower">
+                        <span class="random-icon">🦵</span>
+                        <span class="random-label">Random Lower Body</span>
+                    </button>
+
+                    <button class="random-card" data-type="upper">
+                        <span class="random-icon">💪</span>
+                        <span class="random-label">Random Upper Body</span>
+                    </button>
+
+                    <button class="random-card" data-type="head">
+                        <span class="random-icon">🧠</span>
+                        <span class="random-label">Random Head</span>
+                    </button>
+
+                    <button class="random-card" data-type="mudra">
+                        <span class="random-icon">🤲</span>
+                        <span class="random-label">Random Mudra</span>
+                    </button>
+                </div>
+
+                <div class="back-link">
+                    <a href="index.html">← Back to Home</a>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <nav class="footer-nav">
+                <a href="random.html">🔀 Random</a>
+                <a href="#" id="footer-stats">📊 Stats</a>
+                <a href="index.html">☰ Home</a>
+            </nav>
+        </footer>
+    </div>
+
+    <script>
+        // Random routine selections
+        const routines = {
+            all: [
+                'eyes.html?routine=FULL',
+                'eyes.html?routine=GROUND',
+                'eyes.html?routine=RESTORE',
+                'eyes.html?routine=ALERT',
+                'lower.html?routine=HIPS1',
+                'lower.html?routine=HIPS2',
+                'upper.html?routine=RANDOM',
+                'head.html?routine=RANDOM',
+                'mudras.html',
+                'breathwork.html'
+            ],
+            eyes: [
+                'eyes.html?routine=FULL',
+                'eyes.html?routine=GROUND',
+                'eyes.html?routine=RESTORE',
+                'eyes.html?routine=ALERT'
+            ],
+            breath: ['breathwork.html'],
+            lower: [
+                'lower.html?routine=HIPS1',
+                'lower.html?routine=HIPS2'
+            ],
+            upper: ['upper.html?routine=RANDOM'],
+            head: ['head.html?routine=RANDOM'],
+            mudra: ['mudras.html']
+        };
+
+        // Handle card clicks
+        document.querySelectorAll('.random-card').forEach(card => {
+            card.addEventListener('click', () => {
+                card.classList.add('clicked');
+                const type = card.dataset.type;
+                const options = routines[type];
+                const random = options[Math.floor(Math.random() * options.length)];
+
+                setTimeout(() => {
+                    window.location.href = random;
+                }, 300);
+            });
+        });
+    </script>
+    <script src="js/time-tracker.js"></script>
+    <script type="module" src="js/cloud-sync.js"></script>
+    <script src="js/time-stats-ui.js"></script>
+    <script src="js/menu.js"></script>
+</body>
+
+</html>

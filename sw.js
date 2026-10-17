@@ -1,6 +1,6 @@
 // Offline support: app files are network-first so updates show up,
 // models and libraries are cache-first because they are large and rarely change.
-const VERSION = 'v12';
+const VERSION = 'v13';
 const SHELL = `shell-${VERSION}`;
 const ASSETS = `assets-${VERSION}`;
 const PRECACHE = ['./', 'index.html', 'style.css', 'app.js', 'occult.js', 'cosmos.js', 'trace.js', 'conditions.js', 'account.js', 'firebase-config.js', 'manifest.webmanifest', 'data/catalog.json', 'data/occult.json', 'data/paths.json', 'data/conditions.json',
@@ -16,13 +16,14 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((keys) =>
-    Promise.all(keys.filter((k) => k !== SHELL && k !== ASSETS).map((k) => caches.delete(k)))
+    Promise.all(keys.filter((k) => /^(shell|assets)-/.test(k) && k !== SHELL && k !== ASSETS).map((k) => caches.delete(k)))
   ).then(() => self.clients.claim()));
 });
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+  if (url.pathname.includes('/wellness/')) return; // the wellness app has its own service worker
   if (/\/(models|vendor|icons)\//.test(url.pathname)) {
     e.respondWith(caches.open(ASSETS).then(async (c) => {
       const hit = await c.match(e.request) || await caches.match(e.request); // the shell cache precaches a few of these

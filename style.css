@@ -74,6 +74,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .icon-btn:hover { border-color: rgba(230, 189, 106, 0.6); box-shadow: 0 0 14px rgba(230, 189, 106, 0.35); color: #fff; }
 #btn-scene { color: var(--accent); }
+a.icon-btn { text-decoration: none; }
+#btn-wellness { color: #9fe3c0; }
 .icon-btn svg { display: block; }
 
 .systems {

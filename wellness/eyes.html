@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Tree of Life · Neuro‑Ocular Activation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Use the same font and base stylesheet as other pages -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/legs_style.css">
+  <link rel="stylesheet" href="css/footer-nav.css">
+  <link rel="stylesheet" href="css/completion-modal.css">
+  <!-- Favicon for site icon -->
+  <link rel="icon" type="image/png" href="assets/logo/tolnrilogo.webp">
+  <!-- Inline ocular‑specific styles -->
+  <style>
+    /* Apply a custom background for the ocular page */
+    .ocular-background {
+      /* Use the eyes pattern overlaid by a cosmic indigo tint for depth and legibility */
+      background-image:
+        linear-gradient(rgba(29, 26, 58, 0.3), rgba(29, 26, 58, 0.3)),
+        url('assets/neuroocular/eyesbackground.webp');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* Info section with table and explanations */
+    .info-section {
+      /* Hide the information section on the eyes page. We still retain it in the
+         markup for future reference, but it is hidden so the interface
+         resembles the lower body routine page. */
+      display: none;
+    }
+
+    .info-section h2 {
+      margin: 0 0 10px;
+      font-size: 1.0rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    .info-section h3 {
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    .info-section p {
+      margin: 0 0 10px;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      color: rgba(245, 230, 205, 0.9);
+    }
+
+    .info-section ul {
+      padding-left: 18px;
+      margin: 6px 0 12px;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      color: rgba(245, 230, 205, 0.92);
+    }
+
+    .info-section ul li {
+      margin-bottom: 6px;
+    }
+
+    /* Table styling */
+    .ocular-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.68rem;
+      color: rgba(245, 230, 205, 0.92);
+    }
+
+    .ocular-table thead th {
+      padding: 6px 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.65rem;
+      background: rgba(76, 154, 197, 0.18);
+    }
+
+    .ocular-table tbody td {
+      padding: 6px 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      vertical-align: top;
+    }
+
+    .ocular-table tbody tr:nth-child(odd) {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .ocular-table .pos {
+      font-weight: 600;
+      color: var(--gold);
+      white-space: nowrap;
+    }
+
+    /* Styles for collapsible information section */
+    .info-details {
+      margin-top: 18px;
+      background: rgba(29, 26, 58, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      color: var(--cream);
+      backdrop-filter: blur(6px);
+    }
+
+    .info-details summary {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      cursor: pointer;
+      list-style: none;
+      outline: none;
+    }
+
+    .info-details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .info-details summary::after {
+      content: '▾';
+      float: right;
+      transition: transform 0.2s ease;
+    }
+
+    .info-details[open] summary::after {
+      transform: rotate(180deg);
+    }
+
+    .info-details div {
+      margin-top: 12px;
+    }
+  </style>
+  <!-- Installable app (PWA) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0F0F0F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="ToL NRI">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/logo/icon-180.png">
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+</head>
+
+<body>
+  <div class="app-frame">
+    <header class="brand-header">
+      <div class="brand-mark">
+        <div class="brand-presenter-block">
+          <div class="presented-label">presented by:</div>
+          <div class="presented-name">Brian O'Kelly</div>
+        </div>
+        <a href="index.html" class="brand-logo-link">
+          <img src="assets/logo/tolnrilogo.webp" alt="Tree of Life logo" class="brand-logo-image">
+        </a>
+        <div class="brand-text">
+          <div class="brand-title">TREE OF LIFE</div>
+          <div class="brand-subtitle">Neurological Research Institute</div>
+        </div>
+        <div class="header-actions">
+          <div class="menu-dropdown">
+            <button class="menu-button" type="button" aria-label="Menu">☰</button>
+            <div class="menu-panel">
+              <a href="index.html">🏠 Home</a>
+              <a href="random.html">🔀 Random</a>
+              <a href="eyes.html">👁️ Eyes</a>
+              <a href="breathwork.html">🫁 Breathwork</a>
+              <a href="lower.html">🦶 Lower Body</a>
+              <a href="upper.html">💪 Upper Body</a>
+              <a href="head.html">🧠 Head</a>
+              <a href="mudras.html">🤲 Mudras</a>
+                <a href="../">🧬 3D Anatomy</a>
+              <button type="button" data-menu-stats>📊 Stats</button>
+              <a href="mailto:TreeOfLifeNRI@yahoo.com">📱 Contact</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main ocular-background">
+      <!-- SCREEN 1: Routine picker for ocular sequences -->
+      <section id="screen-select" class="screen screen-active">
+        <h1 class="screen-title">Neuro‑Ocular Activation</h1>
+        <p class="screen-tagline">Choose a gaze sequence to awaken your vision, brainstem and nervous system.</p>
+        <div id="routine-list" class="routine-list">
+          <!-- Cards will be injected by eyes_app.js -->
+        </div>
+        <button id="btn-random" class="btn random-btn">
+          <span class="random-icon">⇄</span>
+          <span>Random Sequence</span>
+        </button>
+      </section>
+
+      <!-- SCREEN 2: Preferences for ocular routines -->
+      <section id="screen-prefs" class="screen">
+        <button class="back-btn" data-back="screen-select">← Back</button>
+        <h1 id="prefs-title" class="screen-title">Sequence</h1>
+        <p id="prefs-tagline" class="screen-tagline">Set your gaze duration and rest.</p>
+        <div class="routine-preview-card">
+          <div class="preview-label" id="prefs-preview-label"></div>
+          <div class="preview-strip" id="prefs-preview-strip">
+            <!-- Thumbnails injected by JS -->
+          </div>
+        </div>
+        <div class="prefs-grid">
+          <div class="field">
+            <label for="input-seconds">Seconds per gaze</label>
+            <input id="input-seconds" type="number" min="5" max="120" step="5" value="45">
+          </div>
+          <div class="field">
+            <label for="input-rest">Time between gazes (sec)</label>
+            <input id="input-rest" type="number" min="0" max="60" step="1" value="3">
+          </div>
+          <div class="field">
+            <label for="input-rounds">Rounds of sequence</label>
+            <input id="input-rounds" type="number" min="1" max="10" step="1" value="2">
+          </div>
+          <div class="field">
+            <label>Sound</label>
+            <!-- Toggle to enable/disable the end‑of‑phase sound -->
+            <button id="ocular-audio-toggle" class="pill-toggle" data-on="1">
+              <span class="pill-knob"></span>
+              <span class="pill-label">On</span>
+            </button>
+          </div>
+        </div>
+        <button id="btn-start-routine" class="btn primary-btn full-width">Start Sequence</button>
+      </section>
+
+      <!-- SCREEN 3: Sequence player -->
+      <section id="screen-player" class="screen">
+        <button class="back-btn" data-back="screen-prefs">← Back</button>
+        <h1 id="player-title" class="screen-title">Sequence</h1>
+        <p id="player-tagline" class="screen-tagline">Follow the gaze sequence at your own pace.</p>
+        <div class="routine-preview-card">
+          <div class="preview-label" id="player-preview-label"></div>
+          <div class="preview-strip" id="player-preview-strip">
+            <!-- Thumbnails injected by JS -->
+          </div>
+        </div>
+        <div class="current-movement-card">
+          <div id="current-movement-label" class="movement-label">Gaze</div>
+          <div class="movement-image-frame">
+            <img id="current-movement-image" alt="Current gaze">
+          </div>
+          <div class="movement-meta">
+            <div id="movement-count" class="movement-count">Gaze 1 of 1</div>
+            <div id="round-count" class="round-count">Round 1 of 1</div>
+            <div id="phase-label" class="phase-label">Ready</div>
+          </div>
+        </div>
+        <div class="progress-area">
+          <div class="progress-wrap">
+            <div id="prog" class="progress-fill"></div>
+          </div>
+        </div>
+        <div class="player-controls">
+          <button id="btn-play-pause" class="btn primary-btn">Start</button>
+          <button id="btn-restart" class="btn ghost-btn">Restart Sequence</button>
+        </div>
+        <div id="status-message" class="status-message"></div>
+      </section>
+
+      <!-- END of app-main screens -->
+    </main>
+    <!-- Collapsible information section with table and routines -->
+    <details class="info-details">
+      <summary>Learn more about gaze science &amp; flows 📚</summary>
+      <div>
+        <p>The nine gaze positions engage distinct cranial nerves, cervical muscles and autonomic pathways. Use the
+          table below to understand the neural signatures.</p>
+        <table class="ocular-table">
+          <thead>
+            <tr>
+              <th>🔢</th>
+              <th>Position</th>
+              <th>Cranial Nerves</th>
+              <th>Cervical &amp; Neuro‑Muscular</th>
+              <th>Autonomic Shift</th>
+              <th>Neurotransmitters</th>
+              <th>Role</th>
+              <th>Somatic Signature</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1️⃣</td>
+              <td class="pos">Up (Vertical Superior)</td>
+              <td>CN III &amp; IV</td>
+              <td>C1–C2 extension, suboccipital activation</td>
+              <td>↑ Sympathetic, ↑ Reticular Activating System</td>
+              <td>Dopamine ↑, Norepinephrine ↑</td>
+              <td>Alertness, future orientation, activation, motivation</td>
+              <td>Awake, lift, upward energetic current</td>
+            </tr>
+            <tr>
+              <td>2️⃣</td>
+              <td class="pos">Down (Vertical Inferior)</td>
+              <td>CN III &amp; IV</td>
+              <td>C1–C2 flexion, deep cervical flexor engagement</td>
+              <td>↑ Parasympathetic, vagal tilt</td>
+              <td>Serotonin ↑, GABA ↑</td>
+              <td>Grounding, emotional regulation, processing</td>
+              <td>Release, calm, dropping into the body</td>
+            </tr>
+            <tr>
+              <td>3️⃣</td>
+              <td class="pos">Left Horizontal</td>
+              <td>CN III &amp; VI</td>
+              <td>Cervical rotation left (C2–C4)</td>
+              <td>Hemispheric regulation (right brain bias)</td>
+              <td>GABA ↑, Cortisol ↓</td>
+              <td>Intuition, spatial awareness, autobiographical recall</td>
+              <td>Softness, imagination, reflection</td>
+            </tr>
+            <tr>
+              <td>4️⃣</td>
+              <td class="pos">Right Horizontal</td>
+              <td>CN III &amp; VI</td>
+              <td>Cervical rotation right (C2–C4)</td>
+              <td>Hemispheric regulation (left brain bias)</td>
+              <td>Dopamine ↑, Acetylcholine ↑</td>
+              <td>Logic, sequencing, speech access, goal‑orientation</td>
+              <td>Clarity, decisiveness, forward movement</td>
+            </tr>
+            <tr>
+              <td>5️⃣</td>
+              <td class="pos">Up‑Left Diagonal</td>
+              <td>CN III &amp; IV</td>
+              <td>Upper cervical rotation + extension</td>
+              <td>Mixed sympathetic/parasympathetic</td>
+              <td>Dopamine + Serotonin blend</td>
+              <td>Creative visualization, reflective planning</td>
+              <td>Calm inspiration, inner vision</td>
+            </tr>
+            <tr>
+              <td>6️⃣</td>
+              <td class="pos">Up‑Right Diagonal</td>
+              <td>CN III &amp; IV</td>
+              <td>Upper cervical rotation + extension</td>
+              <td>↑ Sympathetic</td>
+              <td>Dopamine ↑↑</td>
+              <td>Executive function, decision‑making, intent activation</td>
+              <td>Determination, drive, future‑casting</td>
+            </tr>
+            <tr>
+              <td>7️⃣</td>
+              <td class="pos">Down‑Left Diagonal</td>
+              <td>CN III &amp; IV</td>
+              <td>Cervical flexion + rotation</td>
+              <td>Deep parasympathetic, vagal discharge</td>
+              <td>GABA ↑, Endorphins ↑</td>
+              <td>Emotional release, trauma digestion, somatic unwinding</td>
+              <td>Letting go, exhale, dissolution</td>
+            </tr>
+            <tr>
+              <td>8️⃣</td>
+              <td class="pos">Down‑Right Diagonal</td>
+              <td>CN III &amp; IV</td>
+              <td>Cervical flexion + rotation</td>
+              <td>Parasympathetic + limbic down‑regulation</td>
+              <td>Serotonin ↑</td>
+              <td>Pattern interruption, habit release, reprocessing</td>
+              <td>Acceptance, integration, grounding</td>
+            </tr>
+            <tr>
+              <td>9️⃣</td>
+              <td class="pos">Circular Tracking (CW &amp; CCW)</td>
+              <td>CN III, IV &amp; VI</td>
+              <td>Full cervical coactivation w/ vestibular loop</td>
+              <td>Resets autonomic oscillation</td>
+              <td>Balanced neurotransmitter cycling</td>
+              <td>System recalibration, vestibular integration</td>
+              <td>Reset, coherence, whole‑system alignment</td>
+            </tr>
+          </tbody>
+        </table>
+        <h2>Alertness, High Energy &amp; Awake ⚡</h2>
+        <p>Need a quick lift? These gaze flows deliver sympathetic drive, dopamine lift and razor‑sharp focus.</p>
+        <h3>Ignition Sequence 🚀</h3>
+        <ul>
+          <li>Upward vertical gaze hold (30–45 sec)</li>
+          <li>Rapid left–right saccades (20–30 sec)</li>
+          <li>Upper‑right diagonal hold (20–30 sec)</li>
+          <li>Circle‑wide clockwise (1 slow rotation)</li>
+          <li>Center point reset (10 sec)</li>
+        </ul>
+        <h3>Dopamine Spark ✨</h3>
+        <ul>
+          <li>Straight up hold</li>
+          <li>Straight right hold</li>
+          <li>Micro pulses up–right–up–right (10 rounds)</li>
+          <li>Cross‑midline fast tracking (20 sec)</li>
+        </ul>
+        <h3>Immediate Reboot ⚡</h3>
+        <ul>
+          <li>Fast horizontal saccades (15 sec)</li>
+          <li>Upward hold (20 sec)</li>
+          <li>Clockwise circles (1 rotation)</li>
+          <li>Done—instant lift!</li>
+        </ul>
+        <h2>Grounding, Balance &amp; Harmony 🌿</h2>
+        <p>Enter a relaxed, coherent state—parasympathetic dominance without sedation. These flows cultivate vagal tone
+          and hemispheric balance.</p>
+        <h3>The Equilibrium Pattern 🌊</h3>
+        <ul>
+          <li>Downward diagonal left hold (20–30 sec)</li>
+          <li>Slow horizontal tracking left→right→left (2 passes)</li>
+          <li>Soft center gaze + 4‑second nasal breath (20 sec)</li>
+          <li>Downward vertical hold (20–30 sec)</li>
+          <li>Counter‑clockwise slow circle (1 slow rotation)</li>
+        </ul>
+        <h3>The Floating Bridge 🌈</h3>
+        <ul>
+          <li>Upper‑left diagonal hold</li>
+          <li>Slow‑focus expansion (soften eyes outward)</li>
+          <li>Downward hold</li>
+          <li>Horizontal smooth tracking</li>
+        </ul>
+        <h3>Neutral Centering 🧘‍♂️</h3>
+        <ul>
+          <li>Downward gaze hold (30 sec)</li>
+          <li>Center gaze softening (20 sec)</li>
+          <li>Slow horizontal tracking (2 passes)</li>
+        </ul>
+        <h2>Restoring &amp; Letting Go 🌑</h2>
+        <p>For deep restoration, limbic unloading and dissolving patterned tension. These sequences invite surrender and
+          integration.</p>
+        <h3>The Release Pattern 💧</h3>
+        <ul>
+          <li>Downward‑left hold (20–40 sec)</li>
+          <li>Downward‑right hold (20–40 sec)</li>
+          <li>Slow counter‑clockwise circles (1–2 rotations)</li>
+          <li>Soft eyes / almost‑closed gaze (20 sec)</li>
+          <li>Center drop + exhale focus (3 breaths)</li>
+        </ul>
+        <h3>Limbic Dissolve 🧠✨</h3>
+        <ul>
+          <li>Downward vertical hold</li>
+          <li>Micro‑saccade down (gentle tapping movements)</li>
+          <li>Upper‑left slow tracking</li>
+          <li>Softened peripheral vision (20 sec)</li>
+        </ul>
+        <h3>Letting‑Go Trinity 🌬️</h3>
+        <ul>
+          <li>Down‑left hold (30 sec)</li>
+          <li>Down‑right hold (30 sec)</li>
+          <li>Soft center gaze (20 sec)</li>
+        </ul>
+      </div>
+    </details>
+    <footer class="app-footer">
+      <nav class="footer-nav">
+        <a href="random.html">🔀 Random</a>
+        <a href="#" id="footer-stats">📊 Stats</a>
+        <a href="index.html">☰ Home</a>
+      </nav>
+    </footer>
+  </div>
+  <!-- Audio cue for end of each gaze/phase -->
+  <audio id="audio-ding" src="assets/audio/ding.mp3" preload="auto"></audio>
+
+  <script src="js/time-tracker.js"></script>
+
+  <script type="module" src="js/cloud-sync.js"></script>
+  <script src="js/time-stats-ui.js"></script>
+  <script src="js/lazy-loader.js"></script>
+  <script src="js/phase-bar.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/eyes_app.js" defer></script>
+  <script src="js/completion-prompt.js"></script>
+</body>
+
+</html>

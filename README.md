@@ -49,6 +49,10 @@ Layers > Conditions opens a study card for scapular winging (`conditions.js`, te
 
 The movement is illustrative. The collarbone, shoulder blade and arm move as rigid bones on a normal shoulder rhythm (Ludewig et al.), changed by made-up but plausible amounts for each type; everything else around the shoulder is bent to follow them by blending between the nearest bones. Only the right side moves.
 
+## Wellness practice
+
+`wellness/` is the Tree of Life NRI 1.1 practice app (innervation routines, neuro-ocular eye work, breathwork, mudras and practice stats), copied from JColesRoleModel/TreeofLifeNRI1.1 and served at `/3d-anatomy/wellness/`. It keeps its own look, its own service worker and its own Firebase project (`treeoflifenri`) for stats backup. The lotus button in the anatomy header opens it, and its menu links back. Each app's service worker only clears its own caches.
+
 ## How it's built
 - Plain HTML, CSS and JavaScript with [three.js](https://threejs.org) (bundled in `vendor/`). No build step: GitHub Pages serves the files as they are.
 - `models/*.glb`: one model per source file, simplified and compressed for phones.

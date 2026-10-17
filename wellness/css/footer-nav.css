@@ -1,0 +1,62 @@
+/* Footer Navigation */
+.app-footer {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 10px;
+    max-width: 420px;
+    width: calc(100% - 32px);
+    z-index: 1300;
+    /* Mostly solid so it reads clearly over the page, with a soft blur of what's behind it */
+    background:
+        radial-gradient(circle at top, rgba(76, 154, 197, 0.18), transparent 70%),
+        rgba(10, 10, 14, 0.88);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(194, 135, 63, 0.45);
+    padding: 10px 14px;
+    margin-top: auto;
+    border-radius: 18px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+}
+
+.footer-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.footer-nav a {
+    color: #c2873f;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.footer-nav a:hover {
+    color: #C2873F;
+}
+
+.footer-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #C2873F;
+    transition: width 0.3s ease;
+}
+
+.footer-nav a:hover::after {
+    width: 100%;
+}

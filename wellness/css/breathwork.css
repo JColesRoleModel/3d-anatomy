@@ -1,0 +1,431 @@
+/* Breathwork-specific styling. Uses the same palette variables
+   defined in css/legs_style.css. */
+
+.breath-app .screen {
+  /* Slightly different inner gradient but same basic card as other pages */
+  background: radial-gradient(circle at top, rgba(76,154,197,0.14), rgba(3,4,7,0.98));
+}
+
+/* Layout wrapper inside the screen */
+.breath-layout {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* BRAND PILL BAR */
+
+.breath-branding {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 999px;
+  background: radial-gradient(circle at top, rgba(10,20,40,0.96), rgba(3,5,10,0.98));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.65);
+}
+
+.brand-item {
+  flex: 1 1 45%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: radial-gradient(circle at top, rgba(10,20,40,0.9), rgba(4,8,16,0.96));
+  cursor: pointer;
+  color: var(--cream);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  transition: transform 140ms ease-out, box-shadow 140ms ease-out, border-color 140ms ease-out, background 140ms ease-out;
+}
+
+.brand-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.7);
+  border-color: rgba(242,227,180,0.8);
+}
+
+.brand-item.active {
+  background: radial-gradient(circle at top, rgba(58,145,92,0.8), rgba(7,10,14,1));
+  border-color: var(--gold);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.85);
+}
+
+.brand-icon {
+  flex: 0 0 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.brand-icon img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.brand-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.brand-label-main {
+  font-weight: 600;
+  font-size: 0.74rem;
+}
+
+.brand-label-sub {
+  font-size: 0.63rem;
+  text-transform: none;
+  letter-spacing: 0.03em;
+  color: rgba(246,227,180,0.8);
+}
+
+/* SECTIONS */
+
+.breath-section-header {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.breath-section-title {
+  margin: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.breath-section-subtitle {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: rgba(245,230,205,0.82);
+}
+
+/* Shared card for nostril + hyper main blocks */
+
+.nostril-visual-card {
+  margin-top: 10px;
+  border-radius: var(--radius-md);
+  padding: 10px 10px 12px;
+  background: radial-gradient(circle at top, rgba(246,227,180,0.12), rgba(15,13,8,0.98));
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: var(--shadow-light);
+}
+
+/* Controls row */
+
+.nostril-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.nostril-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+/* Re-use global .field; just tweak hints */
+
+.field-hint {
+  font-size: 0.65rem;
+  color: rgba(246,227,180,0.78);
+  margin-top: 2px;
+}
+
+/* Nostril visual row */
+
+.nostril-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.nostril-col {
+  flex: 1;
+  text-align: center;
+  opacity: 0.55;
+  transform: translateY(0);
+  transition: opacity 160ms ease-out, transform 160ms ease-out;
+}
+
+.nostril-col.active {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.nostril-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.nostril-dot {
+  margin: 6px auto 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid rgba(148,163,184,0.6);
+  box-shadow: 0 0 0 1px rgba(15,23,42,0.9);
+}
+
+.nostril-col.left .nostril-dot {
+  border-color: rgba(168,85,247,0.9);
+}
+
+.nostril-col.right .nostril-dot {
+  border-color: rgba(250,204,21,0.9);
+}
+
+.nostril-col.active .nostril-dot {
+  box-shadow: 0 0 12px rgba(248,250,252,0.9);
+}
+
+.nostril-center {
+  flex: 0 0 auto;
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+/* Phase titles + progress */
+
+.phase-copy {
+  margin-top: 4px;
+}
+
+.phase-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.phase-subtitle {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: rgba(245,230,205,0.9);
+}
+
+.phase-subtitle .tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-right: 4px;
+}
+
+.tag-inhale {
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(74,222,128,0.8);
+  color: rgba(190,242,100,0.95);
+}
+
+.tag-exhale {
+  background: rgba(249,115,22,0.12);
+  border: 1px solid rgba(251,146,60,0.86);
+  color: rgba(253,224,171,0.96);
+}
+
+/* Progress */
+
+.progress-area {
+  margin-top: 8px;
+}
+
+.progress-wrap {
+  width: 100%;
+  height: 18px;
+  background: var(--cream);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(110,90,60,0.9), 0 6px 14px rgba(0,0,0,0.7);
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22c55e 0%, #4ade80 40%, #bef264 100%);
+  transition: width 0.1s linear;
+}
+
+.progress-fill.exhale {
+  background: linear-gradient(90deg, #fb923c 0%, #f97316 40%, #fde68a 100%);
+}
+
+.progress-meta,
+.cycle-meta,
+.hv-stats {
+  margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 10px;
+  font-size: 0.72rem;
+  color: rgba(245,230,205,0.9);
+}
+
+/* Screens toggle */
+
+.breath-screen {
+  display: none;
+}
+
+.breath-screen.active {
+  display: block;
+}
+
+/* Info cards */
+
+.info-card {
+  margin-top: 10px;
+  border-radius: var(--radius-md);
+  padding: 10px 11px 11px;
+  background: radial-gradient(circle at top, rgba(76,154,197,0.2), rgba(9,10,16,0.98));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.7);
+  font-size: 0.78rem;
+  color: rgba(245,230,205,0.94);
+}
+
+.info-card h3 {
+  margin: 0 0 6px;
+  font-size: 0.86rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.info-card p {
+  margin: 0 0 7px;
+}
+
+/* Hyperventilation timer + retention history */
+
+.hv-config {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.hv-timer-row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hv-timer-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hv-timer-display {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.hv-timer-label {
+  font-size: 0.75rem;
+  color: rgba(245,230,205,0.86);
+}
+
+.small-btn {
+  font-size: 0.72rem;
+  padding: 6px 10px;
+}
+
+.hv-holds.hidden {
+  display: none;
+}
+
+.hv-holds ul {
+  padding-left: 18px;
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+}
+
+.hv-holds li {
+  margin-bottom: 3px;
+}
+
+/* Custom input visibility */
+
+.hidden-input {
+  margin-top: 6px;
+  display: none;
+}
+/* Make the Cyclical dropdowns match the dark pill inputs */
+#hvSpeed,
+#hvBreathsSelect {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  padding: 7px 11px;
+  background: rgba(5,8,10,0.96);
+  color: var(--cream);
+  font-size: 0.85rem;
+  width: 100%;
+  outline: none;
+}
+
+/* Optional: make the custom breaths + rounds inputs match as well */
+#hvRounds,
+#hvBreathsCustom {
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  padding: 7px 11px;
+  background: rgba(5,8,10,0.96);
+  color: var(--cream);
+  font-size: 0.85rem;
+  width: 100%;
+  outline: none;
+}
+/* Responsive tweaks */
+
+@media (max-width: 520px) {
+  .brand-item {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .nostril-controls-row,
+  .hv-config {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nostril-buttons {
+    justify-content: flex-start;
+  }
+
+  .hv-timer-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

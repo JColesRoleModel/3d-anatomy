@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Tree of Life · Breathwork Toolkit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Shared font + base styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/legs_style.css">
+  <link rel="stylesheet" href="css/footer-nav.css">
+  <link rel="stylesheet" href="css/completion-modal.css">
+  <!-- Breathwork-specific styles -->
+  <link rel="stylesheet" href="css/breathwork.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/logo/tolnrilogo.webp">
+  <!-- Installable app (PWA) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0F0F0F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="ToL NRI">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/logo/icon-180.png">
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+</head>
+
+<body>
+  <div class="app-frame">
+    <!-- Shared brand header -->
+    <header class="brand-header">
+      <div class="brand-mark">
+        <div class="brand-presenter-block">
+          <div class="presented-label">presented by:</div>
+          <div class="presented-name">Brian O'Kelly</div>
+        </div>
+        <a href="index.html" class="brand-logo-link">
+          <img src="assets/logo/tolnrilogo.webp" alt="Tree of Life logo" class="brand-logo-image">
+        </a>
+        <div class="brand-text">
+          <div class="brand-title">TREE OF LIFE</div>
+          <div class="brand-subtitle">Neurological Research Institute</div>
+        </div>
+        <div class="header-actions">
+          <div class="menu-dropdown">
+            <button class="menu-button" type="button" aria-label="Menu">☰</button>
+            <div class="menu-panel">
+              <a href="index.html">🏠 Home</a>
+              <a href="random.html">🔀 Random</a>
+              <a href="eyes.html">👁️ Eyes</a>
+              <a href="breathwork.html">🫁 Breathwork</a>
+              <a href="lower.html">🦶 Lower Body</a>
+              <a href="upper.html">💪 Upper Body</a>
+              <a href="head.html">🧠 Head</a>
+              <a href="mudras.html">🤲 Mudras</a>
+                <a href="../">🧬 3D Anatomy</a>
+              <button type="button" data-menu-stats>📊 Stats</button>
+              <a href="mailto:TreeOfLifeNRI@yahoo.com">📱 Contact</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main breath-app">
+      <section class="screen screen-active">
+        <h1 class="screen-title">Breathwork Toolkit</h1>
+        <p class="screen-tagline">
+          Solar, Lunar, Alternate and Cyclical breath patterns for nervous system regulation.
+        </p>
+
+        <div class="breath-layout">
+          <!-- BRAND PILL BAR – the ONLY navigation between modes -->
+          <div class="breath-branding">
+            <button class="brand-item active" data-pattern="alternate" type="button">
+              <div class="brand-icon">
+                <img src="assets/breath/alternate.webp" alt="Alternate icon">
+              </div>
+              <div class="brand-labels">
+                <span class="brand-label-main">Alternate</span>
+                <span class="brand-label-sub">Central channel</span>
+              </div>
+            </button>
+
+            <button class="brand-item" data-pattern="solar" type="button">
+              <div class="brand-icon">
+                <img src="assets/breath/solar.webp" alt="Solar icon">
+              </div>
+              <div class="brand-labels">
+                <span class="brand-label-main">Solar</span>
+                <span class="brand-label-sub">Right nostril</span>
+              </div>
+            </button>
+
+            <button class="brand-item" data-pattern="lunar" type="button">
+              <div class="brand-icon">
+                <img src="assets/breath/lunar.webp" alt="Lunar icon">
+              </div>
+              <div class="brand-labels">
+                <span class="brand-label-main">Lunar</span>
+                <span class="brand-label-sub">Left nostril</span>
+              </div>
+            </button>
+
+            <button class="brand-item" data-pattern="cyclical" type="button">
+              <div class="brand-icon">
+                <img src="assets/breath/cyclical.webp" alt="Cyclical icon">
+              </div>
+              <div class="brand-labels">
+                <span class="brand-label-main">Cyclical</span>
+                <span class="brand-label-sub">Hyperventilation</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- NOSTRIL MODULE (Solar / Lunar / Alternate) -->
+          <section id="nostrilScreen" class="breath-screen active">
+            <header class="breath-section-header">
+              <h2 class="breath-section-title">Nostril Pattern</h2>
+              <p class="breath-section-subtitle">
+                Each phase is a timed IN or OUT through a specific nostril.
+              </p>
+            </header>
+
+            <div class="nostril-controls-row">
+              <div class="field">
+                <label for="phaseDuration">Seconds per phase</label>
+                <input id="phaseDuration" type="number" min="1" max="20" step="0.5" value="4">
+                <div class="field-hint">Each IN or OUT phase length.</div>
+              </div>
+              <div class="nostril-buttons">
+                <button id="startAltBtn" class="btn primary-btn" type="button">Start</button>
+                <button id="stopAltBtn" class="btn ghost-btn" type="button">Stop / Reset</button>
+              </div>
+            </div>
+
+            <!-- Nostril visualization -->
+            <div class="nostril-visual-card">
+              <div class="nostril-row">
+                <div class="nostril-col" id="leftNostril">
+                  <div class="nostril-label">Left Nostril</div>
+                  <div class="nostril-dot"></div>
+                </div>
+                <div class="nostril-center">⇄</div>
+                <div class="nostril-col" id="rightNostril">
+                  <div class="nostril-label">Right Nostril</div>
+                  <div class="nostril-dot"></div>
+                </div>
+              </div>
+
+              <div class="phase-copy">
+                <div id="phaseTitle" class="phase-title">Ready</div>
+                <div id="phaseSubtitle" class="phase-subtitle">
+                  Set your phase time, choose a pattern from the icons above, then press <strong>Start</strong>.
+                </div>
+              </div>
+
+              <div class="progress-area">
+                <div class="progress-wrap">
+                  <div id="altProgressBar" class="progress-fill"></div>
+                </div>
+                <div class="progress-meta">
+                  <span>Phase elapsed: <span id="elapsedTime">0.0s</span></span>
+                  <span>Phase length: <span id="totalTime">4.0s</span></span>
+                </div>
+                <div class="cycle-meta">
+                  <span>Cycles: <span id="cycleCount">0</span></span>
+                  <span id="cycleDefinitionText">(Alternate mode: 1 cycle = IN L → OUT R → IN R → OUT L)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Info cards – only one visible at a time -->
+            <article id="nostrilInfoAlternate" class="info-card active">
+              <h3>Alternate Nostril · Central Channel Reset</h3>
+              <p>
+                Alternate nostril breathing balances the left and right sides of the nervous system.
+                You’re moving attention and airflow between hemispheres in a deliberate loop, which
+                tends to smooth out extremes: too wired, too flat, too scattered.
+              </p>
+              <p>
+                One cycle here is: <strong>IN Left → OUT Right → IN Right → OUT Left</strong>.
+                It’s a full figure-8 between both nostrils.
+              </p>
+              <p>
+                Use this when you want clear, steady focus and a sense of being “centered” rather
+                than hyped up or sleepy.
+              </p>
+            </article>
+
+            <article id="nostrilInfoRight" class="info-card">
+              <h3>Solar · Right Nostril Activation</h3>
+              <p>
+                Right nostril breathing is traditionally linked to the solar, energizing side of the
+                system. It is associated with alertness, drive, and a mild sympathetic tilt.
+              </p>
+              <p>
+                One cycle is <strong>IN Right → OUT Right</strong>. We’re keeping attention and flow
+                on a single side to gently turn the dial up.
+              </p>
+              <p>
+                Use this when you want to wake up, focus before work, or prime yourself for action.
+                Avoid close to sleep.
+              </p>
+            </article>
+
+            <article id="nostrilInfoLeft" class="info-card">
+              <h3>Lunar · Left Nostril Calm</h3>
+              <p>
+                Left nostril work is paired with the lunar, cooling side of the system — slower,
+                grounded, more parasympathetic.
+              </p>
+              <p>
+                One cycle is <strong>IN Left → OUT Left</strong>. You’re gently biasing the system
+                toward rest and digestion without collapsing your alertness.
+              </p>
+              <p>
+                Use this later in the day, after stress, or as part of a wind-down routine before
+                sleep.
+              </p>
+            </article>
+          </section>
+
+          <!-- CYCLICAL HYPERVENTILATION MODULE -->
+          <section id="hyperScreen" class="breath-screen">
+            <header class="breath-section-header">
+              <h2 class="breath-section-title">Cyclical Hyperventilation</h2>
+              <p class="breath-section-subtitle">
+                Fast in/out breathing, followed by empty-hold retention, inhale hold, and release.
+              </p>
+            </header>
+
+            <div class="hv-config">
+              <div class="field">
+                <label for="hvSpeed">Breath speed</label>
+                <select id="hvSpeed">
+                  <option value="slow">Slow — 2.2s in / 2.2s out</option>
+                  <option value="standard" selected>Standard — 1.2s in / 1.2s out</option>
+                  <option value="fast">Fast — 0.7s in / 0.7s out</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="hvRounds">Rounds</label>
+                <input id="hvRounds" type="number" min="2" max="12" value="3">
+                <div class="field-hint">Full cycles of breath + holds.</div>
+              </div>
+            </div>
+
+            <div class="hv-config">
+              <div class="field">
+                <label for="hvBreathsSelect">Breaths per round</label>
+                <select id="hvBreathsSelect">
+                  <option value="10">10 breaths</option>
+                  <option value="15">15 breaths</option>
+                  <option value="20" selected>20 breaths</option>
+                  <option value="25">25 breaths</option>
+                  <option value="30">30 breaths</option>
+                  <option value="35">35 breaths</option>
+                  <option value="custom">Custom…</option>
+                </select>
+                <input id="hvBreathsCustom" type="number" min="1" max="200" value="20" class="hidden-input">
+              </div>
+              <div class="nostril-buttons">
+                <button id="startHvBtn" class="btn primary-btn" type="button">Start Rounds</button>
+                <button id="stopHvBtn" class="btn ghost-btn" type="button">Stop / Reset</button>
+              </div>
+            </div>
+
+            <div class="nostril-visual-card">
+              <div class="phase-copy">
+                <div id="hvPhaseTitle" class="phase-title">Ready</div>
+                <div id="hvPhaseSubtitle" class="phase-subtitle">
+                  Choose speed, rounds, and breaths per round, then press <strong>Start Rounds</strong>.
+                </div>
+              </div>
+
+              <div class="progress-area">
+                <div class="progress-wrap">
+                  <div id="hvProgressBar" class="progress-fill"></div>
+                </div>
+                <div class="hv-stats">
+                  <span id="hvRoundLabel">Round: —</span>
+                  <span id="hvBreathLabel">Breath: —</span>
+                  <span id="hvDirectionLabel">Phase: —</span>
+                </div>
+              </div>
+
+              <div class="hv-timer-row">
+                <div class="hv-timer-main">
+                  <div id="hvTimerDisplay" class="hv-timer-display">0.0</div>
+                  <div id="hvTimerLabel" class="hv-timer-label">Timer</div>
+                </div>
+                <button id="hvEndRetentionBtn" class="btn ghost-btn small-btn" type="button" disabled>
+                  End Retention
+                </button>
+              </div>
+            </div>
+
+            <section id="hvHoldsContainer" class="info-card hv-holds hidden">
+              <h3>Retention history</h3>
+              <ul id="hvHoldsList"></ul>
+            </section>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <nav class="footer-nav">
+        <a href="random.html">🔀 Random</a>
+        <a href="#" id="footer-stats">📊 Stats</a>
+        <a href="index.html">☰ Home</a>
+      </nav>
+    </footer>
+  </div>
+
+  <script src="js/time-tracker.js"></script>
+
+  <script type="module" src="js/cloud-sync.js"></script>
+  <script src="js/time-stats-ui.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/breathwork.js"></script>
+  <script src="js/completion-prompt.js"></script>
+</body>
+
+</html>

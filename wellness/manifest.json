@@ -1,0 +1,24 @@
+{
+  "short_name": "ToL NRI",
+  "name": "Tree of Life NRI · Innervation Atlas",
+  "description": "Innervation routines, breathwork, mudras and neuro-ocular activation from the Tree of Life Neurological Research Institute.",
+  "icons": [
+    {
+      "src": "assets/logo/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/logo/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0F0F0F",
+  "theme_color": "#0F0F0F"
+}

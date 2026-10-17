@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Innervation Atlas - Tree of Life NRI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/legs_style.css">
+  <link rel="stylesheet" href="css/footer-nav.css">
+  <!-- Favicon for site icon -->
+  <link rel="icon" type="image/png" href="assets/logo/tolnrilogo.webp">
+  <!-- Installable app (PWA) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0F0F0F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="ToL NRI">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/logo/icon-180.png">
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+</head>
+
+<body>
+  <div class="app-frame">
+    <header class="brand-header">
+      <div class="brand-mark home-brand">
+        <div class="brand-presenter-block">
+          <div class="presented-label">presented by:</div>
+          <div class="presented-name">Brian O'Kelly</div>
+        </div>
+
+        <a href="index.html" class="brand-logo-link">
+          <img src="assets/logo/tolnrilogo.webp" alt="Tree of Life logo" class="brand-logo-image">
+        </a>
+
+        <div class="brand-text">
+          <div class="brand-title">TREE OF LIFE</div>
+          <div class="brand-subtitle">Neurological Research Institute</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <section class="screen screen-active">
+        <div class="home-top-row">
+          <h1 class="screen-title">Innervation Atlas</h1>
+          <div class="header-actions home-menu">
+            <div class="menu-dropdown">
+              <button class="menu-button" type="button" aria-label="Menu">☰</button>
+              <div class="menu-panel">
+                <a href="index.html">🏠 Home</a>
+                <a href="random.html">🔀 Random</a>
+                <a href="eyes.html">👁️ Eyes</a>
+                <a href="breathwork.html">🫁 Breathwork</a>
+                <a href="lower.html">🦶 Lower Body</a>
+                <a href="upper.html">💪 Upper Body</a>
+                <a href="head.html">🧠 Head</a>
+                <a href="mudras.html">🤲 Mudras</a>
+                <a href="../">🧬 3D Anatomy</a>
+                <button type="button" data-menu-stats>📊 Stats</button>
+                <a href="mailto:TreeOfLifeNRI@yahoo.com">📱 Contact</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Summary Widget -->
+        <div class="home-stats-summary">
+          <div class="home-stat-item" id="home-week-time">
+            <div class="home-stat-value">—</div>
+            <div class="home-stat-label">This Week</div>
+          </div>
+          <div class="home-stat-item" id="home-day-streak">
+            <div class="home-stat-value">—</div>
+            <div class="home-stat-label">Day Streak</div>
+          </div>
+          <div class="home-action-buttons">
+            <button class="home-action-btn home-random-btn" id="home-random-btn" title="Start random routine">
+              <span class="home-action-icon">🔀</span>
+              <span class="home-action-text">Random</span>
+            </button>
+            <button class="home-action-btn home-stats-btn" id="home-stats-btn" title="View detailed statistics">
+              <span class="home-action-icon">📊</span>
+              <span class="home-action-text">Stats</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="routine-list">
+          <!-- Neuro-Ocular card -->
+          <div class="routine-card" data-href="eyes.html">
+            <div class="routine-header-row">
+              <div class="routine-name">Neuro-Ocular Activation</div>
+            </div>
+            <div class="icon-strip ocular-icons">
+              <a href="eyes.html?routine=FULL" class="icon-thumb" title="All 9 points">
+                <img data-src="assets/neuroocular/icons/all9.svg" alt="All 9 Icon">
+              </a>
+              <a href="eyes.html?routine=CORE" class="icon-thumb" title="Main 4 points">
+                <img data-src="assets/neuroocular/icons/9main4.svg" alt="Main 4 Icon">
+              </a>
+              <a href="eyes.html?routine=DIAGONAL" class="icon-thumb" title="Supplemental 4 points">
+                <img data-src="assets/neuroocular/icons/9supp4.svg" alt="Supplemental 4 Icon">
+              </a>
+              <a href="eyes.html?routine=ALERT" class="icon-thumb" title="Heart Chakra">
+                <img data-src="assets/neuroocular/icons/9heicon.svg" alt="Heart Chakra Icon">
+              </a>
+            </div>
+          </div>
+
+          <!-- Breathwork Toolkit -->
+          <div class="routine-card" data-href="breathwork.html">
+            <div class="routine-header-row">
+              <div class="routine-name">Breathwork Toolkit</div>
+            </div>
+            <div class="thumb-strip">
+              <div class="thumb"><img data-src="assets/breath/solar.webp" alt="Solar pattern"></div>
+              <div class="thumb"><img data-src="assets/breath/lunar.webp" alt="Lunar pattern"></div>
+              <div class="thumb"><img data-src="assets/breath/alternate.webp" alt="Alternate pattern"></div>
+              <div class="thumb"><img data-src="assets/breath/cyclical.webp" alt="Cyclical pattern"></div>
+            </div>
+          </div>
+
+          <!-- Lower Body Innervation -->
+          <div class="routine-card" data-href="lower.html">
+            <div class="routine-header-row">
+              <div class="routine-name">Lower Body Innervation</div>
+            </div>
+            <div class="icon-strip lower-icons">
+              <!-- JS will inject four icons using first movement image from each routine -->
+            </div>
+          </div>
+
+          <!-- Upper Body Innervation -->
+          <div class="routine-card" data-href="upper.html">
+            <div class="routine-header-row">
+              <div class="routine-name">Upper Body Innervation</div>
+            </div>
+            <div class="icon-strip upper-icons">
+              <!-- JS will inject up to 6 random routine icons -->
+            </div>
+          </div>
+
+          <!-- Head Innervation -->
+          <div class="routine-card" data-href="head.html">
+            <div class="routine-header-row">
+              <div class="routine-name">Head Innervation</div>
+            </div>
+            <div class="icon-strip head-icons">
+              <!-- JS will inject up to 6 random routine icons -->
+            </div>
+          </div>
+
+          <!-- Mudras -->
+          <div class="routine-card" data-href="mudras.html">
+            <div class="routine-header-row">
+              <div class="routine-name">Mudras</div>
+            </div>
+            <div class="thumb-strip mudras-strip">
+              <!-- JS will inject 3 random mudra thumbnails -->
+            </div>
+          </div>
+
+          <!-- Other: About / FAQ / Contact -->
+          <div class="routine-card about-card" data-href="other.html">
+            <div class="routine-header-row">
+              <div class="routine-name">About / FAQ / Contact</div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <nav class="footer-nav">
+        <a href="random.html">🔀 Random</a>
+        <a href="#" id="footer-stats">📊 Stats</a>
+        <a href="index.html">☰ Home</a>
+      </nav>
+    </footer>
+  </div>
+
+  <script>
+    function scrollToTop() {
+      const screen = document.querySelector('.screen-active');
+      if (screen) {
+        screen.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize lazy image loader
+      const lazyLoader = new LazyImageLoader({ rootMargin: '100px' });
+
+      // Observe all images with data-src attribute
+      document.querySelectorAll('img[data-src]').forEach(img => {
+        lazyLoader.observe(img);
+      });
+
+      // Make entire card clickable (except when clicking inside an inner link).
+      document.querySelectorAll('.routine-card[data-href]').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('a')) return; // let icon links work normally
+          const href = card.getAttribute('data-href');
+          if (href) {
+            window.location.href = href;
+          }
+        });
+      });
+
+      function shuffleAndTake(list, maxCount) {
+        const copy = [...list];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy.slice(0, Math.min(maxCount, copy.length));
+      }
+
+      // 1) MUDRAS: show 4 random mudra icons on the Mudras card
+      const mudraStrip = document.querySelector('.mudras-strip');
+      if (mudraStrip) {
+        const TOTAL_MUDRAS = 45; // adjust if you have fewer
+        const chosen = [];
+        while (chosen.length < 4 && chosen.length < TOTAL_MUDRAS) {
+          const n = Math.floor(Math.random() * TOTAL_MUDRAS) + 1;
+          if (!chosen.includes(n)) chosen.push(n);
+        }
+        mudraStrip.innerHTML = '';
+        chosen.forEach(i => {
+          const d = document.createElement('div');
+          d.className = 'thumb';
+          const img = document.createElement('img');
+          img.dataset.src = 'assets/mudras/' + i + '.webp';
+          img.alt = 'Mudra ' + i;
+          lazyLoader.observe(img);
+          d.appendChild(img);
+          mudraStrip.appendChild(d);
+        });
+      }
+
+      // 2) BREATHWORK: show 4 random breathwork icons
+      const breathworkStrip = document.querySelector('.breathwork-strip');
+      if (breathworkStrip) {
+        const BREATHWORK_ICONS = [
+          { file: 'sword.svg', title: 'Breath of Fire' },
+          { file: 'wings.svg', title: 'Angelic Breath' },
+          { file: 'caduceus.svg', title: 'Caduceus Breath' },
+          { file: 'lungs.svg', title: 'Deep Lung Breath' }
+        ];
+
+        breathworkStrip.innerHTML = '';
+        BREATHWORK_ICONS.forEach(icon => {
+          const a = document.createElement('a');
+          a.href = 'breathwork.html';
+          a.className = 'thumb';
+          a.title = icon.title;
+          const img = document.createElement('img');
+          img.dataset.src = `assets/breathwork/${icon.file}`;
+          img.alt = icon.title;
+          a.appendChild(img);
+          breathworkStrip.appendChild(a);
+          if (lazyLoader) lazyLoader.observe(img);
+        });
+      }
+
+      // 3) LOWER BODY: show 4 lower body icons
+      const lowerStrip = document.querySelector('.lower-icons');
+      if (lowerStrip) {
+        const lowerRoutines = [
+          { key: 'FEET', file: '1_FEET_MIDCROSSRIGHT_D_IMG.webp', alt: 'Feet' },
+          { key: 'GROUNDING', file: '1_GROUNDING_FORWARD_D_IMG.webp', alt: 'Grounding' },
+          { key: 'HIPS1', file: '1_HIPS1_LEFTFRONTIN_D_IMG.webp', alt: 'Hips I' },
+          { key: 'HIPS2', file: '1_HIPS2_PLANKOPPOSITELEFTFRONT_D_IMG.webp', alt: 'Hips II' }
+        ];
+        lowerStrip.innerHTML = '';
+        lowerRoutines.forEach(r => {
+          const a = document.createElement('a');
+          a.href = 'lower.html?routine=' + r.key;
+          a.className = 'icon-thumb lower-thumb';
+          const img = document.createElement('img');
+          img.dataset.src = 'InnervationSVGs/' + r.file;
+          img.alt = r.alt;
+          lazyLoader.observe(img);
+          a.appendChild(img);
+          lowerStrip.appendChild(a);
+        });
+      }
+
+      // 3) UPPER BODY: random 6 routines using the first movement SVG from each
+      const upperStrip = document.querySelector('.upper-icons');
+      if (upperStrip) {
+        const UPPER_ROUTINES = [
+          { key: 'PALMSTOGETHER', label: 'Palms Together', file: '2_CLASPMID_LEFT_D_IMG.webp' },
+          { key: 'PALMIN', label: 'Palm In', file: '2_PALMIN_UP_D_IMG.webp' },
+          { key: 'PALMOPEN', label: 'Palm Open', file: '2_PALMOPEN_UP_D_IMG.webp' },
+          { key: 'PALMOUT', label: 'Palm Out', file: '2_PALMOUT_DOWN_D_IMG.webp' },
+          { key: 'PALMCLOSED', label: 'Palm Closed', file: '2_PALMCLOSED_UP_D_IMG.webp' },
+          { key: 'HEARTOPEN', label: 'Heart Open', file: '2_HEARTOPEN_RIGHT_D_IMG.webp' },
+          { key: 'HEARTPROTECTED', label: 'Heart Protected', file: '2_HEARTPROTECTED_RIGHT_D_IMG.webp' },
+          { key: 'SCAPULA', label: 'Scapula', file: '2_SCAPULA_RIGHT_D_IMG.webp' },
+          { key: 'CROSSOPENBACKWARD', label: 'Cross Back', file: '2_CROSSPALM_BACKWARD_0_IMG.webp' },
+          { key: 'CROSSOPENDOWN', label: 'Cross Down', file: '2_CROSSPALM_DOWN_0_IMG.webp' },
+          { key: 'CROSSOPENFORWARD', label: 'Cross Forward', file: '2_CROSSPALM_FORWARD_0_IMG.webp' },
+          { key: 'CROSSOPENREVERSE', label: 'Cross Reverse', file: '2_CROSSPALM_REVERSE_0_IMG.webp' },
+          { key: 'CROSSOPENUP', label: 'Cross Up', file: '2_CROSSPALM_UP_0_IMG.webp' },
+          { key: 'CROSSCLOSEDBACKWARD', label: 'Fists Back', file: '2_CROSSFIST_BACKWARD_0_IMG.webp' },
+          { key: 'CROSSCLOSEDDOWN', label: 'Fists Down', file: '2_CROSSFIST_DOWN_0_IMG.webp' },
+          { key: 'CROSSCLOSEDFORWARD', label: 'Fists Forward', file: '2_CROSSFIST_FORWARD_0_IMG.webp' },
+          { key: 'CROSSCLOSEDREVERSE', label: 'Fists Reverse', file: '2_CROSSFIST_REVERSE_0_IMG.webp' },
+          { key: 'CROSSCLOSEDUP', label: 'Fists Up', file: '2_CROSSFIST_UP_0_IMG.webp' }
+        ];
+
+        upperStrip.innerHTML = '';
+        shuffleAndTake(UPPER_ROUTINES, 4).forEach(r => {
+          const a = document.createElement('a');
+          a.href = 'upper.html?routine=' + r.key;
+          a.className = 'icon-thumb';
+          const img = document.createElement('img');
+          img.dataset.src = 'InnervationSVGs/' + r.file;
+          img.alt = r.label;
+          lazyLoader.observe(img);
+          a.appendChild(img);
+          upperStrip.appendChild(a);
+        });
+      }
+
+      // 4) HEAD: random 6 routines using the first movement SVG from each
+      const headStrip = document.querySelector('.head-icons');
+      if (headStrip) {
+        const HEAD_ROUTINES = [
+          { key: 'CHINBOTTOM', label: 'Chin Bottom', file: '3_CHINBOTTOM_0_D_IMG.webp' },
+          { key: 'CHINTOP', label: 'Chin Top', file: '3_CHINTOP_0_D_IMG.webp' },
+          { key: 'LION', label: 'Lion', file: '3_LION_0_D_IMG.webp' },
+          { key: 'LIONLEFT', label: 'Lion Left', file: '3_LIONLEFT_0_D_IMG.webp' },
+          { key: 'LIONRIGHT', label: 'Lion Right', file: '3_LIONRIGHT_0_D_IMG.webp' },
+          { key: 'NOSE', label: 'Nose', file: '3_OPENNOSE_OPENMOUTH_D_IMG.webp' },
+          { key: 'PULL', label: 'Pulls', file: '3_PULLTOP_R_D_IMG.webp' }
+        ];
+
+        headStrip.innerHTML = '';
+        shuffleAndTake(HEAD_ROUTINES, 4).forEach(r => {
+          const a = document.createElement('a');
+          a.href = 'head.html?routine=' + r.key;
+          a.className = 'icon-thumb';
+          const img = document.createElement('img');
+          img.dataset.src = 'InnervationSVGs/' + r.file;
+          img.alt = r.label;
+          lazyLoader.observe(img);
+          a.appendChild(img);
+          headStrip.appendChild(a);
+        });
+      }
+    });
+  </script>
+
+  <!-- Time Tracking Scripts -->
+  <script src="js/time-tracker.js"></script>
+  <script type="module" src="js/cloud-sync.js"></script>
+  <script src="js/time-stats-ui.js"></script>
+  <script src="js/lazy-loader.js"></script>
+
+  <!-- Homepage Stats Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Update stats summary
+      function updateHomeStats() {
+        if (!window.timeTracker) return;
+
+        const stats = window.timeTracker.getSummaryStats();
+
+        // Week time
+        const weekEl = document.querySelector('#home-week-time .home-stat-value');
+        if (weekEl) {
+          weekEl.textContent = stats.week > 0 ? TimeTracker.formatTime(stats.week) : '0m';
+        }
+
+        // Day streak (count consecutive days with practice)
+        const streakEl = document.querySelector('#home-day-streak .home-stat-value');
+        if (streakEl) {
+          const streak = calculateDayStreak();
+          streakEl.textContent = streak;
+        }
+      }
+
+      // Calculate day streak
+      function calculateDayStreak() {
+        if (!window.timeTracker || !window.timeTracker.data.sessions.length) return '0';
+
+        const sessions = window.timeTracker.data.sessions;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const daysSeen = new Set();
+        sessions.forEach(s => {
+          const d = new Date(s.timestamp);
+          d.setHours(0, 0, 0, 0);
+          daysSeen.add(d.getTime());
+        });
+
+        const sortedDays = Array.from(daysSeen).sort((a, b) => b - a);
+        let streak = 0;
+        let checkDate = today.getTime();
+
+        for (const day of sortedDays) {
+          if (day === checkDate) {
+            streak++;
+            checkDate -= 24 * 60 * 60 * 1000;
+          } else if (day < checkDate) {
+            break;
+          }
+        }
+
+        return streak.toString();
+      }
+
+      // Stats button handlers (home card + header)
+      const homeStatsBtn = document.getElementById('home-stats-btn');
+      if (homeStatsBtn && window.timeStatsUI) {
+        homeStatsBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.timeStatsUI.open();
+        });
+      }
+
+      // Random routine button handler
+      const randomBtn = document.getElementById('home-random-btn');
+      if (randomBtn) {
+        randomBtn.addEventListener('click', () => {
+          const allRoutines = [
+            { url: 'eyes.html?routine=FULL' },
+            { url: 'eyes.html?routine=GROUND' },
+            { url: 'eyes.html?routine=RESTORE' },
+            { url: 'lower.html?routine=HIPS1' },
+            { url: 'lower.html?routine=HIPS2' },
+            { url: 'upper.html?routine=RANDOM' },
+            { url: 'head.html?routine=RANDOM' },
+            { url: 'mudras.html' },
+            { url: 'breathwork.html' }
+          ];
+          const random = allRoutines[Math.floor(Math.random() * allRoutines.length)];
+          window.location.href = random.url;
+        });
+      }
+
+      // Initial update
+      updateHomeStats();
+
+      // Refresh when stats arrive from the cloud backup
+      window.addEventListener('tolnri:data-synced', updateHomeStats);
+    });
+  </script>
+  <script src="js/menu.js"></script>
+</body>
+
+</html>

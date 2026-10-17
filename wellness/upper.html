@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Tree of Life · Upper Body Innervation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Use the same font family as the rest of the app -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <!-- Shared stylesheet for consistent design -->
+  <link rel="stylesheet" href="css/legs_style.css">
+  <link rel="stylesheet" href="css/footer-nav.css">
+  <link rel="stylesheet" href="css/completion-modal.css">
+  <!-- Favicon for the site icon -->
+  <link rel="icon" type="image/png" href="assets/logo/tolnrilogo.webp">
+  <!-- Installable app (PWA) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0F0F0F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="ToL NRI">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/logo/icon-180.png">
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+</head>
+
+<body>
+  <div class="app-frame">
+    <header class="brand-header">
+      <div class="brand-mark">
+        <div class="brand-presenter-block">
+          <div class="presented-label">presented by:</div>
+          <div class="presented-name">Brian O'Kelly</div>
+        </div>
+        <a href="index.html" class="brand-logo-link">
+          <img src="assets/logo/tolnrilogo.webp" alt="Tree of Life logo" class="brand-logo-image">
+        </a>
+        <div class="brand-text">
+          <div class="brand-title">TREE OF LIFE</div>
+          <div class="brand-subtitle">Neurological Research Institute</div>
+        </div>
+        <div class="header-actions">
+          <div class="menu-dropdown">
+            <button class="menu-button" type="button" aria-label="Menu">☰</button>
+            <div class="menu-panel">
+              <a href="index.html">🏠 Home</a>
+              <a href="random.html">🔀 Random</a>
+              <a href="eyes.html">👁️ Eyes</a>
+              <a href="breathwork.html">🫁 Breathwork</a>
+              <a href="lower.html">🦶 Lower Body</a>
+              <a href="upper.html">💪 Upper Body</a>
+              <a href="head.html">🧠 Head</a>
+              <a href="mudras.html">🤲 Mudras</a>
+                <a href="../">🧬 3D Anatomy</a>
+              <button type="button" data-menu-stats>📊 Stats</button>
+              <a href="mailto:TreeOfLifeNRI@yahoo.com">📱 Contact</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <!-- SCREEN 1: ROUTINE PICKER -->
+      <section id="screen-select" class="screen screen-active">
+        <h1 class="screen-title">Upper Body Innervation</h1>
+        <!-- Tagline intentionally omitted per user instruction. -->
+
+        <div id="upper-routine-list" class="routine-list">
+          <!-- Routine cards will be inserted by upper_app.js -->
+        </div>
+
+        <button id="upper-btn-random" class="btn random-btn">
+          <span class="random-icon">⇄</span>
+          <span>Random Routine</span>
+        </button>
+      </section>
+
+      <!-- SCREEN 2: PREFERENCES -->
+      <section id="screen-prefs" class="screen">
+        <button class="back-btn" data-back="screen-select">← Back</button>
+        <h1 id="prefs-title" class="screen-title">Routine</h1>
+        <p id="prefs-tagline" class="screen-tagline">Set your timing and rounds.</p>
+
+        <div class="routine-preview-card">
+          <div class="preview-label" id="prefs-preview-label"></div>
+          <div class="preview-strip" id="prefs-preview-strip">
+            <!-- Thumbnails populated by JS -->
+          </div>
+        </div>
+
+        <div class="prefs-grid">
+          <div class="field">
+            <label for="input-seconds">Seconds per movement</label>
+            <input id="input-seconds" type="number" min="5" max="300" step="5" value="45">
+          </div>
+          <div class="field">
+            <label for="input-rest">Time between movements (sec)</label>
+            <!-- Default rest is 3 seconds -->
+            <input id="input-rest" type="number" min="0" max="120" step="1" value="3">
+          </div>
+          <div class="field">
+            <label for="input-rounds">Rounds of routine</label>
+            <input id="input-rounds" type="number" min="1" max="12" step="1" value="2">
+          </div>
+          <div class="field">
+            <label>Audio</label>
+            <button id="upper-audio-toggle" class="pill-toggle" data-on="1">
+              <span class="pill-knob"></span>
+              <span class="pill-label">On</span>
+            </button>
+          </div>
+        </div>
+        <button id="btn-start-routine" class="btn primary-btn full-width">Start Routine</button>
+      </section>
+
+      <!-- SCREEN 3: ROUTINE PLAYER -->
+      <section id="screen-player" class="screen">
+        <button class="back-btn" data-back="screen-prefs">← Back</button>
+        <h1 id="player-title" class="screen-title">Routine</h1>
+        <p id="player-tagline" class="screen-tagline">Follow the movements at your own pace.</p>
+
+        <div class="routine-preview-card">
+          <div class="preview-label" id="player-preview-label"></div>
+          <div class="preview-strip" id="player-preview-strip">
+            <!-- Thumbnails populated by JS -->
+          </div>
+        </div>
+
+        <div class="current-movement-card">
+          <div id="current-movement-label" class="movement-label">Movement</div>
+          <div class="movement-image-frame">
+            <img id="current-movement-image" alt="Current movement">
+          </div>
+          <div class="movement-meta">
+            <div id="movement-count" class="movement-count">Movement 1 of 1</div>
+            <div id="round-count" class="round-count">Round 1 of 1</div>
+            <div id="phase-label" class="phase-label">Ready</div>
+          </div>
+        </div>
+
+        <div class="progress-area">
+          <div class="progress-wrap">
+            <div id="prog" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="player-controls">
+          <button id="btn-play-pause" class="btn primary-btn">Start</button>
+          <button id="btn-restart" class="btn ghost-btn">Restart Routine</button>
+        </div>
+
+        <div id="status-message" class="status-message"></div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <nav class="footer-nav">
+        <a href="random.html">🔀 Random</a>
+        <a href="#" id="footer-stats">📊 Stats</a>
+        <a href="index.html">☰ Home</a>
+      </nav>
+    </footer>
+  </div>
+
+  <audio id="audio-beep" preload="auto"></audio>
+  <audio id="audio-ding" src="assets/audio/ding.mp3" preload="auto"></audio>
+
+  <script src="js/time-tracker.js"></script>
+
+  <script type="module" src="js/cloud-sync.js"></script>
+  <script src="js/time-stats-ui.js"></script>
+  <script src="js/lazy-loader.js"></script>
+  <script src="js/phase-bar.js"></script>
+  <script src="js/menu.js"></script>
+  <!-- Include the upper body logic script -->
+  <script src="js/upper_app.js" defer></script>
+  <script src="js/completion-prompt.js"></script>
+</body>
+
+</html>
