@@ -24,19 +24,18 @@
   --bar-h: 64px;
 }
 
+html { background: var(--bg); }
 html, body {
   font-family: var(--sans);
   color: var(--text);
-  background: var(--bg);
   -webkit-tap-highlight-color: transparent;
 }
 
 /* The sky: a slow breathing glow of violet and emerald over the stars, on the same nine-second cycle as the 3D site. */
-body::before, body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1; }
-body::before {
-  background: url('../assets/backgrounds/stars-simple.webp') center/cover;
-  opacity: 0.55;
-}
+body { background: transparent !important; }
+body::before, body::after, .hub-sky { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+.hub-sky { width: 100%; height: 100%; }
+body::before { background: url('../assets/backgrounds/stars-simple.webp') center/cover; opacity: 0.9; }
 body::after {
   background:
     radial-gradient(60% 40% at 15% 10%, rgba(167, 123, 255, 0.28), transparent 70%),
@@ -133,8 +132,9 @@ body::after {
 .screen {
   border-radius: 20px;
   padding: 16px 16px 28px;
-  background: var(--panel);
-  backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%);
+  /* see-through, so the sky shows behind everything */
+  background: linear-gradient(180deg, rgba(17, 14, 40, 0.42), rgba(11, 10, 31, 0.3));
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
   border: 1px solid var(--line);
   box-shadow: var(--glow);
 }
@@ -143,11 +143,10 @@ body::after {
   color: var(--cream); text-shadow: 0 0 16px rgba(230, 189, 106, 0.35);
 }
 .screen-tagline { color: var(--muted); font-size: 14px; }
-.hub-presenter { margin: 2px 0 12px; font: italic 500 17px/1.2 var(--serif); color: var(--accent); }
 
 .routine-card {
   border-radius: 16px;
-  background: linear-gradient(180deg, rgba(246, 227, 180, 0.06), rgba(17, 14, 40, 0.6));
+  background: linear-gradient(180deg, rgba(246, 227, 180, 0.07), rgba(17, 14, 40, 0.45));
   border: 1px solid var(--line);
   box-shadow: 0 6px 20px rgba(5, 3, 20, 0.45);
 }
