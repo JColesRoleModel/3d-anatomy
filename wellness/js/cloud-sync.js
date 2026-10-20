@@ -1,36 +1,17 @@
-// Cloud backup for practice history.
-// Stats always save on the device first. When you sign in with Google, every
-// record is also saved to Firebase, so it survives a lost, broken or reset phone,
-// and your history follows you between devices.
+// Cloud backup for practice history, in the same account as the rest of the site (the account button in the top
+// menu). Stats always save on the device first. Signed in, every record is also kept in the account, so it survives
+// a lost, broken or reset phone and follows you between devices.
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-import {
-  getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-  getRedirectResult, onAuthStateChanged, signOut
-} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-import {
-  getFirestore, collection, doc, getDocs, setDoc, writeBatch
-} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+const hub = await waitForHub();
+const account = hub.account;
+let uid = null;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBMW-unQD3o8uGPFmsysXdhO9q9yqaYWNU",
-  authDomain: "treeoflifenri.firebaseapp.com",
-  projectId: "treeoflifenri",
-  storageBucket: "treeoflifenri.firebasestorage.app",
-  messagingSenderId: "819384484112",
-  appId: "1:819384484112:web:b78181d4b2e9b5be59e595"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let currentUser = null;
-let loginLink = null;
-
-// -------------------------
-// Records
-// -------------------------
+function waitForHub() {
+  return new Promise((resolve) => {
+    if (window.tolnriHub) return resolve(window.tolnriHub);
+    const t = setInterval(() => { if (window.tolnriHub) { clearInterval(t); resolve(window.tolnriHub); } }, 50);
+  });
+}
 
 // Stable id per record, so the same movement is never stored twice
 function recordId(s) {
@@ -56,36 +37,30 @@ function isValid(s) {
   return d > 0 && d <= 3600 && Number.isFinite(t);
 }
 
-function sessionsCollection() {
-  return collection(db, "users", currentUser.uid, "sessions");
-}
+const STATUS = {
+  syncing: "Practice history: syncing…",
+  synced: "Practice history is kept in your account.",
+  offline: "Practice history: offline, it will sync when you're back online.",
+  error: "Practice history couldn't sync yet.",
+};
+const setStatus = (s, detail = "") => hub.setStatus("practice", uid ? STATUS[s] + (detail ? ` (${detail})` : "") : "");
 
 // Upload what only this device has, download what only the cloud has
 async function syncAll() {
   const tracker = window.timeTracker;
-  if (!tracker || !currentUser) return;
+  if (!tracker || !uid) return;
+  const me = uid;
   setStatus("syncing");
   try {
-    const col = sessionsCollection();
-    const snap = await getDocs(col);
-    const cloud = new Map();
-    snap.forEach(d => cloud.set(d.id, d.data()));
-
+    const cloud = new Map(await account.listSessions(me));
+    if (uid !== me) return;
     const local = new Map(tracker.data.sessions.map(s => [recordId(s), s]));
-
-    const toUpload = [...local].filter(([id, s]) => !cloud.has(id) && isValid(s));
-    for (let i = 0; i < toUpload.length; i += 400) {
-      const batch = writeBatch(db);
-      toUpload.slice(i, i + 400).forEach(([id, s]) => batch.set(doc(col, id), cleanRecord(s)));
-      await batch.commit();
-    }
+    const toUpload = [...local].filter(([id, s]) => !cloud.has(id) && isValid(s)).map(([id, s]) => [id, cleanRecord(s)]);
+    if (toUpload.length) await account.putSessions(me, toUpload);
 
     let added = 0;
     cloud.forEach((s, id) => {
-      if (!local.has(id)) {
-        tracker.data.sessions.push(s);
-        added++;
-      }
+      if (!local.has(id)) { tracker.data.sessions.push(s); added++; }
     });
     if (added) {
       tracker.data.sessions.sort((a, b) => a.timestamp - b.timestamp);
@@ -95,7 +70,7 @@ async function syncAll() {
     setStatus("synced");
   } catch (e) {
     console.error("Cloud sync failed:", e);
-    setStatus(navigator.onLine ? "error" : "offline");
+    setStatus(navigator.onLine ? "error" : "offline", navigator.onLine ? account.message(e) : "");
   }
 }
 
@@ -110,9 +85,9 @@ function hookTracker() {
     const before = tracker.data.sessions.length;
     recordMovement(...args);
     const s = tracker.data.sessions[tracker.data.sessions.length - 1];
-    if (currentUser && tracker.data.sessions.length > before && isValid(s)) {
+    if (uid && tracker.data.sessions.length > before && isValid(s)) {
       // If this fails (offline), the next sync uploads it
-      setDoc(doc(sessionsCollection(), recordId(s)), cleanRecord(s)).catch(() => setStatus("offline"));
+      account.putSession(uid, recordId(s), cleanRecord(s)).catch(() => setStatus("offline"));
     }
   };
 
@@ -121,110 +96,31 @@ function hookTracker() {
   tracker.clearAllData = () => {
     const ids = tracker.data.sessions.map(recordId);
     clearAllData();
-    if (currentUser) deleteCloudRecords(ids);
+    if (uid) deleteCloudRecords(uid, ids);
   };
 
   // Imported backups get uploaded on the next sync
   const importData = tracker.importData.bind(tracker);
   tracker.importData = (json) => {
     const ok = importData(json);
-    if (ok && currentUser) syncAll();
+    if (ok && uid) syncAll();
     return ok;
   };
 }
 
-async function deleteCloudRecords(localIds) {
+async function deleteCloudRecords(me, localIds) {
   try {
-    const col = sessionsCollection();
-    const snap = await getDocs(col);
     const ids = new Set(localIds);
-    snap.forEach(d => ids.add(d.id));
-    const all = [...ids];
-    for (let i = 0; i < all.length; i += 400) {
-      const batch = writeBatch(db);
-      all.slice(i, i + 400).forEach(id => batch.delete(doc(col, id)));
-      await batch.commit();
-    }
+    for (const [id] of await account.listSessions(me)) ids.add(id);
+    await account.deleteSessions(me, [...ids]);
   } catch (e) {
     console.error("Clearing cloud data failed:", e);
   }
 }
 
-// -------------------------
-// Login button in the top bar
-// -------------------------
-
-const STATUS_LABELS = {
-  signedOut: "🔑 Login",
-  syncing: "⏳ Syncing",
-  synced: "☁️ Synced",
-  offline: "📴 Offline",
-  error: "⚠️ Retry"
-};
-
-function setStatus(status) {
-  if (!loginLink) return;
-  loginLink.textContent = STATUS_LABELS[status] || STATUS_LABELS.signedOut;
-  loginLink.title = currentUser
-    ? `Signed in as ${currentUser.email || "you"}. Tap to sign out.`
-    : "Sign in with Google to back up your stats";
-}
-
-function addLoginLink() {
-  // The sign-in pill sits in the top bar, next to the stats button.
-  const slot = document.getElementById("hub-login-slot");
-  if (!slot || document.getElementById("footer-login")) return;
-  loginLink = document.createElement("a");
-  loginLink.href = "#";
-  loginLink.id = "footer-login";
-  loginLink.className = "hub-login";
-  slot.replaceWith(loginLink);
-  loginLink.addEventListener("click", handleLoginClick);
-  setStatus("signedOut");
-}
-
-async function handleLoginClick(e) {
-  e.preventDefault();
-  if (currentUser) {
-    if (confirm(`Signed in as ${currentUser.email || "your Google account"}.\n\nYour stats stay on this device either way. Sign out?`)) {
-      await signOut(auth);
-    } else {
-      syncAll();
-    }
-    return;
-  }
-  const provider = new GoogleAuthProvider();
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (err) {
-    // Some installed apps block popups: fall back to a full-page sign-in
-    if (["auth/popup-blocked", "auth/operation-not-supported-in-this-environment", "auth/cancelled-popup-request"].includes(err.code)) {
-      await signInWithRedirect(auth, provider);
-    } else if (err.code !== "auth/popup-closed-by-user") {
-      console.error("Sign-in failed:", err);
-      alert("Sign-in didn't work. Please try again.");
-    }
-  }
-}
-
-// -------------------------
-// Start
-// -------------------------
-
-function start() {
-  hookTracker();
-  addLoginLink();
-  getRedirectResult(auth).catch(() => {});
-  onAuthStateChanged(auth, user => {
-    currentUser = user;
-    if (user) syncAll();
-    else setStatus("signedOut");
-  });
-  window.addEventListener("online", () => { if (currentUser) syncAll(); });
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", start);
-} else {
-  start();
-}
+hookTracker();
+hub.onUser((u) => {
+  uid = u ? u.uid : null;
+  if (uid) syncAll(); else setStatus("synced");
+});
+window.addEventListener("online", () => { if (uid) syncAll(); });

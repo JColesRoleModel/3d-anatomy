@@ -15,6 +15,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preload" href="vendor/fonts/cormorant-garamond-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hub/nav.css">
   <script type="importmap">
     {
       "imports": {
@@ -27,23 +28,7 @@
 <body>
   <canvas id="view"></canvas>
 
-  <header class="topbar">
-    <div class="brand">
-      <img class="brand-logo" src="icons/brand/tree-of-life.webp" alt="" width="160" height="172">
-      <div class="brand-text">
-        <h1>Tree of Life:</h1>
-        <span class="brand-sub">Neurological Research Institute</span>
-      </div>
-    </div>
-    <div class="topbar-actions">
-      <a id="btn-wellness" class="icon-btn" href="wellness/" title="Wellness practice: innervation, breathwork, mudras" aria-label="Wellness practice"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 4.5c2.2 2.3 2.9 5 2.1 8.2-.5 1.8-1.2 3.3-2.1 4.6-.9-1.3-1.6-2.8-2.1-4.6-.8-3.2-.1-5.9 2.1-8.2z M12 17.3c-2.8-.1-5.2-1.2-7-3.4 1-.9 2.3-1.4 3.7-1.5 M12 17.3c2.8-.1 5.2-1.2 7-3.4-1-.9-2.3-1.4-3.7-1.5 M5 19.5h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></a>
-      <button id="btn-scene" class="icon-btn" title="Sky and art" aria-label="Sky and art settings"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 3.2 2.6 8.6 12 14l9.4-5.4z" fill="currentColor" fill-opacity="0.22"/><path d="M12 3.2 2.6 8.6 12 14l9.4-5.4z M2.6 12.7 12 18.1l9.4-5.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg></button>
-      <button id="btn-saves" class="icon-btn" title="Saved views" aria-label="Saved views"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M6.5 3.5h11v17L12 16.4l-5.5 4.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
-      <button id="btn-keys" class="icon-btn desktop-only" title="Keyboard controls (?)" aria-label="Keyboard controls">⌨</button>
-      <button id="btn-reset" class="icon-btn" title="Reset view (R)" aria-label="Reset view">⟲</button>
-      <button id="btn-about" class="icon-btn" title="About" aria-label="About">i</button>
-    </div>
-  </header>
+  <header id="hub-nav" data-section="anatomy" data-base=""></header>
 
   <div id="loading" class="loading" hidden>
     <div class="spinner" aria-hidden="true"></div><span id="loading-text">Loading…</span>
@@ -128,7 +113,7 @@
     <p>Under <b>Conditions</b> in the Layers panel, <b>Scapular winging</b> moves the right shoulder blade and arm: normal, or winged in each of its forms. It lights the weak muscle, traces its nerve, marks where that nerve is most often injured, and badges each effect on vessels, nerves and lymph by how well it is documented.</p>
     <p>The <b>Occult anatomy</b> layers at the bottom of the Layers panel show the chakras, elements and prana vayus, the pineal–pituitary–thalamus trinity, the hand map and mudras, the Tree of Life, the nadis and electric / magnetic polarity. Tap a symbol on the body, or a name in the panel, to read it. Values marked <span style="color:#e8b04a">*</span> are incomplete, unsure or conflicting on the source boards.</p>
     <p>The night sky breathes on a slow nine-second cycle. Shooting stars cross it every few seconds, and every half minute or so something rarer happens: a meteor shower, a lightning storm, a comet, a nova or an aurora surge. Around the body stand the pieces of the <i>Secret of the Ages</i> poster in 3D: the pillars with the sun above Jachin and the moon above Boaz, the emerald cross, the Tree of Life, the crown of twelve rays for the twelve cranial nerves, the star of David as a turning star tetrahedron, the zodiac wheel and ring, and at the star's corners the Aquarian jar, the bag of magic dust, the caduceus and the emerald tablet. The art fades away when you zoom in to study. The layers button at the top turns the sky, the art or the motion off.</p>
-    <p>The lotus button at the top opens the <b>wellness practice</b>: the Innervation Atlas routines, neuro-ocular eye work, breathwork, mudras and your practice stats. Its menu has a link back here.</p>
+    <p>The icons along the top go to each part of the site: the <b>3D anatomy</b> and the <b>practice</b> pages (the Innervation Atlas routines, neuro-ocular eye work, breathwork and mudras). The menu button shows everything with its name, and the person button is your account: one sign-in for the whole site keeps your saved views and practice history on every device.</p>
     <p>The bookmark button keeps <b>saved views</b>: save what's showing and come back to it later, or reset everything to how the app first opens.</p>
     <p class="small">3D models from <a href="https://www.z-anatomy.com" target="_blank" rel="noopener">Z-Anatomy</a> (CC BY-SA 4.0), derived from BodyParts3D, © The Database Center for Life Science (CC BY-SA 2.1 Japan). Converted and simplified for the web. This app's models are shared under the same CC BY-SA license. Zodiac, planet and alchemy glyphs use Noto Sans Symbols, and headings use Cormorant Garamond (both SIL Open Font License). The sky and the 3D art are drawn in code for this app. The emerald tablet carries the opening of the first of the Emerald Tablets of Thoth, as translated by Doreal.</p>
     <form method="dialog"><button>Close</button></form>
@@ -145,29 +130,7 @@
   <dialog id="saves">
     <h2>Saved views</h2>
     <p class="small">Saves everything that's showing: the systems and layers, their filters, colours and opacity, what's hidden or focused, and where the camera is. Open a saved view any time to go straight back to it.</p>
-    <div id="account" class="account" hidden>
-      <div id="acct-out">
-        <p class="small">Sign in to keep your saved views in your account, so they're on every device you use.</p>
-        <div class="acct-row">
-          <button id="acct-google" type="button">Sign in with Google</button>
-          <button id="acct-email-toggle" type="button" class="link-btn">Use email instead</button>
-        </div>
-        <form id="acct-email-form" class="acct-email" hidden>
-          <input id="acct-email" type="email" autocomplete="email" placeholder="Email" aria-label="Email">
-          <input id="acct-password" type="password" autocomplete="current-password" placeholder="Password (6 or more characters)" aria-label="Password">
-          <div class="acct-row">
-            <button id="acct-signin" type="submit">Sign in</button>
-            <button id="acct-create" type="button">Create account</button>
-            <button id="acct-forgot" type="button" class="link-btn">Forgot password?</button>
-          </div>
-        </form>
-      </div>
-      <div id="acct-in" class="acct-row" hidden>
-        <span class="acct-who">Signed in as <b id="acct-who"></b></span>
-        <button id="acct-signout" type="button">Sign out</button>
-      </div>
-      <p id="acct-msg" class="small acct-msg" role="status" aria-live="polite"></p>
-    </div>
+    <p id="saves-acct" class="small saves-acct"></p>
     <form id="save-form" class="save-form">
       <input id="save-name" type="text" maxlength="60" placeholder="Name this view" aria-label="Name for this view" autocomplete="off">
       <button type="submit">Save</button>

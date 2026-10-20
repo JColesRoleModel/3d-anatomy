@@ -50,8 +50,16 @@
     if (bar && bar.scrollWidth > bar.clientWidth) bar.scrollLeft = chip.offsetLeft - (bar.clientWidth - chip.offsetWidth) / 2 - 60; // a little right of centre, past the pinned 3D Anatomy chip
   }
 
+  // ...#stats (from the account menu on another page) opens the stats straight away.
+  function openStatsFromLink() {
+    if (location.hash !== '#stats') return;
+    history.replaceState(null, '', location.pathname + location.search);
+    setTimeout(() => window.timeStatsUI?.open(), 0);
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     showCurrentChip();
+    openStatsFromLink();
     initMenuDropdown();
     initFooterStats();
   });

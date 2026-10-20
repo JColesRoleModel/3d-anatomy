@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/legs_style.css">
   <link rel="stylesheet" href="css/footer-nav.css">
   <link rel="stylesheet" href="css/completion-modal.css">
+  <link rel="stylesheet" href="../hub/nav.css">
   <link rel="stylesheet" href="css/hub.css">
   <!-- Favicon for the site icon -->
   <link rel="icon" type="image/png" href="../icons/icon-192.png">
@@ -26,17 +27,7 @@
 
 <body>
   <div class="app-frame">
-    <header class="hub-top">
-      <a class="brand" href="index.html" aria-label="Wellness home">
-        <img class="brand-logo" src="../icons/brand/tree-of-life.webp" alt="" width="160" height="172">
-        <div class="brand-text"><div class="brand-name">Tree of Life:</div><div class="brand-sub">Neurological Research Institute</div></div>
-      </a>
-      <div class="hub-actions">
-        <span id="hub-login-slot"></span>
-        <a href="#" id="footer-stats" class="icon-btn" title="Your practice stats" aria-label="Your practice stats"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 19.5V12M10 19.5V6M15 19.5v-9M20 19.5V9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></a>
-        <a href="other.html" class="icon-btn" title="About, FAQ and contact" aria-label="About, FAQ and contact">i</a>
-      </div>
-    </header>
+    <header id="hub-nav" data-section="practice" data-base="../"></header>
 
     <main class="app-main">
       <!-- SCREEN 1: ROUTINE PICKER -->
@@ -149,6 +140,14 @@
   <audio id="audio-ding" src="assets/audio/ding.mp3" preload="auto"></audio>
 
   <script src="js/time-tracker.js"></script>
+  <script type="module">
+    import { initHub } from '../hub/nav.js';
+    initHub({ tools: [
+      { id: 'footer-stats', icon: 'stats', label: 'Practice stats' },
+      { id: 'hub-about', icon: 'info', label: 'About & contact', href: 'other.html' },
+    ] });
+  </script>
+
 
   <script type="module" src="js/cloud-sync.js"></script>
   <script src="js/time-stats-ui.js"></script>

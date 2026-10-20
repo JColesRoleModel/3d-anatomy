@@ -2,6 +2,7 @@
 // users/<their id>/saves. The Firebase code (vendor/firebase.js) only loads when someone signs in, or was signed in
 // on this device before, so the app stays as light as ever for everyone else.
 import { firebaseConfig } from './firebase-config.js';
+const here = new URL('.', import.meta.url).href; // so pages in subfolders (wellness/) load the same files
 
 // For testing on this computer against the Firebase emulators: http://localhost:8081/?emulator
 const EMULATOR = ['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).has('emulator');
@@ -10,7 +11,7 @@ export const config = EMULATOR ? { apiKey: 'demo-key', authDomain: 'localhost', 
 let ready = null;
 let fb, auth, db;
 function load() {
-  ready ??= import('./vendor/firebase.js').then((mod) => {
+  ready ??= import(here + 'vendor/firebase.js').then((mod) => {
     fb = mod;
     const app = fb.initializeApp(config);
     auth = fb.initializeAuth(app, {
@@ -68,6 +69,35 @@ export async function put(uid, sv) {
 export async function remove(uid, id) {
   await load();
   return fb.deleteDoc(fb.doc(savesOf(uid), id));
+}
+
+// Practice records (time spent on each movement, breath or mudra): one document per record, under
+// users/<their id>/sessions, so the same account carries saved views and practice history.
+const sessionsOf = (uid) => fb.collection(db, 'users', uid, 'sessions');
+export async function listSessions(uid) {
+  await load();
+  const snap = await fb.getDocs(sessionsOf(uid));
+  return snap.docs.map((d) => [d.id, d.data()]);
+}
+export async function putSession(uid, id, rec) {
+  await load();
+  return fb.setDoc(fb.doc(sessionsOf(uid), id), rec);
+}
+export async function putSessions(uid, entries) { // [[id, record], …], 400 per batch
+  await load();
+  for (let i = 0; i < entries.length; i += 400) {
+    const batch = fb.writeBatch(db);
+    for (const [id, rec] of entries.slice(i, i + 400)) batch.set(fb.doc(sessionsOf(uid), id), rec);
+    await batch.commit();
+  }
+}
+export async function deleteSessions(uid, ids) {
+  await load();
+  for (let i = 0; i < ids.length; i += 400) {
+    const batch = fb.writeBatch(db);
+    for (const id of ids.slice(i, i + 400)) batch.delete(fb.doc(sessionsOf(uid), id));
+    await batch.commit();
+  }
 }
 
 // Plain words for what went wrong.

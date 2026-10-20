@@ -15,7 +15,7 @@ await build({
         signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail,
         onAuthStateChanged, signOut,
       } from 'firebase/auth';
-      export { getFirestore, connectFirestoreEmulator, collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore/lite';
+      export { getFirestore, connectFirestoreEmulator, collection, doc, getDocs, setDoc, deleteDoc, writeBatch } from 'firebase/firestore/lite';
     `,
     resolveDir: '.',
     loader: 'js',

@@ -7,8 +7,18 @@ import { initCosmos } from './cosmos.js';
 import { initTrace } from './trace.js';
 import { initConditions } from './conditions.js';
 import * as account from './account.js';
+import { initHub } from './hub/nav.js';
 
 const $ = (id) => document.getElementById(id);
+
+// The site menu, with this page's own tools in it.
+const hub = initHub({ tools: [
+  { id: 'btn-scene', icon: 'layers', label: 'Sky and art' },
+  { id: 'btn-saves', icon: 'bookmark', label: 'Saved views' },
+  { id: 'btn-keys', icon: 'keys', label: 'Keyboard', title: 'Keyboard controls (?)', desktopOnly: true },
+  { id: 'btn-reset', icon: 'reset', label: 'Reset view', title: 'Reset view (R)' },
+  { id: 'btn-about', icon: 'info', label: 'About' },
+] });
 
 // ---------- Scene ----------
 const canvas = $('view');
@@ -645,7 +655,6 @@ syncStill();
 // hidden or focused, and the camera. They're kept on this device and, for someone signed in, in their account too.
 const SAVES_KEY = 'tolnri.saves.v1';
 const DELETED_KEY = 'tolnri.saves.deleted.v1'; // views deleted while offline, still to delete from the account
-const ACCOUNT_KEY = 'tolnri.account.v1'; // '1' while someone is signed in on this device
 let saves = [], pendingDeletes = [];
 try { saves = JSON.parse(localStorage.getItem(SAVES_KEY)) || []; } catch {}
 try { pendingDeletes = JSON.parse(localStorage.getItem(DELETED_KEY)) || []; } catch {}
@@ -733,7 +742,7 @@ $('save-form').addEventListener('submit', (e) => {
 // couldn't be sent (offline) is marked dirty and goes up at the next sync. Signing out takes the account's views off
 // this device; views saved while signed out stay here, and join the account at the next sign-in.
 let user = null, syncing = null;
-const acctMsg = (text = '', err = false) => { $('acct-msg').textContent = text; $('acct-msg').classList.toggle('err', err); };
+const acctMsg = (text = '', err = false) => { hub.setStatus('views', text || (user ? 'Saved views are kept in your account.' : '')); $('saves-acct').classList.toggle('err', err); renderSavesAcct(err ? text : ''); };
 
 function changed(sv) {
   if (user) { sv.owner = user.uid; sv.dirty = true; }
@@ -795,48 +804,22 @@ function syncSaves() {
   return syncing;
 }
 
-function renderAccount() {
-  $('account').hidden = !account.config;
-  $('acct-out').hidden = !!user;
-  $('acct-in').hidden = !user;
-  if (user) $('acct-who').textContent = user.email || user.displayName || 'your account';
+function renderSavesAcct(err = '') {
+  $('saves-acct').textContent = err || (!account.config ? '' : user
+    ? `Signed in as ${user.email || user.displayName || 'you'}: your views are kept in your account.`
+    : 'Sign in from the account button at the top to keep your views on every device.');
 }
 
 function onUser(u) {
   const was = user;
   user = u;
-  if (u) {
-    try { localStorage.setItem(ACCOUNT_KEY, '1'); } catch {}
-    $('acct-email-form').hidden = true;
-    syncSaves();
-  } else {
-    try { localStorage.removeItem(ACCOUNT_KEY); } catch {}
-    if (was) { saves = saves.filter((sv) => !sv.owner); pendingDeletes = pendingDeletes.filter((d) => d.owner !== was.uid); storeSaves(); }
-  }
-  renderAccount(); renderSaves();
+  if (u) syncSaves();
+  else if (was) { saves = saves.filter((sv) => !sv.owner); pendingDeletes = pendingDeletes.filter((d) => d.owner !== was.uid); storeSaves(); }
+  hub.setStatus('views', u ? 'Saved views are kept in your account.' : '');
+  renderSavesAcct(); renderSaves();
 }
-
-// Runs a sign-in step with the buttons disabled, showing what went wrong in plain words.
-async function busy(fn, doing) {
-  const buttons = [...$('account').querySelectorAll('button')];
-  buttons.forEach((b) => (b.disabled = true));
-  acctMsg(doing);
-  try { await account.start(onUser); await fn(); acctMsg(''); return true; }
-  catch (err) { if (account.QUIET.has(err?.code)) acctMsg(''); else acctMsg(account.message(err), true); return false; }
-  finally { buttons.forEach((b) => (b.disabled = false)); }
-}
-const emailValue = () => $('acct-email').value.trim();
-$('acct-google').addEventListener('click', () => busy(() => account.signInGoogle(), 'Opening Google sign-in…'));
-$('acct-email-toggle').addEventListener('click', () => { $('acct-email-form').hidden = false; $('acct-email').focus(); });
-$('acct-email-form').addEventListener('submit', (e) => { e.preventDefault(); busy(() => account.signInEmail(emailValue(), $('acct-password').value), 'Signing in…'); });
-$('acct-create').addEventListener('click', () => busy(() => account.createAccount(emailValue(), $('acct-password').value), 'Creating your account…'));
-$('acct-forgot').addEventListener('click', async () => {
-  if (await busy(() => account.resetPassword(emailValue()), 'Sending…')) acctMsg(`If there's an account for ${emailValue()}, a reset link is on its way there.`);
-});
-$('acct-signout').addEventListener('click', () => busy(() => account.signOut(), 'Signing out…'));
+hub.onUser(onUser);
 window.addEventListener('online', () => { pushDeletes(); syncSaves(); });
-renderAccount();
-if (account.config && localStorage.getItem(ACCOUNT_KEY) === '1') account.start(onUser).catch((err) => acctMsg(account.message(err), true));
 
 // Reset everything: forget the remembered view, occult layers and sky settings, then start again as on a first
 // visit. Saved views are kept. The button asks for a second tap first.
@@ -855,6 +838,7 @@ $('btn-start-over').addEventListener('click', (e) => {
 });
 
 $('btn-saves').addEventListener('click', () => { renderSaves(); $('saves').showModal(); syncSaves(); });
+if (location.hash === '#saves') { history.replaceState(null, '', location.pathname + location.search); $('btn-saves').click(); }
 
 // ---------- Go ----------
 cond = await initConditions({

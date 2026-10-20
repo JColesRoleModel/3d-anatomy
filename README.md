@@ -49,9 +49,13 @@ Layers > Conditions opens a study card for scapular winging (`conditions.js`, te
 
 The movement is illustrative. The collarbone, shoulder blade and arm move as rigid bones on a normal shoulder rhythm (Ludewig et al.), changed by made-up but plausible amounts for each type; everything else around the shoulder is bent to follow them by blending between the nearest bones. Only the right side moves.
 
+## Site menu and account
+
+`hub/nav.js` and `hub/nav.css` draw the same top bar on every page: the logo, one icon per part of the site, the page's own tools, a Menu button that drops down everything with its name, and the account button. A page adds `<header id="hub-nav" data-section="…" data-base="…">` and calls `initHub({ tools })`. New parts of the site go in `SECTIONS` in `hub/nav.js` (Watch and Health are listed there as coming soon). The account (Firebase project `tree-of-life-nri`, `account.js`) is one sign-in for the whole site: saved views live under `users/<uid>/saves` and practice records under `users/<uid>/sessions` (see `firestore.rules`).
+
 ## Wellness practice
 
-`wellness/` is the Tree of Life NRI 1.1 practice app (innervation routines, neuro-ocular eye work, breathwork, mudras and practice stats), copied from JColesRoleModel/TreeofLifeNRI1.1 (which stays as it was) and served at `/3d-anatomy/wellness/`. It is restyled to match the 3D site (`wellness/css/hub.css`, loaded last on every page): the same top bar and tree logo, and a bottom row of section chips with 3D Anatomy pinned at the left. Both sites share one installable app (`manifest.webmanifest`) and the lightning tree icon. It keeps its own service worker and its own Firebase project (`treeoflifenri`) for stats backup. The lotus button in the anatomy header opens it, and its menu links back. Each app's service worker only clears its own caches.
+`wellness/` is the Tree of Life NRI 1.1 practice app (innervation routines, neuro-ocular eye work, breathwork, mudras and practice stats), copied from JColesRoleModel/TreeofLifeNRI1.1 (which stays as it was) and served at `/3d-anatomy/wellness/`. It is restyled to match the 3D site (`wellness/css/hub.css`, loaded last on every page): the same top bar and tree logo, and a bottom row of section chips with 3D Anatomy pinned at the left. Both sites share one installable app (`manifest.webmanifest`) and the lightning tree icon. It keeps its own service worker; its stats backup now uses the site's account. Each app's service worker only clears its own caches.
 
 ## How it's built
 - Plain HTML, CSS and JavaScript with [three.js](https://threejs.org) (bundled in `vendor/`). No build step: GitHub Pages serves the files as they are.

@@ -10,6 +10,17 @@ service cloud.firestore {
         && request.resource.data.name.size() <= 60
         && request.resource.data.data is map;
     }
+    // Practice records: time spent on each movement, breath or mudra.
+    match /users/{uid}/sessions/{sessionId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['section', 'routine', 'movement', 'duration', 'timestamp'])
+        && request.resource.data.section is string && request.resource.data.section.size() <= 100
+        && (request.resource.data.routine == null || (request.resource.data.routine is string && request.resource.data.routine.size() <= 100))
+        && (request.resource.data.movement == null || (request.resource.data.movement is string && request.resource.data.movement.size() <= 200))
+        && request.resource.data.duration is number && request.resource.data.duration > 0 && request.resource.data.duration <= 3600
+        && request.resource.data.timestamp is number;
+    }
     // Nothing else can be read or written.
     match /{document=**} {
       allow read, write: if false;
