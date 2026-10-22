@@ -148,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.timeTracker) {
       const modeLabel = altMode === "alternate" ? "Alternate" : altMode === "right" ? "Right-only" : "Left-only";
       window.timeTracker.startSession('Breathwork Toolkit', `Nostril - ${modeLabel}`);
+      window.timeTracker.beginMovement(`${modeLabel} Cycle`);
     }
 
     if (altRafId) cancelAnimationFrame(altRafId);
@@ -161,9 +162,11 @@ document.addEventListener("DOMContentLoaded", () => {
       altRafId = null;
     }
 
-    // Stop time tracking
-    if (window.timeTracker) {
+    // Stop time tracking, keeping the part of a cycle already done
+    if (window.timeTracker && window.timeTracker.sessionStartTime) {
       window.timeTracker.stopSession();
+      const sessionTime = window.timeTracker.getLastSessionDuration();
+      if (sessionTime > 0 && window.TimeStatsUI) TimeStatsUI.showQuickSummary('Breathwork', sessionTime);
     }
 
     altPhaseStart = null;
@@ -238,11 +241,11 @@ document.addEventListener("DOMContentLoaded", () => {
         altCycleCount++;
         cycleCountEl.textContent = String(altCycleCount);
 
-        // Record completed cycle
+        // Keep the time of the cycle just done, and start timing the next
         if (window.timeTracker) {
-          const cycleTime = (altDurationMs / 1000) * seq.length; // Total time for one full cycle
           const modeLabel = altMode === "alternate" ? "Alternate" : altMode === "right" ? "Right-only" : "Left-only";
-          window.timeTracker.recordMovement(`${modeLabel} Cycle`, cycleTime);
+          window.timeTracker.endMovement();
+          window.timeTracker.beginMovement(`${modeLabel} Cycle`);
         }
       }
     }
@@ -296,6 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function resetHvUI() {
+    stopHvTracking();
     hvRunning = false;
     hvState = "idle";
     hvRoundTotal = 0;
@@ -329,6 +333,27 @@ document.addEventListener("DOMContentLoaded", () => {
     hvHoldsContainer.classList.add("hidden");
   }
 
+  // Keep the time of a breath-rounds session, finished or stopped part-way
+  function stopHvTracking() {
+    const tracker = window.timeTracker;
+    if (!tracker || tracker.currentRoutine !== 'Breath rounds' || !tracker.sessionStartTime) return;
+    tracker.stopSession();
+    const sessionTime = tracker.getLastSessionDuration();
+    if (sessionTime > 0 && window.TimeStatsUI) TimeStatsUI.showQuickSummary('Breathwork', sessionTime);
+  }
+
+  // Leaving the page stops alternate-nostril breathing (keeping its time). Breath rounds carry on where they
+  // were, but the time away isn't counted.
+  window.addEventListener("practice:away", () => {
+    if (altRunning) {
+      altStop(true);
+      phaseSubtitleEl.textContent = "Stopped while you were away. Your time so far is saved. Press Start to begin again.";
+    }
+  });
+  window.addEventListener("practice:back", () => {
+    if (hvRunning && window.timeTracker) window.timeTracker.resumeMovement();
+  });
+
   function hvStart() {
     if (hvRunning) return;
 
@@ -355,6 +380,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     hvRunning = true;
     hvRoundCurrent = 1;
+    if (window.timeTracker) {
+      window.timeTracker.startSession('Breathwork Toolkit', 'Breath rounds');
+      window.timeTracker.beginMovement('Breath rounds');
+    }
     hvHoldsList.innerHTML = "";
     hvHoldsContainer.classList.add("hidden");
 
@@ -522,6 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function finishHvSession() {
+    stopHvTracking();
     hvRunning = false;
     hvState = "idle";
     if (hvBreathingRafId) cancelAnimationFrame(hvBreathingRafId);

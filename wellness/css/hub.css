@@ -115,3 +115,63 @@ body::after {
 }
 .home-top-row { flex-direction: column; align-items: flex-start; gap: 0; }
 .mini-heading { font: 700 22px/1.15 var(--serif); color: var(--cream); letter-spacing: 0.2px; }
+
+/* ---------- Practice pages: one screen each, with a clear way back ---------- */
+/* The page is exactly the height of the window; each screen fits inside it rather than making the page scroll. */
+.app-frame { height: 100vh; height: 100dvh; min-height: 0; }
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; flex: none;
+  min-height: 38px; margin: 0 0 10px; padding: 6px 14px 6px 8px; border-radius: 999px;
+  border: 1px solid rgba(230, 189, 106, 0.5); background: rgba(230, 189, 106, 0.1);
+  color: var(--cream); font: 500 14px/1 var(--sans); text-decoration: none; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.back-btn:hover, .back-btn:focus-visible { border-color: var(--accent); background: rgba(230, 189, 106, 0.2); box-shadow: 0 0 12px rgba(230, 189, 106, 0.3); }
+.back-btn svg { flex: none; color: var(--accent); }
+
+/* Settings: Start near the top, the choices two to a row */
+.prefs-screen .screen-tagline { margin-bottom: 10px; }
+.prefs-screen #btn-start-routine { margin: 0 0 12px; }
+.prefs-screen .prefs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-top: 12px; }
+.prefs-screen .field { justify-content: flex-end; }
+.prefs-screen .field label { line-height: 1.3; }
+.mudra-info { margin-top: 14px; }
+
+/* The player: back and title on one row, then the timer and its buttons, then the picture filling what's left */
+.screen.player-screen { display: flex; flex-direction: column; padding-bottom: 12px; }
+.player-screen .screen-top { display: flex; align-items: center; gap: 10px; min-width: 0; margin-bottom: 10px; }
+.player-screen .screen-top .back-btn { margin: 0; }
+.player-screen .screen-title { flex: 1; min-width: 0; font-size: 23px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-screen .screen-tagline, .player-screen .routine-preview-card { display: none; }
+.player-dock { flex: none; }
+.player-status { margin: 0 0 6px; justify-content: space-between; font-size: 13px; }
+.player-status .phase-label { color: var(--cream); font-weight: 600; font-variant-numeric: tabular-nums; }
+.player-screen .progress-area { margin-top: 0; }
+.player-screen .progress-wrap { height: 18px; }
+.player-screen .session-progress-wrap { margin-top: 6px; }
+.player-screen .player-controls { margin-top: 10px; }
+.player-screen .player-controls .btn { flex: 1; min-height: 42px; }
+.player-screen .status-message { margin-top: 8px; }
+.player-screen .status-message:empty { display: none; }
+.player-screen .current-movement-card { flex: 1 1 auto; min-height: 150px; display: flex; flex-direction: column; margin-top: 10px; }
+.player-screen .movement-image-frame { flex: 1 1 auto; min-height: 0; }
+.player-screen .movement-image-frame img { width: 100%; height: 100%; object-fit: contain; }
+
+/* Short windows (landscape phones, small laptops): tighter, so the picture keeps its room */
+@media (max-height: 700px) {
+  .screen { padding-top: 12px; }
+  .player-screen .screen-top { margin-bottom: 6px; }
+  .player-screen .screen-title { font-size: 20px; }
+  .player-screen .player-controls { margin-top: 8px; }
+  .player-screen .player-controls .btn { min-height: 38px; padding-top: 6px; padding-bottom: 6px; }
+  .player-screen .current-movement-card { margin-top: 8px; padding: 6px 8px 8px; }
+  .player-screen .movement-label { margin-bottom: 4px; }
+}
+
+/* Home: the numbers always fit their boxes (the page also shrinks a long one to fit) */
+.home-stat-item { display: flex; flex-direction: column; justify-content: center; min-width: 0; overflow: hidden; }
+.home-stat-value { white-space: nowrap; font-variant-numeric: tabular-nums; transition: none; }
+@media (min-width: 601px) { .home-stat-item { height: auto; min-height: 88px; } }
+/* Every screen ends just above the row of section chips, so nothing sits hidden behind them */
+.app-main > .screen { bottom: calc(var(--bar-h) + var(--safe-bottom) + 4px); }

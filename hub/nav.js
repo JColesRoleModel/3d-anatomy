@@ -48,6 +48,7 @@ const PRACTICE = [
 ];
 const PRACTICE_KEY = 'innervation-atlas-time-data'; // the practice timer's records, kept on this device
 const ACCOUNT_KEY = 'tolnri.account.v1'; // '1' while someone is signed in on this device
+const FACE_KEY = 'tolnri.account.face.v1'; // their picture and initial, so the account button shows them at once
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 let user = null;
@@ -85,7 +86,7 @@ export function initHub({ tools = [] } = {}) {
       <span class="hub-group hub-sections">${sectionLinks}</span>
       ${tools.length ? `<span class="hub-group hub-tools">${toolButtons}</span>` : ''}
       <button type="button" class="hub-icon hub-menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="hub-menu" title="Menu">${icon('menu')}</button>
-      <button type="button" class="hub-icon hub-user-btn" aria-label="Your account" aria-expanded="false" aria-controls="hub-account" title="Your account">${icon('user')}<span class="hub-user-dot" hidden></span></button>
+      <button type="button" class="hub-icon hub-user-btn" aria-label="Your account" aria-expanded="false" aria-controls="hub-account" title="Your account"><span class="hub-face">${icon('user')}</span></button>
     </nav>
     <div id="hub-menu" class="hub-drop hub-menu" hidden>
       <div class="hub-drop-title">Tree of Life</div>
@@ -102,7 +103,7 @@ export function initHub({ tools = [] } = {}) {
     </div>
     <div id="hub-account" class="hub-drop hub-account" hidden>
       <div class="hub-acct-head">
-        <span class="hub-avatar">${icon('user', 22)}</span>
+        <span class="hub-avatar hub-face">${icon('user', 22)}</span>
         <div><div class="hub-acct-name" id="hub-acct-name">Not signed in</div><div class="hub-acct-sub" id="hub-acct-sub">One account for the whole site</div></div>
       </div>
       <div class="hub-stats" id="hub-stats"></div>
@@ -182,7 +183,15 @@ export function initHub({ tools = [] } = {}) {
 
   function onUser(u) {
     user = u;
-    try { if (u) localStorage.setItem(ACCOUNT_KEY, '1'); else localStorage.removeItem(ACCOUNT_KEY); } catch {}
+    try {
+      if (u) {
+        localStorage.setItem(ACCOUNT_KEY, '1');
+        localStorage.setItem(FACE_KEY, JSON.stringify(faceOf(u)));
+      } else {
+        localStorage.removeItem(ACCOUNT_KEY);
+        localStorage.removeItem(FACE_KEY);
+      }
+    } catch {}
     renderUser();
     for (const fn of listeners) fn(u);
   }
@@ -191,14 +200,39 @@ export function initHub({ tools = [] } = {}) {
     $('hub-acct-in').hidden = !user;
     $('hub-acct-name').textContent = user ? (user.displayName || user.email || 'Signed in') : 'Not signed in';
     $('hub-acct-sub').textContent = user ? (user.displayName && user.email ? user.email : 'Signed in') : 'One account for the whole site';
-    el.querySelector('.hub-user-dot').hidden = !user;
+    renderFace(user ? faceOf(user) : null);
     userBtn.classList.toggle('in', !!user);
+    userBtn.title = user ? `Your account (${user.displayName || user.email || 'signed in'})` : 'Your account';
     if (!user) $('hub-email-form').hidden = true;
     renderStatus();
   }
+  // Signed-in people see their picture (or initial) in place of the person icon: their Google photo, if they have one
+  function faceOf(u) {
+    const name = u.displayName || u.email || '';
+    return { photo: u.photoURL || (u.providerData || []).find((p) => p.photoURL)?.photoURL || '', initial: name.trim().charAt(0).toUpperCase() };
+  }
+  function renderFace(face) {
+    el.querySelectorAll('.hub-face').forEach((box) => {
+      const size = box.classList.contains('hub-avatar') ? 22 : 20;
+      box.classList.toggle('has-face', !!face);
+      if (!face) { box.innerHTML = icon('user', size); return; }
+      const letter = () => { box.innerHTML = face.initial ? `<span class="hub-initial">${esc(face.initial)}</span>` : icon('user', size); };
+      if (!face.photo) return letter();
+      const img = new Image();
+      img.className = 'hub-photo';
+      img.alt = '';
+      img.referrerPolicy = 'no-referrer'; // Google's picture links refuse requests that say which site they came from
+      img.onerror = letter;
+      img.src = face.photo;
+      box.replaceChildren(img);
+    });
+  }
+
   renderUser();
   let wasIn = false;
   try { wasIn = localStorage.getItem(ACCOUNT_KEY) === '1'; } catch {}
+  // Show the picture from last time straight away, before the account has finished loading
+  if (wasIn) { try { const face = JSON.parse(localStorage.getItem(FACE_KEY) || 'null'); if (face) renderFace(face); } catch {} }
   if (account.config && wasIn) account.start(onUser).catch((err) => msg(account.message(err), true));
   return hub;
 }

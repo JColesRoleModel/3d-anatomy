@@ -425,6 +425,11 @@ function startPhase(phase, resume = false) {
   }
 
   updateMovementUI();
+  if (window.timeTracker && phase === "move") {
+    const move = selectedRoutineMovements[currentMovementIndex];
+    if (resume) window.timeTracker.resumeMovement();
+    else if (move) window.timeTracker.beginMovement(movementLabelFromFile(selectedRoutineKey, move.file), prefs.secondsPerMovement);
+  }
 
   if (movementTimerId) clearInterval(movementTimerId);
   if (!isRunning) return;
@@ -447,14 +452,8 @@ function startPhase(phase, resume = false) {
 }
 
 function handlePhaseComplete() {
-  // Record movement that just completed
-  if (currentPhase === "move" && window.timeTracker) {
-    const move = selectedRoutineMovements[currentMovementIndex];
-    if (move) {
-      const label = movementLabelFromFile(selectedRoutineKey, move.file);
-      window.timeTracker.recordMovement(label, prefs.secondsPerMovement);
-    }
-  }
+  // Keep the time actually spent on the movement that just ended
+  if (currentPhase === "move" && window.timeTracker) window.timeTracker.endMovement();
 
   playDing();
   if (currentPhase === "move" && prefs.restBetween > 0 && !isLastStep()) {
@@ -548,12 +547,37 @@ function togglePlayPause() {
     }
     qs("#btn-play-pause").textContent = "Resume";
     if (phaseBar) phaseBar.pause();
+    if (window.timeTracker) window.timeTracker.pauseMovement();
   } else {
     isRunning = true;
     qs("#btn-play-pause").textContent = "Pause";
+    qs("#status-message").textContent = "";
     startPhase(currentPhase || "move", true);
   }
 }
+
+// Stop part-way through: the time done so far is kept, and shown
+function stopRoutine() {
+  stopRoutineTimers();
+  isRunning = false;
+  currentPhase = "idle";
+  if (phaseBar) phaseBar.reset();
+  qs("#btn-play-pause").textContent = "Start";
+  qs("#phase-label").textContent = "Ready";
+  qs("#status-message").textContent = "";
+  if (window.timeTracker && window.timeTracker.sessionStartTime) {
+    window.timeTracker.stopSession();
+    const sessionTime = window.timeTracker.getLastSessionDuration();
+    if (sessionTime > 0 && window.TimeStatsUI) TimeStatsUI.showQuickSummary('Head Innervation', sessionTime);
+  }
+}
+
+// Leaving the page pauses the routine, so time away is never counted
+window.addEventListener("practice:away", () => {
+  if (!isRunning) return;
+  togglePlayPause();
+  qs("#status-message").textContent = "Paused while you were away. Press Resume to carry on.";
+});
 
 function restartRoutine() {
   if (!selectedRoutineMovements.length) return;
@@ -566,14 +590,7 @@ function initBackButtons() {
     btn.addEventListener("click", () => {
       const target = btn.dataset.back;
       if (!target) return;
-      if (btn.closest("#screen-player")) {
-        stopRoutineTimers();
-        isRunning = false;
-        qs("#btn-play-pause").textContent = "Start";
-        currentPhase = "idle";
-        if (phaseBar) phaseBar.reset();
-        qs("#phase-label").textContent = "Ready";
-      }
+      if (btn.closest("#screen-player")) stopRoutine();
       switchScreen(target);
     });
   });
@@ -587,6 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderRoutineCards();
   initBackButtons();
+  qs("#btn-stop").addEventListener("click", stopRoutine);
 
   qs("#btn-random").addEventListener("click", pickRandomRoutine);
   qs("#btn-start-routine").addEventListener("click", collectPrefsAndStart);
