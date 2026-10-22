@@ -31,7 +31,7 @@
     <main class="app-main">
       <!-- SCREEN 1: ROUTINE PICKER -->
       <section id="screen-select" class="screen screen-active">
-        <a class="back-btn" href="index.html"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Practice home</span></a>
+        <a class="back-btn home-btn" href="index.html"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M4 11.2 12 4.5l8 6.7M6.5 9.5v10h11v-10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Practice home</span></a>
         <h1 class="screen-title">Lower Body Innervation</h1>
         <p class="screen-tagline">Choose a routine to awaken the feet, hips and grounding lines.</p>
 
@@ -47,7 +47,10 @@
 
       <!-- SCREEN 2: PREFERENCES -->
       <section id="screen-prefs" class="screen prefs-screen">
-        <button type="button" class="back-btn" data-back="screen-select"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>All routines</span></button>
+        <div class="screen-nav">
+          <button type="button" class="back-btn" data-back="screen-select"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>All routines</span></button>
+          <a class="back-btn home-btn" href="index.html"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M4 11.2 12 4.5l8 6.7M6.5 9.5v10h11v-10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Practice home</span></a>
+        </div>
         <h1 id="prefs-title" class="screen-title">Routine</h1>
         <p id="prefs-tagline" class="screen-tagline">Set your timing and rounds.</p>
         <button id="btn-start-routine" class="btn primary-btn full-width">Start Routine</button>
@@ -90,6 +93,7 @@
       <section id="screen-player" class="screen player-screen">
         <div class="screen-top">
           <button type="button" class="back-btn" data-back="screen-prefs"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Settings</span></button>
+          <a class="back-btn home-btn" href="index.html" title="Practice home"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M4 11.2 12 4.5l8 6.7M6.5 9.5v10h11v-10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Home</span></a>
           <h1 id="player-title" class="screen-title">Routine</h1>
         </div>
         <p id="player-tagline" class="screen-tagline">Follow the movements at your own pace.</p>
