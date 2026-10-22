@@ -175,3 +175,9 @@ body::after {
 @media (min-width: 601px) { .home-stat-item { height: auto; min-height: 88px; } }
 /* Every screen ends just above the row of section chips, so nothing sits hidden behind them */
 .app-main > .screen { bottom: calc(var(--bar-h) + var(--safe-bottom) + 4px); }
+
+/* Practice home is one tap away on every screen */
+.screen-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.screen-nav .back-btn { margin: 0; }
+.home-btn { padding-left: 10px; gap: 6px; }
+@media (max-width: 380px) { .player-screen .home-btn span { display: none; } .player-screen .home-btn { padding: 6px 10px; } }
