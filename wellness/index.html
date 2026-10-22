@@ -355,7 +355,8 @@
         // Week time
         const weekEl = document.querySelector('#home-week-time .home-stat-value');
         if (weekEl) {
-          weekEl.textContent = stats.week > 0 ? TimeTracker.formatTime(stats.week) : '0m';
+          weekEl.textContent = stats.week > 0 ? TimeTracker.formatShort(stats.week) : '0m';
+          fitText(weekEl);
         }
 
         // Day streak (count consecutive days with practice)
@@ -363,8 +364,20 @@
         if (streakEl) {
           const streak = calculateDayStreak();
           streakEl.textContent = streak;
+          fitText(streakEl);
         }
       }
+
+      // Shrink a number to fit its box (a long one like "12h 30m" would otherwise spill out)
+      function fitText(el) {
+        el.style.fontSize = '';
+        const box = getComputedStyle(el.parentElement);
+        const room = el.parentElement.clientWidth - parseFloat(box.paddingLeft) - parseFloat(box.paddingRight);
+        if (el.scrollWidth <= room) return;
+        const size = parseFloat(getComputedStyle(el).fontSize);
+        el.style.fontSize = Math.max(14, Math.floor(size * room / el.scrollWidth)) + 'px';
+      }
+      window.addEventListener('resize', () => document.querySelectorAll('.home-stat-value').forEach(fitText));
 
       // Calculate day streak
       function calculateDayStreak() {

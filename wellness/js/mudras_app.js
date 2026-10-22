@@ -142,8 +142,15 @@ function startSession() {
   }
 
   if (phaseBar) phaseBar.startPhase("move", prefs.secondsPerMudra);
+  beginMudraClock();
 
   runTimerTick();
+}
+
+// Start the clock for the mudra on screen
+function beginMudraClock() {
+  const current = mudraSequence[currentIndex];
+  if (window.timeTracker && current) window.timeTracker.beginMovement(current.label, prefs.secondsPerMudra);
 }
 
 function runTimerTick() {
@@ -164,13 +171,8 @@ function runTimerTick() {
 }
 
 function handlePhaseComplete() {
-  // Record the mudra that just completed
-  if (currentPhase === "move" && window.timeTracker) {
-    const current = mudraSequence[currentIndex];
-    if (current) {
-      window.timeTracker.recordMovement(current.label, prefs.secondsPerMudra);
-    }
-  }
+  // Keep the time actually spent on the mudra that just ended
+  if (currentPhase === "move" && window.timeTracker) window.timeTracker.endMovement();
 
   playDing();
 
@@ -196,6 +198,7 @@ function handlePhaseComplete() {
   secondsRemaining = prefs.secondsPerMudra;
   updateMudraUI();
   if (phaseBar) phaseBar.startPhase("move", prefs.secondsPerMudra);
+  beginMudraClock();
 
   runTimerTick();
 }
@@ -296,11 +299,15 @@ function togglePlayPause() {
     }
     if (playBtn) playBtn.textContent = "Resume";
     if (phaseBar) phaseBar.pause();
+    if (window.timeTracker) window.timeTracker.pauseMovement();
   } else {
     // Resume
     isRunning = true;
     if (playBtn) playBtn.textContent = "Pause";
     if (phaseBar) phaseBar.resume();
+    if (window.timeTracker && currentPhase === "move") window.timeTracker.resumeMovement();
+    const status = qs("#status-message");
+    if (status) status.textContent = "";
 
     runTimerTick();
   }
@@ -308,6 +315,7 @@ function togglePlayPause() {
 
 function restartSession() {
   if (!mudraSequence.length) return;
+  if (window.timeTracker) window.timeTracker.stopSession(); // keeps the time already done
   isRunning = false;
   if (timerId) {
     clearInterval(timerId);
@@ -318,6 +326,37 @@ function restartSession() {
   secondsRemaining = 0;
   prepareSession();
 }
+
+// Stop part-way through: the time done so far is kept, and shown
+function stopMudraSession() {
+  isRunning = false;
+  if (timerId) {
+    clearInterval(timerId);
+    timerId = null;
+  }
+  currentIndex = 0;
+  currentPhase = "idle";
+  secondsRemaining = 0;
+  resetProgressBar();
+  updateMudraUI();
+  const playBtn = qs("#btn-play-pause");
+  if (playBtn) playBtn.textContent = "Start";
+  const status = qs("#status-message");
+  if (status) status.textContent = "";
+  if (window.timeTracker && window.timeTracker.sessionStartTime) {
+    window.timeTracker.stopSession();
+    const sessionTime = window.timeTracker.getLastSessionDuration();
+    if (sessionTime > 0 && window.TimeStatsUI) TimeStatsUI.showQuickSummary('Mudras', sessionTime);
+  }
+}
+
+// Leaving the page pauses the session, so time away is never counted
+window.addEventListener("practice:away", () => {
+  if (!isRunning) return;
+  togglePlayPause();
+  const status = qs("#status-message");
+  if (status) status.textContent = "Paused while you were away. Press Resume to carry on.";
+});
 
 // Handle Generate button (random sequence) and One Mudra Now
 function handleGenerateClick(single) {
@@ -382,6 +421,9 @@ function initMudrasApp() {
     playBtn.addEventListener("click", togglePlayPause);
   }
 
+  const stopBtn = qs("#btn-stop");
+  if (stopBtn) stopBtn.addEventListener("click", stopMudraSession);
+
   const restartBtn = qs("#btn-restart");
   if (restartBtn) {
     restartBtn.addEventListener("click", restartSession);
@@ -390,16 +432,7 @@ function initMudrasApp() {
   const backBtn = qs("#btn-back-to-config");
   if (backBtn) {
     backBtn.addEventListener("click", () => {
-      // stop everything and go back
-      isRunning = false;
-      if (timerId) {
-        clearInterval(timerId);
-        timerId = null;
-      }
-      currentPhase = "idle";
-      if (phaseBar) phaseBar.reset();
-      const phaseLabel = qs("#phase-label");
-      if (phaseLabel) phaseLabel.textContent = "Ready";
+      stopMudraSession();
       switchScreen("screen-config");
     });
   }

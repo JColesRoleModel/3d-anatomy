@@ -159,6 +159,7 @@
     <main class="app-main ocular-background">
       <!-- SCREEN 1: Routine picker for ocular sequences -->
       <section id="screen-select" class="screen screen-active">
+        <a class="back-btn" href="index.html"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Practice home</span></a>
         <h1 class="screen-title">Neuro‑Ocular Activation</h1>
         <p class="screen-tagline">Choose a gaze sequence to awaken your vision, brainstem and nervous system.</p>
         <div id="routine-list" class="routine-list">
@@ -168,13 +169,200 @@
           <span class="random-icon">⇄</span>
           <span>Random Sequence</span>
         </button>
+        <!-- Collapsible information section with table and routines -->
+        <details class="info-details">
+          <summary>Learn more about gaze science &amp; flows 📚</summary>
+          <div>
+            <p>The nine gaze positions engage distinct cranial nerves, cervical muscles and autonomic pathways. Use the
+              table below to understand the neural signatures.</p>
+            <table class="ocular-table">
+              <thead>
+                <tr>
+                  <th>🔢</th>
+                  <th>Position</th>
+                  <th>Cranial Nerves</th>
+                  <th>Cervical &amp; Neuro‑Muscular</th>
+                  <th>Autonomic Shift</th>
+                  <th>Neurotransmitters</th>
+                  <th>Role</th>
+                  <th>Somatic Signature</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1️⃣</td>
+                  <td class="pos">Up (Vertical Superior)</td>
+                  <td>CN III &amp; IV</td>
+                  <td>C1–C2 extension, suboccipital activation</td>
+                  <td>↑ Sympathetic, ↑ Reticular Activating System</td>
+                  <td>Dopamine ↑, Norepinephrine ↑</td>
+                  <td>Alertness, future orientation, activation, motivation</td>
+                  <td>Awake, lift, upward energetic current</td>
+                </tr>
+                <tr>
+                  <td>2️⃣</td>
+                  <td class="pos">Down (Vertical Inferior)</td>
+                  <td>CN III &amp; IV</td>
+                  <td>C1–C2 flexion, deep cervical flexor engagement</td>
+                  <td>↑ Parasympathetic, vagal tilt</td>
+                  <td>Serotonin ↑, GABA ↑</td>
+                  <td>Grounding, emotional regulation, processing</td>
+                  <td>Release, calm, dropping into the body</td>
+                </tr>
+                <tr>
+                  <td>3️⃣</td>
+                  <td class="pos">Left Horizontal</td>
+                  <td>CN III &amp; VI</td>
+                  <td>Cervical rotation left (C2–C4)</td>
+                  <td>Hemispheric regulation (right brain bias)</td>
+                  <td>GABA ↑, Cortisol ↓</td>
+                  <td>Intuition, spatial awareness, autobiographical recall</td>
+                  <td>Softness, imagination, reflection</td>
+                </tr>
+                <tr>
+                  <td>4️⃣</td>
+                  <td class="pos">Right Horizontal</td>
+                  <td>CN III &amp; VI</td>
+                  <td>Cervical rotation right (C2–C4)</td>
+                  <td>Hemispheric regulation (left brain bias)</td>
+                  <td>Dopamine ↑, Acetylcholine ↑</td>
+                  <td>Logic, sequencing, speech access, goal‑orientation</td>
+                  <td>Clarity, decisiveness, forward movement</td>
+                </tr>
+                <tr>
+                  <td>5️⃣</td>
+                  <td class="pos">Up‑Left Diagonal</td>
+                  <td>CN III &amp; IV</td>
+                  <td>Upper cervical rotation + extension</td>
+                  <td>Mixed sympathetic/parasympathetic</td>
+                  <td>Dopamine + Serotonin blend</td>
+                  <td>Creative visualization, reflective planning</td>
+                  <td>Calm inspiration, inner vision</td>
+                </tr>
+                <tr>
+                  <td>6️⃣</td>
+                  <td class="pos">Up‑Right Diagonal</td>
+                  <td>CN III &amp; IV</td>
+                  <td>Upper cervical rotation + extension</td>
+                  <td>↑ Sympathetic</td>
+                  <td>Dopamine ↑↑</td>
+                  <td>Executive function, decision‑making, intent activation</td>
+                  <td>Determination, drive, future‑casting</td>
+                </tr>
+                <tr>
+                  <td>7️⃣</td>
+                  <td class="pos">Down‑Left Diagonal</td>
+                  <td>CN III &amp; IV</td>
+                  <td>Cervical flexion + rotation</td>
+                  <td>Deep parasympathetic, vagal discharge</td>
+                  <td>GABA ↑, Endorphins ↑</td>
+                  <td>Emotional release, trauma digestion, somatic unwinding</td>
+                  <td>Letting go, exhale, dissolution</td>
+                </tr>
+                <tr>
+                  <td>8️⃣</td>
+                  <td class="pos">Down‑Right Diagonal</td>
+                  <td>CN III &amp; IV</td>
+                  <td>Cervical flexion + rotation</td>
+                  <td>Parasympathetic + limbic down‑regulation</td>
+                  <td>Serotonin ↑</td>
+                  <td>Pattern interruption, habit release, reprocessing</td>
+                  <td>Acceptance, integration, grounding</td>
+                </tr>
+                <tr>
+                  <td>9️⃣</td>
+                  <td class="pos">Circular Tracking (CW &amp; CCW)</td>
+                  <td>CN III, IV &amp; VI</td>
+                  <td>Full cervical coactivation w/ vestibular loop</td>
+                  <td>Resets autonomic oscillation</td>
+                  <td>Balanced neurotransmitter cycling</td>
+                  <td>System recalibration, vestibular integration</td>
+                  <td>Reset, coherence, whole‑system alignment</td>
+                </tr>
+              </tbody>
+            </table>
+            <h2>Alertness, High Energy &amp; Awake ⚡</h2>
+            <p>Need a quick lift? These gaze flows deliver sympathetic drive, dopamine lift and razor‑sharp focus.</p>
+            <h3>Ignition Sequence 🚀</h3>
+            <ul>
+              <li>Upward vertical gaze hold (30–45 sec)</li>
+              <li>Rapid left–right saccades (20–30 sec)</li>
+              <li>Upper‑right diagonal hold (20–30 sec)</li>
+              <li>Circle‑wide clockwise (1 slow rotation)</li>
+              <li>Center point reset (10 sec)</li>
+            </ul>
+            <h3>Dopamine Spark ✨</h3>
+            <ul>
+              <li>Straight up hold</li>
+              <li>Straight right hold</li>
+              <li>Micro pulses up–right–up–right (10 rounds)</li>
+              <li>Cross‑midline fast tracking (20 sec)</li>
+            </ul>
+            <h3>Immediate Reboot ⚡</h3>
+            <ul>
+              <li>Fast horizontal saccades (15 sec)</li>
+              <li>Upward hold (20 sec)</li>
+              <li>Clockwise circles (1 rotation)</li>
+              <li>Done—instant lift!</li>
+            </ul>
+            <h2>Grounding, Balance &amp; Harmony 🌿</h2>
+            <p>Enter a relaxed, coherent state—parasympathetic dominance without sedation. These flows cultivate vagal tone
+              and hemispheric balance.</p>
+            <h3>The Equilibrium Pattern 🌊</h3>
+            <ul>
+              <li>Downward diagonal left hold (20–30 sec)</li>
+              <li>Slow horizontal tracking left→right→left (2 passes)</li>
+              <li>Soft center gaze + 4‑second nasal breath (20 sec)</li>
+              <li>Downward vertical hold (20–30 sec)</li>
+              <li>Counter‑clockwise slow circle (1 slow rotation)</li>
+            </ul>
+            <h3>The Floating Bridge 🌈</h3>
+            <ul>
+              <li>Upper‑left diagonal hold</li>
+              <li>Slow‑focus expansion (soften eyes outward)</li>
+              <li>Downward hold</li>
+              <li>Horizontal smooth tracking</li>
+            </ul>
+            <h3>Neutral Centering 🧘‍♂️</h3>
+            <ul>
+              <li>Downward gaze hold (30 sec)</li>
+              <li>Center gaze softening (20 sec)</li>
+              <li>Slow horizontal tracking (2 passes)</li>
+            </ul>
+            <h2>Restoring &amp; Letting Go 🌑</h2>
+            <p>For deep restoration, limbic unloading and dissolving patterned tension. These sequences invite surrender and
+              integration.</p>
+            <h3>The Release Pattern 💧</h3>
+            <ul>
+              <li>Downward‑left hold (20–40 sec)</li>
+              <li>Downward‑right hold (20–40 sec)</li>
+              <li>Slow counter‑clockwise circles (1–2 rotations)</li>
+              <li>Soft eyes / almost‑closed gaze (20 sec)</li>
+              <li>Center drop + exhale focus (3 breaths)</li>
+            </ul>
+            <h3>Limbic Dissolve 🧠✨</h3>
+            <ul>
+              <li>Downward vertical hold</li>
+              <li>Micro‑saccade down (gentle tapping movements)</li>
+              <li>Upper‑left slow tracking</li>
+              <li>Softened peripheral vision (20 sec)</li>
+            </ul>
+            <h3>Letting‑Go Trinity 🌬️</h3>
+            <ul>
+              <li>Down‑left hold (30 sec)</li>
+              <li>Down‑right hold (30 sec)</li>
+              <li>Soft center gaze (20 sec)</li>
+            </ul>
+          </div>
+        </details>
       </section>
 
       <!-- SCREEN 2: Preferences for ocular routines -->
-      <section id="screen-prefs" class="screen">
-        <button class="back-btn" data-back="screen-select">← Back</button>
+      <section id="screen-prefs" class="screen prefs-screen">
+        <button type="button" class="back-btn" data-back="screen-select"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>All sequences</span></button>
         <h1 id="prefs-title" class="screen-title">Sequence</h1>
         <p id="prefs-tagline" class="screen-tagline">Set your gaze duration and rest.</p>
+        <button id="btn-start-routine" class="btn primary-btn full-width">Start Sequence</button>
         <div class="routine-preview-card">
           <div class="preview-label" id="prefs-preview-label"></div>
           <div class="preview-strip" id="prefs-preview-strip">
@@ -203,231 +391,53 @@
             </button>
           </div>
         </div>
-        <button id="btn-start-routine" class="btn primary-btn full-width">Start Sequence</button>
       </section>
 
       <!-- SCREEN 3: Sequence player -->
-      <section id="screen-player" class="screen">
-        <button class="back-btn" data-back="screen-prefs">← Back</button>
-        <h1 id="player-title" class="screen-title">Sequence</h1>
+      <section id="screen-player" class="screen player-screen">
+        <div class="screen-top">
+          <button type="button" class="back-btn" data-back="screen-prefs"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Settings</span></button>
+          <h1 id="player-title" class="screen-title">Sequence</h1>
+        </div>
         <p id="player-tagline" class="screen-tagline">Follow the gaze sequence at your own pace.</p>
+
+        <!-- Controls first, so the timer and buttons are always in view above the picture -->
+        <div class="player-dock">
+          <div class="movement-meta player-status">
+            <div id="movement-count" class="movement-count">Gaze 1 of 1</div>
+            <div id="round-count" class="round-count">Round 1 of 1</div>
+            <div id="phase-label" class="phase-label">Ready</div>
+          </div>
+          <div class="progress-area">
+            <div class="progress-wrap">
+              <div id="prog" class="progress-fill"></div>
+            </div>
+          </div>
+          <div class="player-controls">
+            <button id="btn-play-pause" class="btn primary-btn">Start</button>
+            <button id="btn-stop" class="btn ghost-btn" title="Stop and keep the time done so far">Stop</button>
+            <button id="btn-restart" class="btn ghost-btn" title="Restart Sequence">Restart</button>
+          </div>
+          <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="current-movement-card">
+          <div id="current-movement-label" class="movement-label">Gaze</div>
+          <div class="movement-image-frame">
+            <img id="current-movement-image" alt="Current gaze">
+          </div>
+        </div>
+
         <div class="routine-preview-card">
           <div class="preview-label" id="player-preview-label"></div>
           <div class="preview-strip" id="player-preview-strip">
             <!-- Thumbnails injected by JS -->
           </div>
         </div>
-        <div class="current-movement-card">
-          <div id="current-movement-label" class="movement-label">Gaze</div>
-          <div class="movement-image-frame">
-            <img id="current-movement-image" alt="Current gaze">
-          </div>
-          <div class="movement-meta">
-            <div id="movement-count" class="movement-count">Gaze 1 of 1</div>
-            <div id="round-count" class="round-count">Round 1 of 1</div>
-            <div id="phase-label" class="phase-label">Ready</div>
-          </div>
-        </div>
-        <div class="progress-area">
-          <div class="progress-wrap">
-            <div id="prog" class="progress-fill"></div>
-          </div>
-        </div>
-        <div class="player-controls">
-          <button id="btn-play-pause" class="btn primary-btn">Start</button>
-          <button id="btn-restart" class="btn ghost-btn">Restart Sequence</button>
-        </div>
-        <div id="status-message" class="status-message"></div>
       </section>
 
       <!-- END of app-main screens -->
     </main>
-    <!-- Collapsible information section with table and routines -->
-    <details class="info-details">
-      <summary>Learn more about gaze science &amp; flows 📚</summary>
-      <div>
-        <p>The nine gaze positions engage distinct cranial nerves, cervical muscles and autonomic pathways. Use the
-          table below to understand the neural signatures.</p>
-        <table class="ocular-table">
-          <thead>
-            <tr>
-              <th>🔢</th>
-              <th>Position</th>
-              <th>Cranial Nerves</th>
-              <th>Cervical &amp; Neuro‑Muscular</th>
-              <th>Autonomic Shift</th>
-              <th>Neurotransmitters</th>
-              <th>Role</th>
-              <th>Somatic Signature</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1️⃣</td>
-              <td class="pos">Up (Vertical Superior)</td>
-              <td>CN III &amp; IV</td>
-              <td>C1–C2 extension, suboccipital activation</td>
-              <td>↑ Sympathetic, ↑ Reticular Activating System</td>
-              <td>Dopamine ↑, Norepinephrine ↑</td>
-              <td>Alertness, future orientation, activation, motivation</td>
-              <td>Awake, lift, upward energetic current</td>
-            </tr>
-            <tr>
-              <td>2️⃣</td>
-              <td class="pos">Down (Vertical Inferior)</td>
-              <td>CN III &amp; IV</td>
-              <td>C1–C2 flexion, deep cervical flexor engagement</td>
-              <td>↑ Parasympathetic, vagal tilt</td>
-              <td>Serotonin ↑, GABA ↑</td>
-              <td>Grounding, emotional regulation, processing</td>
-              <td>Release, calm, dropping into the body</td>
-            </tr>
-            <tr>
-              <td>3️⃣</td>
-              <td class="pos">Left Horizontal</td>
-              <td>CN III &amp; VI</td>
-              <td>Cervical rotation left (C2–C4)</td>
-              <td>Hemispheric regulation (right brain bias)</td>
-              <td>GABA ↑, Cortisol ↓</td>
-              <td>Intuition, spatial awareness, autobiographical recall</td>
-              <td>Softness, imagination, reflection</td>
-            </tr>
-            <tr>
-              <td>4️⃣</td>
-              <td class="pos">Right Horizontal</td>
-              <td>CN III &amp; VI</td>
-              <td>Cervical rotation right (C2–C4)</td>
-              <td>Hemispheric regulation (left brain bias)</td>
-              <td>Dopamine ↑, Acetylcholine ↑</td>
-              <td>Logic, sequencing, speech access, goal‑orientation</td>
-              <td>Clarity, decisiveness, forward movement</td>
-            </tr>
-            <tr>
-              <td>5️⃣</td>
-              <td class="pos">Up‑Left Diagonal</td>
-              <td>CN III &amp; IV</td>
-              <td>Upper cervical rotation + extension</td>
-              <td>Mixed sympathetic/parasympathetic</td>
-              <td>Dopamine + Serotonin blend</td>
-              <td>Creative visualization, reflective planning</td>
-              <td>Calm inspiration, inner vision</td>
-            </tr>
-            <tr>
-              <td>6️⃣</td>
-              <td class="pos">Up‑Right Diagonal</td>
-              <td>CN III &amp; IV</td>
-              <td>Upper cervical rotation + extension</td>
-              <td>↑ Sympathetic</td>
-              <td>Dopamine ↑↑</td>
-              <td>Executive function, decision‑making, intent activation</td>
-              <td>Determination, drive, future‑casting</td>
-            </tr>
-            <tr>
-              <td>7️⃣</td>
-              <td class="pos">Down‑Left Diagonal</td>
-              <td>CN III &amp; IV</td>
-              <td>Cervical flexion + rotation</td>
-              <td>Deep parasympathetic, vagal discharge</td>
-              <td>GABA ↑, Endorphins ↑</td>
-              <td>Emotional release, trauma digestion, somatic unwinding</td>
-              <td>Letting go, exhale, dissolution</td>
-            </tr>
-            <tr>
-              <td>8️⃣</td>
-              <td class="pos">Down‑Right Diagonal</td>
-              <td>CN III &amp; IV</td>
-              <td>Cervical flexion + rotation</td>
-              <td>Parasympathetic + limbic down‑regulation</td>
-              <td>Serotonin ↑</td>
-              <td>Pattern interruption, habit release, reprocessing</td>
-              <td>Acceptance, integration, grounding</td>
-            </tr>
-            <tr>
-              <td>9️⃣</td>
-              <td class="pos">Circular Tracking (CW &amp; CCW)</td>
-              <td>CN III, IV &amp; VI</td>
-              <td>Full cervical coactivation w/ vestibular loop</td>
-              <td>Resets autonomic oscillation</td>
-              <td>Balanced neurotransmitter cycling</td>
-              <td>System recalibration, vestibular integration</td>
-              <td>Reset, coherence, whole‑system alignment</td>
-            </tr>
-          </tbody>
-        </table>
-        <h2>Alertness, High Energy &amp; Awake ⚡</h2>
-        <p>Need a quick lift? These gaze flows deliver sympathetic drive, dopamine lift and razor‑sharp focus.</p>
-        <h3>Ignition Sequence 🚀</h3>
-        <ul>
-          <li>Upward vertical gaze hold (30–45 sec)</li>
-          <li>Rapid left–right saccades (20–30 sec)</li>
-          <li>Upper‑right diagonal hold (20–30 sec)</li>
-          <li>Circle‑wide clockwise (1 slow rotation)</li>
-          <li>Center point reset (10 sec)</li>
-        </ul>
-        <h3>Dopamine Spark ✨</h3>
-        <ul>
-          <li>Straight up hold</li>
-          <li>Straight right hold</li>
-          <li>Micro pulses up–right–up–right (10 rounds)</li>
-          <li>Cross‑midline fast tracking (20 sec)</li>
-        </ul>
-        <h3>Immediate Reboot ⚡</h3>
-        <ul>
-          <li>Fast horizontal saccades (15 sec)</li>
-          <li>Upward hold (20 sec)</li>
-          <li>Clockwise circles (1 rotation)</li>
-          <li>Done—instant lift!</li>
-        </ul>
-        <h2>Grounding, Balance &amp; Harmony 🌿</h2>
-        <p>Enter a relaxed, coherent state—parasympathetic dominance without sedation. These flows cultivate vagal tone
-          and hemispheric balance.</p>
-        <h3>The Equilibrium Pattern 🌊</h3>
-        <ul>
-          <li>Downward diagonal left hold (20–30 sec)</li>
-          <li>Slow horizontal tracking left→right→left (2 passes)</li>
-          <li>Soft center gaze + 4‑second nasal breath (20 sec)</li>
-          <li>Downward vertical hold (20–30 sec)</li>
-          <li>Counter‑clockwise slow circle (1 slow rotation)</li>
-        </ul>
-        <h3>The Floating Bridge 🌈</h3>
-        <ul>
-          <li>Upper‑left diagonal hold</li>
-          <li>Slow‑focus expansion (soften eyes outward)</li>
-          <li>Downward hold</li>
-          <li>Horizontal smooth tracking</li>
-        </ul>
-        <h3>Neutral Centering 🧘‍♂️</h3>
-        <ul>
-          <li>Downward gaze hold (30 sec)</li>
-          <li>Center gaze softening (20 sec)</li>
-          <li>Slow horizontal tracking (2 passes)</li>
-        </ul>
-        <h2>Restoring &amp; Letting Go 🌑</h2>
-        <p>For deep restoration, limbic unloading and dissolving patterned tension. These sequences invite surrender and
-          integration.</p>
-        <h3>The Release Pattern 💧</h3>
-        <ul>
-          <li>Downward‑left hold (20–40 sec)</li>
-          <li>Downward‑right hold (20–40 sec)</li>
-          <li>Slow counter‑clockwise circles (1–2 rotations)</li>
-          <li>Soft eyes / almost‑closed gaze (20 sec)</li>
-          <li>Center drop + exhale focus (3 breaths)</li>
-        </ul>
-        <h3>Limbic Dissolve 🧠✨</h3>
-        <ul>
-          <li>Downward vertical hold</li>
-          <li>Micro‑saccade down (gentle tapping movements)</li>
-          <li>Upper‑left slow tracking</li>
-          <li>Softened peripheral vision (20 sec)</li>
-        </ul>
-        <h3>Letting‑Go Trinity 🌬️</h3>
-        <ul>
-          <li>Down‑left hold (30 sec)</li>
-          <li>Down‑right hold (30 sec)</li>
-          <li>Soft center gaze (20 sec)</li>
-        </ul>
-      </div>
-    </details>
     <nav class="hub-bar" aria-label="Sections">
       <a class="chip chip-anatomy" href="../" title="Back to the 3D anatomy"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="4.6" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 9.2h14M12 9.2v6.3M12 15.5l-3.2 5.6M12 15.5l3.2 5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>3D Anatomy</a>
       <a class="chip" href="index.html" style="--c:#e6bd6a"><span class="dot"></span>Home</a>
@@ -444,6 +454,7 @@
   <audio id="audio-ding" src="assets/audio/ding.mp3" preload="auto"></audio>
 
   <script src="js/time-tracker.js"></script>
+  <script src="js/screen-history.js" defer></script>
   <script type="module">
     import { initHub } from '../hub/nav.js';
     initHub({ tools: [
