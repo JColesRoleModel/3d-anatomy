@@ -70,7 +70,7 @@
 .d-week-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .d-wday { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; border-radius: 12px; }
 .d-wday.on { background: rgba(230, 189, 106, 0.12); }
-.d-wday.future { opacity: 0.35; }
+.d-wday.future { opacity: 0.45; }
 .d-wring { width: 44px; height: 44px; }
 .d-wring svg { width: 100%; height: 100%; display: block; }
 .d-wday b { font-size: 12px; font-weight: 600; color: var(--text); }
@@ -95,7 +95,7 @@
 .is-night .sky { display: none; }
 
 @media (max-width: 900px), (orientation: portrait) {
-  .d-grid { grid-template-columns: 1fr; grid-template-areas: 'rings' 'tasks' 'recent' 'quote'; }
+  .d-grid { grid-template-columns: 1fr; grid-template-areas: 'quote' 'rings' 'tasks' 'recent'; }
 }
 @media (max-width: 560px) {
   .d-main { padding-left: 12px; padding-right: 12px; }

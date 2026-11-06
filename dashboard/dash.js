@@ -70,15 +70,15 @@ function renderStats() {
   const s = allStreak(days, state.goals);
   $('#streak').textContent = s ? `${s} day${s === 1 ? '' : 's'} closing all three ✦` : 'Close all three to start a streak';
 
-  // This week, Monday to Sunday
+  // This week: always Monday to Sunday (not the last 7 days); days still ahead show as empty rings
   const back = (new Date().getDay() + 6) % 7;
   const week = Array.from({ length: 7 }, (_, i) => daysBack(back - i));
   const fmt = (d, o) => d.toLocaleDateString(undefined, o);
-  $('#week-label').textContent = `${fmt(week[0], { month: 'short', day: 'numeric' })} – ${fmt(week[6], { month: 'short', day: 'numeric' })}`;
+  $('#week-label').textContent = `This week · ${fmt(week[0], { month: 'short', day: 'numeric' })} – ${fmt(week[6], { month: 'short', day: 'numeric' })}`;
   fill($('#week'), week.map((d) => {
     const k = dayKey(d.getTime()), v = days[k] || {}, future = d > new Date();
     return h('div', { class: 'd-wday' + (k === today() ? ' on' : '') + (future ? ' future' : '') },
-      h('div', { class: 'd-wring', html: future ? '' : ringsSVG({ body: pct('body', v), mind: pct('mind', v), spirit: pct('spirit', v) }, 44, 5) }),
+      h('div', { class: 'd-wring', html: ringsSVG(future ? {} : { body: pct('body', v), mind: pct('mind', v), spirit: pct('spirit', v) }, 44, 5) }),
       h('b', {}, fmt(d, { weekday: 'short' })), h('small', {}, String(d.getDate())));
   }));
 
