@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Scroll - Tree of Life NRI</title>
+  <link rel="stylesheet" href="../hub/nav.css">
+  <link rel="stylesheet" href="../hub/page.css">
+  <link rel="stylesheet" href="scroll.css">
+  <link rel="icon" type="image/png" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b0a1f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tree of Life">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header id="hub-nav" data-section="scroll" data-base="../"></header>
+
+  <main class="t-main s-main">
+    <section class="t-gate" id="gate">
+      <h1 class="t-title">The Scroll</h1>
+      <p class="t-lede" id="gate-text">Opening the Scroll…</p>
+      <button class="t-btn t-primary hidden" id="gate-signin" type="button">Sign in</button>
+    </section>
+
+    <section class="hidden s-app" id="app">
+      <div class="s-head">
+        <nav class="s-tabs" role="tablist">
+          <button class="s-tab on" data-view="feed" role="tab" type="button">Feed</button>
+          <button class="s-tab" data-view="saved" role="tab" type="button">Saved <span class="t-count" id="saved-count">0</span></button>
+          <button class="s-tab" data-view="stats" role="tab" type="button">Stats</button>
+        </nav>
+        <div class="s-session" title="Time in the Scroll this visit, counting toward Mind"><i class="s-live" id="live"></i><b id="session-time">0:00</b></div>
+      </div>
+
+      <div class="w-starter-like hidden" id="starter">
+        <p>The Scroll is empty. Load your 156 cards (stoics, Florence Scovel Shinn, Thoth, Manly P. Hall, Robert Greene and more)?</p>
+        <button class="t-btn t-primary" id="starter-load" type="button">Load the cards</button>
+      </div>
+
+      <section id="view-feed">
+        <button class="s-oracle" id="reshuffle" type="button">✦ Consult the oracle ✦</button>
+        <div class="s-feed" id="feed"></div>
+        <div class="s-more" id="more" aria-hidden="true"></div>
+      </section>
+      <section id="view-saved" class="hidden"><div class="s-feed" id="saved"></div></section>
+      <section id="view-stats" class="hidden"><div class="s-stats" id="stats"></div></section>
+    </section>
+  </main>
+
+  <div class="t-modal hidden" id="add">
+    <div class="t-modal-back" data-close></div>
+    <form class="t-modal-card" id="add-form" role="dialog" aria-modal="true" aria-labelledby="add-title" autocomplete="off">
+      <div class="t-modal-head">
+        <h2 id="add-title">Add a card</h2>
+        <button class="t-btn t-icon" type="button" data-close aria-label="Close">✕</button>
+      </div>
+      <label class="t-field"><span>Card text</span><textarea class="t-input t-textarea" id="add-text" maxlength="2000" required></textarea></label>
+      <div class="t-grid2">
+        <label class="t-field"><span>Author</span><input class="t-input" id="add-author" maxlength="120" required></label>
+        <label class="t-field"><span>Book or source (optional)</span><input class="t-input" id="add-book" maxlength="160"></label>
+      </div>
+      <p class="t-hint" id="add-hint" role="alert"></p>
+      <div class="t-modal-foot">
+        <button class="t-btn" type="button" data-close>Cancel</button>
+        <button class="t-btn t-primary" type="submit">Add</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="t-toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module">
+    import { initHub } from '../hub/nav.js';
+    initHub({ tools: [{ id: 's-add', label: 'Add a card', icon: 'plus' }] });
+  </script>
+  <script type="module" src="scroll.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});</script>
+</body>
+</html>

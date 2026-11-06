@@ -1,0 +1,132 @@
+/* The shared look for the site's own pages (Tasks, Watch, Scroll, Rings, Dashboard): night-sky glass,
+   Cormorant headings, gold and cream. Pages add their own sheet after this one. */
+@font-face { font-family: 'Cormorant Garamond'; font-weight: 600; font-display: swap; src: url(../vendor/fonts/cormorant-garamond-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-weight: 700; font-display: swap; src: url(../vendor/fonts/cormorant-garamond-latin-700-normal.woff2) format('woff2'); }
+
+:root {
+  --bg: #0b0a1f;
+  --panel: rgba(17, 14, 40, 0.72);
+  --panel-solid: #141030;
+  --line: rgba(246, 227, 180, 0.14);
+  --text: #f4efe3;
+  --muted: #aca6c6;
+  --gold: #e6bd6a;
+  --cream: #f6e3b4;
+  --violet: #a77bff;
+  --emerald: #3fe08f;
+  --red: #ff8a7a;
+  --amber: #ffb35c;
+  --serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --glass: blur(14px) saturate(150%);
+  --glow: 0 0 0 1px rgba(246, 227, 180, 0.05), 0 8px 32px rgba(5, 3, 20, 0.55), 0 0 24px rgba(167, 123, 255, 0.12);
+  --dim: 0.55;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0; min-height: 100dvh;
+  font: 16px/1.45 var(--sans); color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+.hidden { display: none !important; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* The sky, or the landscape under a tint. */
+.sky { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: var(--bg); }
+.sky::before, .sky::after { content: ''; position: absolute; inset: 0; }
+.sky::before { background: url('../wellness/assets/backgrounds/stars-simple.webp') center/cover; opacity: 0.9; }
+.sky::after {
+  background:
+    radial-gradient(60% 45% at 18% 12%, rgba(167, 123, 255, 0.22), transparent 70%),
+    radial-gradient(50% 40% at 88% 30%, rgba(63, 224, 143, 0.12), transparent 70%),
+    radial-gradient(70% 50% at 50% 100%, rgba(230, 189, 106, 0.1), transparent 70%);
+  animation: breathe 9s ease-in-out infinite;
+}
+@keyframes breathe { 0%, 100% { opacity: 0.65; } 50% { opacity: 1; } }
+.bg-landscape .sky::before { background-image: url('../tasks/assets/landscape.webp'); opacity: 1; }
+.bg-landscape .sky::after { background: rgba(11, 10, 31, var(--dim)); animation: none; }
+
+/* The site menu scrolls away with the page here. */
+.hub-nav { position: sticky; }
+
+.t-main {
+  max-width: 1180px; margin: 0 auto;
+  padding: 8px 16px calc(env(safe-area-inset-bottom, 0px) + 32px);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.t-title { font: 700 40px/1.05 var(--serif); color: var(--cream); margin: 0; text-shadow: 0 0 18px rgba(230, 189, 106, 0.35); }
+.t-lede { color: var(--muted); margin: 0; max-width: 48ch; }
+.t-gate {
+  margin: 12vh auto 0; max-width: 460px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding: 28px 22px; border-radius: 22px; border: 1px solid var(--line);
+  background: var(--panel); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); box-shadow: var(--glow);
+}
+
+.t-panel {
+  border-radius: 18px; border: 1px solid var(--line);
+  background: var(--panel); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); box-shadow: var(--glow);
+  padding: 12px;
+}
+#app { display: flex; flex-direction: column; gap: 14px; }
+
+/* Buttons and inputs */
+.t-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 42px; padding: 0 18px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: rgba(246, 227, 180, 0.06); color: var(--text);
+  transition: border-color 0.2s, background 0.2s;
+}
+.t-btn:hover { border-color: rgba(230, 189, 106, 0.55); }
+.t-primary { border-color: rgba(230, 189, 106, 0.6); background: rgba(230, 189, 106, 0.2); color: var(--cream); font-weight: 600; }
+.t-primary:hover { background: rgba(230, 189, 106, 0.3); }
+.t-icon { width: 42px; padding: 0; }
+.t-input, .t-select {
+  width: 100%; min-height: 44px; padding: 9px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: rgba(11, 10, 31, 0.55); outline: none;
+}
+.t-input:focus, .t-select:focus { border-color: rgba(230, 189, 106, 0.65); box-shadow: 0 0 0 3px rgba(230, 189, 106, 0.15); }
+.t-textarea { min-height: 88px; resize: vertical; }
+.t-select { width: auto; padding-right: 10px; }
+.t-check { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.t-check input { width: 18px; height: 18px; accent-color: var(--gold); }
+
+.t-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.t-seg-btn {
+  min-height: 40px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--line); background: rgba(246, 227, 180, 0.04); color: var(--muted); font-size: 14px;
+}
+.t-seg-btn.on { color: var(--cream); border-color: rgba(230, 189, 106, 0.7); background: rgba(230, 189, 106, 0.16); }
+.t-seg-btn.on[data-section="general"] { border-color: rgba(167, 123, 255, 0.7); background: rgba(167, 123, 255, 0.16); }
+
+/* Dialogs */
+.t-modal { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: flex-start; justify-content: center; padding: max(24px, env(safe-area-inset-top)) 16px 24px; overflow-y: auto; }
+.t-modal-back { position: fixed; inset: 0; background: rgba(5, 3, 20, 0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.t-modal-card {
+  position: relative; width: min(560px, 100%); margin: auto 0;
+  display: flex; flex-direction: column; gap: 14px; padding: 18px;
+  border-radius: 22px; border: 1px solid rgba(230, 189, 106, 0.3); background: rgba(17, 14, 40, 0.96); box-shadow: var(--glow);
+}
+.t-modal-head { display: flex; align-items: center; justify-content: space-between; }
+.t-modal-head h2 { margin: 0; font: 700 28px/1 var(--serif); color: var(--cream); }
+.t-field { display: flex; flex-direction: column; gap: 6px; }
+.t-field > span { font-size: 13px; color: var(--muted); }
+.t-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.t-hint { margin: 0; min-height: 1em; color: var(--red); font-size: 14px; }
+.t-modal-foot { display: flex; justify-content: flex-end; gap: 10px; }
+.t-confirm p { margin: 0; font-size: 17px; }
+
+.t-toast {
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); z-index: 2100;
+  display: flex; align-items: center; gap: 14px; padding: 10px 12px 10px 18px; border-radius: 999px;
+  background: rgba(20, 16, 48, 0.96); border: 1px solid rgba(230, 189, 106, 0.45); color: var(--cream); box-shadow: var(--glow);
+  white-space: nowrap;
+}
+.t-toast-btn {
+  padding: 4px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(230, 189, 106, 0.6); background: rgba(230, 189, 106, 0.18); color: var(--cream); font-weight: 600;
+}
+

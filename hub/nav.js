@@ -15,6 +15,11 @@ const ICONS = {
   coin: '<circle cx="12" cy="12" r="8"/><path d="M14.6 9.3c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2s1.1 1.7 2.6 2.1 2.7.9 2.7 2.1-1.2 2-2.7 2c-1.2 0-2.2-.5-2.7-1.5M12 6.4v1.5M12 16.2v1.5"/>',
   menu: '<path d="M4.5 7h15M4.5 12h15M4.5 17h15"/>',
   check: '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.3l2.8 2.8L16.2 9"/>',
+  scroll: '<path d="M7 4.5h10.5a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H16v9a2.5 2.5 0 0 1-2.5 2.5H6.5A2.5 2.5 0 0 1 4 17.5v0A2.5 2.5 0 0 1 6.5 15H7z M7 4.5a2 2 0 0 0-2 2M10 9h3M10 12h3"/>',
+  rings: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="2.5"/>',
+  screen: '<rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M9 20h6M12 16.5V20"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  dice: '<rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>',
   upload: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 19.5h14"/>',
@@ -39,14 +44,17 @@ const ICONS = {
 export const icon = (name, size = 20) =>
   `<svg viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ''}</svg>`;
 
-// The parts of the site. "soon" ones show in the Menu as what's coming, without a link.
+// The parts of the site, listed at the bottom of the side menu on every page. "soon" ones show as what's coming.
 const SECTIONS = [
   { id: 'anatomy', label: '3D Anatomy', href: '', icon: 'body' },
   { id: 'practice', label: 'Practice', href: 'wellness/', icon: 'lotus' },
+  { id: 'watch', label: 'Watch', href: 'watch/', icon: 'play' },
+  { id: 'scroll', label: 'Scroll', href: 'scroll/', icon: 'scroll' },
   { id: 'tasks', label: 'Tasks', href: 'tasks/', icon: 'check' },
-  { id: 'watch', label: 'Watch', icon: 'play', soon: true },
-  { id: 'health', label: 'Health', icon: 'pulse', soon: true },
+  { id: 'rings', label: 'Rings', href: 'rings/', icon: 'rings' },
+  { id: 'dashboard', label: 'Dashboard', href: 'dashboard/', icon: 'screen' },
 ];
+export const SITE_SECTIONS = SECTIONS;
 // The practice pages, listed in the Menu wherever you are.
 const PRACTICE = [
   ['index.html', 'Home', 'home'], ['eyes.html', 'Eyes', 'eye'], ['breathwork.html', 'Breath', 'breath'], ['mudras.html', 'Mudras', 'hand'],
@@ -75,38 +83,51 @@ export function initHub({ tools = [] } = {}) {
   const page = location.pathname.split('/').pop() || 'index.html';
   el.classList.add('hub-nav');
 
-  const sectionLinks = SECTIONS.filter((s) => !s.soon).map((s) =>
-    `<a class="hub-icon${s.id === section ? ' on' : ''}" href="${base}${s.href}" title="${s.label}" aria-label="${s.label}"${s.id === section ? ' aria-current="true"' : ''}>${icon(s.icon)}</a>`).join('');
+  const current = SECTIONS.find((s) => s.id === section);
   // A tool is a button the page wires up itself, or a link when it has an href.
   const toolButtons = tools.map((t) => {
     const attrs = `id="${t.id}" class="hub-icon hub-tool${t.desktopOnly ? ' hub-desktop' : ''}" title="${esc(t.title || t.label)}" aria-label="${esc(t.label)}"`;
     return t.href ? `<a ${attrs} href="${t.href}">${icon(t.icon)}</a>` : `<button type="button" ${attrs}>${icon(t.icon)}</button>`;
   }).join('');
 
+  // The same bar on every page: the menu button, the tree logo, this page's own tools (wide screens), the account.
+  // The menu slides out from the left: this page's tools at the top, the practice routines, then every part of the
+  // site at the bottom.
   el.innerHTML = `
-    <a class="hub-brand" href="${base}" aria-label="Tree of Life home">
-      <img class="hub-logo" src="${base}icons/brand/tree-of-life.webp" alt="" width="160" height="172">
-      <span class="hub-name"><span class="hub-title">Tree of Life:</span><span class="hub-sub">Neurological Research Institute</span></span>
-    </a>
-    <nav class="hub-icons" aria-label="Site">
-      <span class="hub-group hub-sections">${sectionLinks}</span>
-      ${tools.length ? `<span class="hub-group hub-tools">${toolButtons}</span>` : ''}
+    <div class="hub-left">
       <button type="button" class="hub-icon hub-menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="hub-menu" title="Menu">${icon('menu')}</button>
+      <a class="hub-brand" href="${base}" aria-label="Tree of Life home">
+        <img class="hub-logo" src="${base}icons/brand/tree-of-life.webp" alt="" width="160" height="172">
+        <span class="hub-name"><span class="hub-title">${current && current.id !== 'anatomy' ? esc(current.label) : 'Tree of Life:'}</span><span class="hub-sub">${current && current.id !== 'anatomy' ? 'Tree of Life' : 'Neurological Research Institute'}</span></span>
+      </a>
+    </div>
+    <nav class="hub-icons" aria-label="Page">
+      ${tools.length ? `<span class="hub-group hub-tools">${toolButtons}</span>` : ''}
       <button type="button" class="hub-icon hub-user-btn" aria-label="Your account" aria-expanded="false" aria-controls="hub-account" title="Your account"><span class="hub-face">${icon('user')}</span></button>
     </nav>
-    <div id="hub-menu" class="hub-drop hub-menu" hidden>
-      <div class="hub-drop-title">Tree of Life</div>
-      <div class="hub-tiles">${SECTIONS.map((s) => s.soon
-        ? `<span class="hub-tile soon" title="Coming soon">${icon(s.icon, 22)}<span>${s.label}</span><em>Soon</em></span>`
-        : `<a class="hub-tile${s.id === section ? ' on' : ''}" href="${base}${s.href}">${icon(s.icon, 22)}<span>${s.label}</span></a>`).join('')}</div>
-      ${tools.length ? `<div class="hub-drop-title">On this page</div>
-      <div class="hub-tiles">${tools.map((t) => `<button type="button" class="hub-tile${t.desktopOnly ? ' hub-desktop' : ''}" data-tool="${t.id}">${icon(t.icon, 22)}<span>${esc(t.label)}</span></button>`).join('')}</div>` : ''}
-      <div class="hub-drop-title">Practice</div>
-      <div class="hub-tiles">${PRACTICE.map(([href, label, ic]) => {
-        const on = section === 'practice' && page === href;
-        return `<a class="hub-tile${on ? ' on' : ''}" href="${base}wellness/${href}">${icon(ic, 22)}<span>${label}</span></a>`;
-      }).join('')}</div>
-    </div>
+    <div class="hub-scrim" hidden></div>
+    <aside id="hub-menu" class="hub-drawer" aria-label="Menu" hidden>
+      <div class="hub-drawer-head">
+        <img class="hub-logo" src="${base}icons/brand/tree-of-life.webp" alt="" width="160" height="172">
+        <span class="hub-name"><span class="hub-title">Tree of Life</span><span class="hub-sub">Neurological Research Institute</span></span>
+        <button type="button" class="hub-icon hub-drawer-close" aria-label="Close menu">${icon('close')}</button>
+      </div>
+      <div class="hub-drawer-body">
+        ${tools.length ? `<div class="hub-drop-title">On this page</div>
+        <div class="hub-rows">${tools.map((t) => `<button type="button" class="hub-rowlink" data-tool="${t.id}">${icon(t.icon, 20)}<span>${esc(t.label)}</span></button>`).join('')}</div>` : ''}
+        <div class="hub-drop-title">Practice</div>
+        <div class="hub-rows hub-rows-2">${PRACTICE.map(([href, label, ic]) => {
+          const on = section === 'practice' && page === href;
+          return `<a class="hub-rowlink${on ? ' on' : ''}" href="${base}wellness/${href}">${icon(ic, 20)}<span>${label}</span></a>`;
+        }).join('')}</div>
+      </div>
+      <nav class="hub-drawer-foot" aria-label="Site">
+        <div class="hub-drop-title">Go to</div>
+        <div class="hub-tiles">${SECTIONS.map((s) => s.soon
+          ? `<span class="hub-tile soon" title="Coming soon">${icon(s.icon, 22)}<span>${s.label}</span><em>Soon</em></span>`
+          : `<a class="hub-tile${s.id === section ? ' on' : ''}" href="${base}${s.href}"${s.id === section ? ' aria-current="page"' : ''}>${icon(s.icon, 22)}<span>${s.label}</span></a>`).join('')}</div>
+      </nav>
+    </aside>
     <div id="hub-account" class="hub-drop hub-account" hidden>
       <div class="hub-acct-head">
         <span class="hub-avatar hub-face">${icon('user', 22)}</span>
@@ -143,15 +164,26 @@ export function initHub({ tools = [] } = {}) {
   const $ = (id) => document.getElementById(id);
   const menu = $('hub-menu'), acct = $('hub-account');
   const menuBtn = el.querySelector('.hub-menu-btn'), userBtn = el.querySelector('.hub-user-btn');
+  const scrim = el.querySelector('.hub-scrim');
   const drops = [[menu, menuBtn], [acct, userBtn]];
-  const close = () => drops.forEach(([d, b]) => { d.hidden = true; b.setAttribute('aria-expanded', 'false'); });
+  const close = () => {
+    drops.forEach(([d, b]) => { d.hidden = true; b.setAttribute('aria-expanded', 'false'); });
+    scrim.hidden = true;
+    document.documentElement.classList.remove('hub-drawer-open');
+  };
   const toggle = (d, b) => {
     const open = d.hidden;
     close();
-    if (open) { d.hidden = false; b.setAttribute('aria-expanded', 'true'); if (d === acct) renderStats(); }
+    if (!open) return;
+    d.hidden = false;
+    b.setAttribute('aria-expanded', 'true');
+    if (d === acct) renderStats();
+    if (d === menu) { scrim.hidden = false; document.documentElement.classList.add('hub-drawer-open'); menu.querySelector('.hub-drawer-close').focus(); }
   };
   menuBtn.addEventListener('click', (e) => { e.stopPropagation(); toggle(menu, menuBtn); });
   userBtn.addEventListener('click', (e) => { e.stopPropagation(); toggle(acct, userBtn); });
+  scrim.addEventListener('click', close);
+  menu.querySelector('.hub-drawer-close').addEventListener('click', close);
   document.addEventListener('click', (e) => { if (!el.contains(e.target)) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
   menu.addEventListener('click', (e) => {

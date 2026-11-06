@@ -1,9 +1,9 @@
 // Offline support: app files are network-first so updates show up,
 // models and libraries are cache-first because they are large and rarely change.
-const VERSION = 'v15';
+const VERSION = 'v16';
 const SHELL = `shell-${VERSION}`;
 const ASSETS = `assets-${VERSION}`;
-const PRECACHE = ['./', 'index.html', 'style.css', 'app.js', 'occult.js', 'cosmos.js', 'trace.js', 'conditions.js', 'account.js', 'firebase-config.js', 'hub/nav.js', 'hub/nav.css', 'tasks/', 'tasks/index.html', 'tasks/tasks.css', 'tasks/tasks.js', 'tasks/logic.js', 'manifest.webmanifest', 'data/catalog.json', 'data/occult.json', 'data/paths.json', 'data/conditions.json',
+const PRECACHE = ['./', 'index.html', 'style.css', 'app.js', 'occult.js', 'cosmos.js', 'trace.js', 'conditions.js', 'account.js', 'firebase-config.js', 'hub/nav.js', 'hub/nav.css', 'hub/page.css', 'hub/page.js', 'hub/rings.js', 'tasks/', 'tasks/index.html', 'tasks/tasks.css', 'tasks/tasks.js', 'tasks/logic.js', 'watch/', 'watch/index.html', 'watch/watch.css', 'watch/watch.js', 'scroll/', 'scroll/index.html', 'scroll/scroll.css', 'scroll/scroll.js', 'rings/', 'rings/index.html', 'rings/rings.css', 'rings/rings.js', 'dashboard/', 'dashboard/index.html', 'dashboard/dash.css', 'dashboard/dash.js', 'manifest.webmanifest', 'data/catalog.json', 'data/occult.json', 'data/paths.json', 'data/conditions.json',
   'icons/brand/tree-of-life.webp', 'icons/brand/seal.png', 'vendor/fonts/noto-sans-symbols-symbols-500-normal.woff2',
   'vendor/fonts/cormorant-garamond-latin-600-normal.woff2', 'vendor/fonts/cormorant-garamond-latin-700-normal.woff2', 'vendor/fonts/cormorant-garamond-latin-500-italic.woff2',
   'vendor/three.module.js', 'vendor/three.core.js', 'vendor/addons/controls/OrbitControls.js',

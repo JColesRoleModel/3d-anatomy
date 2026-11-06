@@ -30,6 +30,37 @@ service cloud.firestore {
         && (!('notes' in request.resource.data) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 5000))
         && (!('section' in request.resource.data) || request.resource.data.section in ['due', 'general']);
     }
+    // Watch library: one document per video (id = YouTube video id).
+    match /users/{uid}/library/{videoId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.ring in ['body', 'mind', 'spirit']
+        && request.resource.data.videoId is string && request.resource.data.videoId.size() <= 20
+        && (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 300))
+        && (!('notes' in request.resource.data) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 2000))
+        && request.resource.data.size() <= 20;
+    }
+    // Activity: one document per Watch or Scroll session, counting toward a ring. At most 4 hours each.
+    match /users/{uid}/activity/{sessionId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.ring in ['body', 'mind', 'spirit']
+        && request.resource.data.source in ['watch', 'scroll']
+        && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 14400
+        && request.resource.data.startedAt is number
+        && request.resource.data.size() <= 12;
+    }
+    // The Scroll: one document per card, with its own counts (views, time on screen, liked, saved).
+    match /users/{uid}/scroll/{cardId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && (!('text' in request.resource.data) || (request.resource.data.text is string && request.resource.data.text.size() <= 2000))
+        && request.resource.data.size() <= 20;
+    }
+    // Settings, such as the ring goals.
+    match /users/{uid}/prefs/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == uid && docId == 'main';
+    }
     // Nothing else can be read or written.
     match /{document=**} {
       allow read, write: if false;

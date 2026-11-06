@@ -51,13 +51,22 @@ The movement is illustrative. The collarbone, shoulder blade and arm move as rig
 
 ## Site menu and account
 
-`hub/nav.js` and `hub/nav.css` draw the same top bar on every page: the logo, one icon per part of the site, the page's own tools, a Menu button that drops down everything with its name, and the account button. A page adds `<header id="hub-nav" data-section="…" data-base="…">` and calls `initHub({ tools })`. New parts of the site go in `SECTIONS` in `hub/nav.js` (Watch and Health are listed there as coming soon). The account (Firebase project `tree-of-life-nri`, `account.js`) is one sign-in for the whole site: saved views live under `users/<uid>/saves`, practice records under `users/<uid>/sessions`, and tasks under `users/<uid>/tasks` (see `firestore.rules`).
+`hub/nav.js` and `hub/nav.css` draw the same top bar on every page: the menu button, the logo with the page name, the page's own tools, and the account button. The menu slides out from the left with the page's tools, the practice routines, and every part of the site at the bottom. A page adds `<header id="hub-nav" data-section="…" data-base="…">` and calls `initHub({ tools })`. New parts of the site go in `SECTIONS` in `hub/nav.js` (3D Anatomy, Practice, Watch, Scroll, Tasks, Rings, Dashboard). The account (Firebase project `tree-of-life-nri`, `account.js`) is one sign-in for the whole site: saved views live under `users/<uid>/saves`, practice records under `users/<uid>/sessions`, and tasks under `users/<uid>/tasks` (see `firestore.rules`).
 
 ## Tasks
 
 `tasks/` is the to-do list that used to be DoubleDoIt (doubledoit.web.app), moved in so everything shares one account. Two columns: **Due**, anything with a date, grouped Overdue / Today / Tomorrow / This week / Later; and **General**, sortable and shuffleable. A quick-add bar has General / Today / Tomorrow / Pick a date chips. Tasks live under `users/<uid>/tasks`, sync live between devices, and work offline. The top bar's tools add a task, export or import JSON (DoubleDoIt's export files import as-is), and clear done tasks. The background can be the night sky or the landscape picture, with a dimness slider, set per device. `tasks/logic.js` holds the date and sorting rules, with no page or Firebase code.
 
-`watch/test.html` is a one-video test for the coming Watch section: it checks whether YouTube shows ads in the site, and counts only the seconds a video actually plays.
+## Watch, Scroll, Rings and Dashboard
+
+Everything a person does counts toward three daily rings: **Body** (yoga, stretching, lymph drainage, innervation, mudras), **Mind** (talks, books, the Scroll) and **Spirit** (meditation, breathwork, neuro-ocular). `hub/rings.js` holds the rings, the default goals (30 / 30 / 15 minutes), the practice-section-to-ring map, and `SessionTimer`, which times one session and rewrites a single `users/<uid>/activity` document every 20 seconds and on every stop. It only counts while running and while the page is showing, so time is kept if the page closes and never counted twice. Practice records (`users/<uid>/sessions` and the device's own copy) feed the rings too, so the practice stats and the rings always agree.
+
+- `watch/`: the video library (`users/<uid>/library`, one document per YouTube video). It filters by ring, plays inside the page through the YouTube player, and counts only seconds actually playing. Long videos (45 min or more) resume where they stopped. 🎲 Random picks by ring and length, favoring what hasn't been played lately, and can also launch a practice routine (Body: innervation; Spirit: breath and neuro-ocular) or the Scroll (Mind). `watch/seed.json` is the starter library, loaded on request.
+- `scroll/`: a positive doomscroll (`users/<uid>/scroll`, one document per card). Time counts toward Mind while the page shows and you're active (it pauses after a minute idle). Each card keeps views, time on screen, liked and saved, added with Firestore increments. Stats show the cards and authors that held attention. `scroll/seed.json` holds the 156 starter cards.
+- `rings/`: today's rings, the week, streaks, the last 12 weeks, today's sessions, and the goals (`users/<uid>/prefs/main`).
+- `dashboard/`: a screen to leave on, made for an iPad on iOS 15. It shows the clock, the temperature (Open-Meteo, no key), rings and streak, today's tasks, a card of the day from the Scroll, and what to do next. The top bar hides itself, and it goes to a dim red clock from 10pm to 6am.
+
+`hub/page.css` and `hub/page.js` hold the look and the small helpers (sign-in gate, toast, dialogs) these pages share. The site menu is a slide-out drawer on every page: this page's tools, the practice routines, then every part of the site.
 
 ## Wellness practice
 

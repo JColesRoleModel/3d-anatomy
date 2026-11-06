@@ -136,6 +136,43 @@ export function bulkTasks(uid, creates = [], deletes = [], onError) { // 400 wri
   }
 }
 
+// Everything else a person keeps (users/<their id>/<name>: library, activity, scroll, prefs) goes through these.
+// Writes apply on the device at once and sync when online, like the task helpers above.
+const colOf = (uid, name) => fb.collection(db, 'users', uid, name);
+export async function watchCollection(uid, name, onData, onError, sinceField = null, since = 0) {
+  await load();
+  const src = sinceField ? fb.query(colOf(uid, name), fb.where(sinceField, '>=', since)) : colOf(uid, name);
+  return fb.onSnapshot(src, (snap) => onData(snap.docs.map((d) => ({ id: d.id, ...d.data() })), { fromCache: snap.metadata.fromCache }), onError);
+}
+export async function readCollection(uid, name) {
+  await load();
+  const snap = await fb.getDocs(colOf(uid, name));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+export function putDoc(uid, name, id, data, onError, merge = false) {
+  const ref = id ? fb.doc(colOf(uid, name), id) : fb.doc(colOf(uid, name));
+  (merge ? fb.setDoc(ref, data, { merge: true }) : fb.setDoc(ref, data)).catch(onError);
+  return ref.id;
+}
+export function patchDoc(uid, name, id, patch, onError) {
+  fb.updateDoc(fb.doc(colOf(uid, name), id), patch).catch(onError);
+}
+export function removeDoc(uid, name, id, onError) {
+  fb.deleteDoc(fb.doc(colOf(uid, name), id)).catch(onError);
+}
+export function putMany(uid, name, entries, onError, merge = false) { // [[id or null, data], …], 400 per batch
+  for (let i = 0; i < entries.length; i += 400) {
+    const batch = fb.writeBatch(db);
+    for (const [id, data] of entries.slice(i, i + 400)) {
+      const ref = id ? fb.doc(colOf(uid, name), id) : fb.doc(colOf(uid, name));
+      merge ? batch.set(ref, data, { merge: true }) : batch.set(ref, data);
+    }
+    batch.commit().catch(onError);
+  }
+}
+// Adds to a number field without reading it first, so two devices counting at once both count.
+export const plus = (n) => fb.increment(n);
+
 // Plain words for what went wrong.
 const MESSAGES = {
   'auth/invalid-credential': "That email and password don't match an account.",

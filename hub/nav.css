@@ -146,3 +146,47 @@
 .hub-msg.err { color: #ffb3c4; }
 
 @media (prefers-reduced-motion: reduce) { .hub-logo, .hub-drop { animation: none; } }
+
+/* ---------- The menu button, and the menu that slides out from the left ---------- */
+.hub-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.hub-menu-btn { flex: none; }
+.hub-scrim {
+  position: fixed; inset: 0; z-index: 1490; pointer-events: auto;
+  background: rgba(5, 3, 20, 0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  animation: hub-fade 0.2s ease-out;
+}
+@keyframes hub-fade { from { opacity: 0; } }
+.hub-drawer {
+  position: fixed; top: 0; bottom: 0; left: 0; z-index: 1500; pointer-events: auto;
+  width: min(360px, 88vw); display: flex; flex-direction: column;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px calc(env(safe-area-inset-bottom, 0px) + 14px);
+  border-right: 1px solid var(--hub-line); background: rgba(15, 12, 36, 0.97);
+  box-shadow: 12px 0 40px rgba(5, 3, 20, 0.7), 0 0 24px rgba(167, 123, 255, 0.15);
+  animation: hub-slide 0.22s ease-out;
+}
+@keyframes hub-slide { from { transform: translateX(-100%); } }
+.hub-drawer-head { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--hub-line); }
+.hub-drawer-head .hub-name { flex: 1; min-width: 0; }
+.hub-drawer-head .hub-title { font-size: 24px; }
+.hub-drawer-head .hub-logo { width: 38px; }
+.hub-drawer-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 0 10px; }
+.hub-drawer-foot { flex: none; padding-top: 10px; border-top: 1px solid var(--hub-line); }
+.hub-drawer-foot .hub-tiles { grid-template-columns: repeat(4, 1fr); }
+.hub-drawer-foot .hub-tile { min-height: 64px; padding: 8px 4px; font-size: 12px; }
+.hub-rows { display: flex; flex-direction: column; gap: 4px; }
+.hub-rows-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.hub-rowlink {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 8px 12px; border-radius: 12px;
+  border: 1px solid transparent; background: none; color: var(--hub-text); text-decoration: none; text-align: left;
+  font: 15px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; cursor: pointer;
+}
+.hub-rowlink svg { color: var(--hub-cream); flex: none; }
+.hub-rowlink:hover { background: rgba(230, 189, 106, 0.08); border-color: var(--hub-line); }
+.hub-rowlink.on { background: rgba(230, 189, 106, 0.14); border-color: rgba(230, 189, 106, 0.5); }
+.hub-rowlink.on svg { color: var(--hub-accent); }
+.hub-drawer-open, .hub-drawer-open body { overflow: hidden; }
+@media (max-width: 699px) {
+  .hub-left { gap: 8px; }
+  .hub-drawer .hub-sub { white-space: nowrap; font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .hub-drawer, .hub-scrim { animation: none; } }

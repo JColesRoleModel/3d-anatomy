@@ -1,0 +1,84 @@
+/* Dashboard: big type for across the room, laid out for a landscape iPad, still fine in portrait and on phones.
+   Kept to what Safari 15 supports (no color-mix, no :has). */
+.d-body { overflow-x: hidden; }
+.d-body .hub-nav { position: fixed; transition: opacity 0.4s, transform 0.4s; }
+.d-body.bar-hidden .hub-nav { opacity: 0; transform: translateY(-100%); pointer-events: none; }
+.d-main { padding: calc(env(safe-area-inset-top, 0px) + 74px) 22px calc(env(safe-area-inset-bottom, 0px) + 18px); min-height: 100vh; }
+.d-app { display: flex; flex-direction: column; gap: 18px; max-width: 1400px; margin: 0 auto; }
+
+/* Gentle twinkle over the stars */
+.d-twinkle { position: absolute; inset: 0; background-image:
+  radial-gradient(1.5px 1.5px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 72% 12%, #fff, transparent),
+  radial-gradient(1.5px 1.5px at 40% 66%, #f6e3b4, transparent), radial-gradient(1px 1px at 86% 54%, #fff, transparent),
+  radial-gradient(1.2px 1.2px at 22% 84%, #d9c8ff, transparent), radial-gradient(1px 1px at 58% 32%, #fff, transparent);
+  animation: d-twinkle 7s ease-in-out infinite alternate; }
+@keyframes d-twinkle { from { opacity: 0.2; } to { opacity: 0.9; } }
+
+.d-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding-top: 10px; }
+.d-clock { font: 700 clamp(64px, 11vw, 140px)/0.9 var(--serif); color: var(--cream); letter-spacing: 0.01em;
+  text-shadow: 0 0 30px rgba(230, 189, 106, 0.35); font-variant-numeric: tabular-nums; }
+.d-date { margin-top: 8px; font: 600 clamp(18px, 2.2vw, 28px)/1.2 var(--serif); color: var(--gold); letter-spacing: 0.04em; }
+.d-temp { display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 22px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--text); -webkit-backdrop-filter: var(--glass); backdrop-filter: var(--glass); }
+.d-temp b { font: 700 clamp(36px, 5vw, 60px)/1 var(--serif); }
+.d-temp small { font-size: 14px; color: var(--muted); max-width: 120px; text-align: left; }
+.d-temp-icon { font-size: clamp(26px, 3.4vw, 40px); color: var(--gold); }
+
+.d-grid { display: grid; grid-template-columns: 1.05fr 1fr; grid-template-rows: auto auto; gap: 18px; }
+.d-card { padding: 20px; border-radius: 26px; border: 1px solid var(--line); background: var(--panel);
+  -webkit-backdrop-filter: var(--glass); backdrop-filter: var(--glass); box-shadow: var(--glow); min-width: 0; }
+.d-h2 { margin: 0 0 12px; font: 700 26px/1 var(--serif); color: var(--cream); }
+
+.d-rings { display: grid; grid-template-columns: auto 1fr; grid-template-rows: 1fr auto; align-items: center; gap: 8px 22px; }
+.d-rings-svg svg { display: block; width: clamp(150px, 18vw, 220px); height: auto; }
+.d-rings-legend { display: flex; flex-direction: column; gap: 12px; }
+.d-leg { display: flex; align-items: baseline; gap: 10px; }
+.d-leg span { width: 70px; font: 700 24px/1 var(--serif); color: var(--c); }
+.d-leg b { font: 700 34px/1 var(--serif); color: var(--text); }
+.d-leg small { font-size: 16px; color: var(--muted); }
+.d-streak { grid-column: 1 / -1; font: 600 18px/1.2 var(--serif); color: var(--gold); text-align: center; }
+
+.d-task-list { display: flex; flex-direction: column; gap: 8px; }
+.d-task { display: grid; grid-template-columns: 12px 1fr auto; gap: 12px; align-items: center; font-size: clamp(17px, 1.8vw, 22px); }
+.d-task-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); }
+.d-task.b-overdue .d-task-dot { background: var(--red); box-shadow: 0 0 8px var(--red); }
+.d-task.b-tomorrow .d-task-dot { background: var(--amber); }
+.d-task-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.d-task-when { font-size: 14px; color: var(--muted); white-space: nowrap; }
+.d-task.b-overdue .d-task-when { color: var(--red); }
+.d-more, .d-empty { margin: 8px 0 0; color: var(--muted); font-size: 16px; }
+.d-done { margin: 0; font: 700 26px/1.2 var(--serif); color: var(--gold); }
+
+.d-quote { display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+.d-quote-title { font: 700 14px/1.2 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); }
+.d-quote-text { margin: 0; font: 600 clamp(22px, 2.5vw, 32px)/1.35 var(--serif); color: var(--text); }
+.d-quote-who { font: 600 18px/1.2 var(--serif); color: var(--muted); }
+
+.d-next-ring { font: 600 20px/1.2 var(--serif); color: var(--muted); margin-bottom: 12px; }
+.d-next-ring b { color: var(--c); font-size: 24px; }
+.d-next-item { display: grid; grid-template-columns: 128px 1fr; gap: 14px; align-items: center; }
+.d-next-item img { width: 128px; height: 72px; object-fit: cover; border-radius: 12px; display: block; }
+.d-next-title { font-weight: 600; font-size: 18px; line-height: 1.25; }
+.d-next-meta { font-size: 14px; color: var(--muted); margin-top: 4px; }
+.d-continue { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 15px; color: var(--muted); }
+.d-continue b { color: var(--text); font-weight: 600; }
+.d-continue small { font-size: 13px; }
+.w-bar { display: block; height: 6px; border-radius: 999px; background: rgba(246, 227, 180, 0.08); overflow: hidden; }
+.w-bar i { display: block; height: 100%; border-radius: inherit; background: var(--c, var(--gold)); }
+
+/* Night: a dim, warm clock and nothing else */
+.d-night { position: fixed; inset: 0; z-index: 1300; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; cursor: pointer; }
+.d-night-clock { font: 700 clamp(80px, 16vw, 220px)/1 var(--serif); color: #5a1c14; font-variant-numeric: tabular-nums; }
+.d-night-date { margin-top: 12px; font: 600 clamp(18px, 2vw, 26px)/1 var(--serif); color: #3a120d; }
+.is-night .sky { display: none; }
+
+@media (max-width: 900px), (orientation: portrait) {
+  .d-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .d-main { padding-left: 12px; padding-right: 12px; }
+  .d-top { flex-direction: column; align-items: flex-start; }
+  .d-rings { grid-template-columns: 1fr; justify-items: center; }
+  .d-leg span { width: 60px; font-size: 20px; }
+  .d-leg b { font-size: 28px; }
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Dashboard - Tree of Life NRI</title>
+  <link rel="stylesheet" href="../hub/nav.css">
+  <link rel="stylesheet" href="../hub/page.css">
+  <link rel="stylesheet" href="dash.css">
+  <link rel="icon" type="image/png" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b0a1f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dashboard">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+</head>
+<body class="d-body">
+  <div class="sky" aria-hidden="true"><div class="d-twinkle"></div></div>
+  <header id="hub-nav" data-section="dashboard" data-base="../"></header>
+
+  <main class="d-main">
+    <section class="t-gate" id="gate">
+      <h1 class="t-title">Dashboard</h1>
+      <p class="t-lede" id="gate-text">Opening…</p>
+      <button class="t-btn t-primary hidden" id="gate-signin" type="button">Sign in</button>
+    </section>
+
+    <section class="hidden d-app" id="app">
+      <header class="d-top">
+        <div>
+          <div class="d-clock" id="clock">--:--</div>
+          <div class="d-date" id="date"></div>
+        </div>
+        <button class="d-temp" id="temp" type="button" title="Tap to set your location"></button>
+      </header>
+
+      <div class="d-grid">
+        <section class="d-card d-rings">
+          <div class="d-rings-svg" id="rings"></div>
+          <div class="d-rings-legend" id="rings-legend"></div>
+          <div class="d-streak" id="streak"></div>
+        </section>
+
+        <section class="d-card d-tasks">
+          <h2 class="d-h2">Today <span class="t-count" id="task-count">0</span></h2>
+          <div class="d-task-list" id="tasks"></div>
+        </section>
+
+        <section class="d-card d-quote" id="quote"></section>
+
+        <section class="d-card d-next">
+          <h2 class="d-h2">Up next</h2>
+          <div id="next"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Night mode: everything else hides, a dim clock stays -->
+    <div class="d-night hidden" id="night">
+      <div class="d-night-clock" id="night-clock"></div>
+      <div class="d-night-date" id="night-date"></div>
+    </div>
+  </main>
+
+  <!-- Location for the temperature -->
+  <div class="t-modal hidden" id="place">
+    <div class="t-modal-back" data-close></div>
+    <form class="t-modal-card" id="place-form" role="dialog" aria-modal="true" aria-labelledby="place-title" autocomplete="off">
+      <div class="t-modal-head"><h2 id="place-title">Temperature</h2><button class="t-btn t-icon" type="button" data-close aria-label="Close">✕</button></div>
+      <label class="t-field"><span>City or ZIP code</span><input class="t-input" id="place-q" placeholder="Fort Worth"></label>
+      <button class="t-btn" id="place-here" type="button">Use this device's location</button>
+      <div class="t-seg" id="units">
+        <button type="button" class="t-seg-btn" data-unit="fahrenheit">°F</button>
+        <button type="button" class="t-seg-btn" data-unit="celsius">°C</button>
+      </div>
+      <p class="t-hint" id="place-hint"></p>
+      <div class="t-modal-foot"><button class="t-btn" type="button" data-close>Cancel</button><button class="t-btn t-primary" type="submit">Save</button></div>
+    </form>
+  </div>
+
+  <div class="t-toast hidden" id="toast" role="status" aria-live="polite"></div>
+  <script type="module">
+    import { initHub } from '../hub/nav.js';
+    initHub({ tools: [{ id: 'd-night', label: 'Night mode now', icon: 'screen' }] });
+  </script>
+  <script type="module" src="dash.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});</script>
+</body>
+</html>

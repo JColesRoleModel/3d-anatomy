@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Watch - Tree of Life NRI</title>
+  <link rel="stylesheet" href="../hub/nav.css">
+  <link rel="stylesheet" href="../hub/page.css">
+  <link rel="stylesheet" href="watch.css">
+  <link rel="icon" type="image/png" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b0a1f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tree of Life">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header id="hub-nav" data-section="watch" data-base="../"></header>
+
+  <main class="t-main">
+    <section class="t-gate" id="gate">
+      <h1 class="t-title">Watch</h1>
+      <p class="t-lede" id="gate-text">Opening your library…</p>
+      <button class="t-btn t-primary hidden" id="gate-signin" type="button">Sign in</button>
+    </section>
+
+    <section class="hidden w-app" id="app">
+      <!-- Today, and the big random button -->
+      <div class="t-panel w-top">
+        <div class="w-today" id="today"></div>
+        <button class="t-btn t-primary w-random-btn" id="random-open" type="button">🎲 Random</button>
+      </div>
+
+      <!-- Player (shown once something is picked) -->
+      <section class="t-panel w-player hidden" id="player-box" aria-label="Now playing">
+        <div class="w-frame"><div id="player"></div></div>
+        <div class="w-now">
+          <div class="w-now-text">
+            <div class="w-now-title" id="now-title"></div>
+            <div class="w-now-meta" id="now-meta"></div>
+          </div>
+          <div class="w-counted"><b id="now-counted">0:00</b><span>counted</span></div>
+        </div>
+        <div class="w-now-actions">
+          <a class="t-btn" id="now-yt" href="#" target="_blank" rel="noopener">Open in YouTube</a>
+          <button class="t-btn" id="now-close" type="button">Close</button>
+        </div>
+        <p class="w-note" id="now-note"></p>
+      </section>
+
+      <!-- Long things already started -->
+      <section class="w-continue hidden" id="continue-box">
+        <h2 class="w-h2">Continue</h2>
+        <div class="w-continue-list" id="continue-list"></div>
+      </section>
+
+      <!-- Library -->
+      <section class="t-panel w-library">
+        <div class="w-lib-head">
+          <div class="w-filters" id="filters" role="tablist"></div>
+          <input class="t-input w-search" id="search" type="search" placeholder="Search" aria-label="Search the library">
+        </div>
+        <div class="w-starter hidden" id="starter">
+          <p>Your library is empty. Load the 26 videos and audiobooks from your Library Inbox?</p>
+          <button class="t-btn t-primary" id="starter-load" type="button">Load starter library</button>
+        </div>
+        <div class="w-list" id="list"></div>
+      </section>
+
+      <p class="w-yt-note">Ads: YouTube only skips ads when this browser is signed in to your Premium account.
+        <a href="https://accounts.google.com/ServiceLogin?service=youtube&continue=https%3A%2F%2Fwww.youtube.com%2F" target="_blank" rel="noopener">Sign in to YouTube</a></p>
+    </section>
+  </main>
+
+  <!-- Random -->
+  <div class="t-modal hidden" id="random">
+    <div class="t-modal-back" data-close></div>
+    <div class="t-modal-card" role="dialog" aria-modal="true" aria-labelledby="random-title">
+      <div class="t-modal-head">
+        <h2 id="random-title">🎲 Random</h2>
+        <button class="t-btn t-icon" type="button" data-close aria-label="Close">✕</button>
+      </div>
+      <div class="w-pick-label">Which ring?</div>
+      <div class="w-rings-pick" id="pick-ring"></div>
+      <div class="w-pick-label" id="mode-label">How?</div>
+      <div class="t-seg w-seg3" id="pick-mode"></div>
+      <div class="w-pick-label">How long?</div>
+      <div class="t-seg w-seg4" id="pick-len"></div>
+      <p class="t-hint" id="random-hint"></p>
+      <div class="t-modal-foot">
+        <button class="t-btn t-primary w-roll" id="roll" type="button">🎲 Roll</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / edit -->
+  <div class="t-modal hidden" id="edit">
+    <div class="t-modal-back" data-close></div>
+    <form class="t-modal-card" id="edit-form" role="dialog" aria-modal="true" aria-labelledby="edit-title" autocomplete="off">
+      <div class="t-modal-head">
+        <h2 id="edit-title">Add a video</h2>
+        <button class="t-btn t-icon" type="button" data-close aria-label="Close">✕</button>
+      </div>
+      <label class="t-field"><span>YouTube link</span><input class="t-input" id="edit-url" type="url" placeholder="https://youtube.com/watch?v=…"></label>
+      <label class="t-field"><span>Title (optional, filled in when it first plays)</span><input class="t-input" id="edit-title-in" maxlength="200"></label>
+      <div class="w-pick-label">Ring</div>
+      <div class="w-rings-pick" id="edit-ring"></div>
+      <label class="t-field"><span>Notes (optional)</span><textarea class="t-input t-textarea" id="edit-notes" maxlength="1000"></textarea></label>
+      <p class="t-hint" id="edit-hint" role="alert"></p>
+      <div class="t-modal-foot">
+        <button class="t-btn red hidden" id="edit-remove" type="button">Remove</button>
+        <button class="t-btn" type="button" data-close>Cancel</button>
+        <button class="t-btn t-primary" id="edit-save" type="submit">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="t-toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module">
+    import { initHub } from '../hub/nav.js';
+    initHub({ tools: [
+      { id: 'w-add', label: 'Add a video', icon: 'plus' },
+      { id: 'w-random', label: 'Random', icon: 'dice' },
+    ] });
+  </script>
+  <script type="module" src="watch.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});</script>
+</body>
+</html>

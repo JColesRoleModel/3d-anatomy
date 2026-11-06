@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Rings - Tree of Life NRI</title>
+  <link rel="stylesheet" href="../hub/nav.css">
+  <link rel="stylesheet" href="../hub/page.css">
+  <link rel="stylesheet" href="rings.css">
+  <link rel="icon" type="image/png" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b0a1f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tree of Life">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header id="hub-nav" data-section="rings" data-base="../"></header>
+
+  <main class="t-main">
+    <section class="t-gate" id="gate">
+      <h1 class="t-title">Rings</h1>
+      <p class="t-lede" id="gate-text">Opening your rings…</p>
+      <button class="t-btn t-primary hidden" id="gate-signin" type="button">Sign in</button>
+    </section>
+
+    <section class="hidden r-app" id="app">
+      <div class="t-panel r-today">
+        <div class="r-big" id="big"></div>
+        <div class="r-legend" id="legend"></div>
+      </div>
+
+      <div class="r-row">
+        <section class="t-panel r-week">
+          <h2 class="r-h2">This week</h2>
+          <div class="r-days" id="week"></div>
+        </section>
+        <section class="t-panel r-streaks">
+          <h2 class="r-h2">Streaks</h2>
+          <div class="r-streak-list" id="streaks"></div>
+        </section>
+      </div>
+
+      <section class="t-panel">
+        <h2 class="r-h2">Last 12 weeks</h2>
+        <div class="r-heat" id="heat"></div>
+        <p class="r-heat-key">Each square is a day: brighter means more rings closed. <span id="totals"></span></p>
+      </section>
+
+      <section class="t-panel">
+        <h2 class="r-h2">Today, minute by minute</h2>
+        <div class="r-log" id="log"></div>
+      </section>
+
+      <section class="t-panel">
+        <h2 class="r-h2">Daily goals</h2>
+        <form class="r-goals" id="goals" autocomplete="off"></form>
+      </section>
+    </section>
+  </main>
+
+  <div class="t-toast hidden" id="toast" role="status" aria-live="polite"></div>
+  <script type="module">
+    import { initHub } from '../hub/nav.js';
+    initHub();
+  </script>
+  <script type="module" src="rings.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});</script>
+</body>
+</html>

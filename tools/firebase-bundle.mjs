@@ -18,7 +18,7 @@ await build({
       } from 'firebase/auth';
       export {
         initializeFirestore, persistentLocalCache, persistentMultipleTabManager, memoryLocalCache, connectFirestoreEmulator,
-        collection, doc, getDocs, setDoc, updateDoc, deleteDoc, writeBatch, onSnapshot,
+        collection, doc, getDocs, setDoc, updateDoc, deleteDoc, writeBatch, onSnapshot, increment, query, where,
       } from 'firebase/firestore';
     `,
     resolveDir: '.',

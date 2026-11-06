@@ -1,0 +1,90 @@
+/* Watch: today's ring bars, the player, the library cards, and the random picker. Ring colors come in as --c. */
+.w-app { display: flex; flex-direction: column; gap: 14px; }
+.w-h2 { margin: 0 0 8px; font: 700 24px/1 var(--serif); color: var(--cream); }
+.w-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); margin-right: 6px; vertical-align: 1px; flex: none; }
+.w-bar { display: block; height: 6px; border-radius: 999px; background: rgba(246, 227, 180, 0.08); overflow: hidden; }
+.w-bar i { display: block; height: 100%; border-radius: inherit; background: var(--c, var(--gold)); box-shadow: 0 0 10px var(--c, var(--gold)); }
+
+.w-top { display: flex; gap: 14px; align-items: center; }
+.w-today { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.w-ring-top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-bottom: 6px; font-size: 13px; color: var(--muted); }
+.w-ring-top span { color: var(--c); font: 700 17px/1 var(--serif); }
+.w-ring-top b { font-weight: 600; color: var(--text); font-size: 12.5px; white-space: nowrap; }
+.w-random-btn { min-height: 52px; padding: 0 22px; font-size: 17px; flex: none; }
+
+/* Player */
+.w-player { display: flex; flex-direction: column; gap: 12px; border-color: color-mix(in srgb, var(--c) 45%, transparent); }
+.w-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: #000; }
+.w-frame > div, .w-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+.w-now { display: flex; align-items: center; gap: 14px; }
+.w-now-text { flex: 1; min-width: 0; }
+.w-now-title { font: 700 22px/1.15 var(--serif); color: var(--cream); overflow-wrap: anywhere; }
+.w-now-meta { margin-top: 4px; font-size: 14px; color: var(--muted); }
+.w-counted { text-align: center; padding: 6px 12px; border-radius: 14px; border: 1px solid var(--line); flex: none; }
+.w-counted b { display: block; font: 700 26px/1.1 var(--serif); color: var(--c); font-variant-numeric: tabular-nums; }
+.w-counted span { font-size: 11px; color: var(--muted); }
+.w-now-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.w-now-actions a { text-decoration: none; }
+.w-note { margin: 0; min-height: 0; font-size: 14px; color: var(--muted); }
+.w-note:empty { display: none; }
+
+/* Continue */
+.w-continue-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.w-cont {
+  display: flex; flex-direction: column; gap: 8px; text-align: left; cursor: pointer; padding: 12px; border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); background: var(--panel);
+  backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+}
+.w-cont-title { font-weight: 600; overflow-wrap: anywhere; }
+.w-cont-meta { font-size: 12.5px; color: var(--muted); }
+
+/* Library */
+.w-lib-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.w-filters { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+.w-filter {
+  display: inline-flex; align-items: center; padding: 7px 12px; border-radius: 999px; cursor: pointer; font-size: 14px;
+  border: 1px solid var(--line); background: rgba(246, 227, 180, 0.04); color: var(--muted);
+}
+.w-filter.on { color: var(--cream); border-color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); }
+.w-filter .t-count { margin-left: 2px; }
+.w-search { max-width: 240px; }
+.w-starter { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px; margin-bottom: 12px; border-radius: 14px; border: 1px dashed rgba(230, 189, 106, 0.5); }
+.w-starter p { margin: 0; flex: 1 1 260px; color: var(--muted); }
+.w-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+.w-card {
+  display: grid; grid-template-columns: 112px 1fr auto; gap: 12px; align-items: center; padding: 8px; border-radius: 16px;
+  border: 1px solid var(--line); background: rgba(11, 10, 31, 0.45); transition: border-color 0.2s;
+}
+.w-card:hover, .w-card.on { border-color: color-mix(in srgb, var(--c) 55%, transparent); }
+.w-thumb { width: 112px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; background: rgba(246, 227, 180, 0.05); display: block; }
+.w-card-body { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.w-card-title { font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.w-card-meta { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; flex-wrap: wrap; }
+.w-card-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+.w-play { width: 44px; padding: 0; font-size: 15px; }
+.w-yt-note { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+.w-yt-note a { color: var(--gold); }
+
+/* Random + add */
+.w-pick-label { font-size: 13px; color: var(--muted); margin-bottom: -6px; }
+.w-rings-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.w-ringbtn {
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left; padding: 10px 12px; border-radius: 14px; cursor: pointer;
+  border: 1px solid var(--line); background: rgba(246, 227, 180, 0.04); color: var(--muted);
+}
+.w-ringbtn b { font: 700 19px/1 var(--serif); color: var(--c); }
+.w-ringbtn span { font-size: 11.5px; line-height: 1.3; }
+.w-ringbtn.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--text); }
+.w-roll { min-width: 140px; font-size: 17px; }
+.t-btn.red { color: var(--red); border-color: rgba(255, 138, 122, 0.4); margin-right: auto; }
+
+@media (max-width: 700px) {
+  .w-top { flex-direction: column; align-items: stretch; }
+  .w-random-btn { width: 100%; }
+  .w-list { grid-template-columns: 1fr; }
+  .w-card { grid-template-columns: 92px 1fr auto; }
+  .w-thumb { width: 92px; }
+  .w-search { max-width: none; flex: 1 1 100%; }
+  .w-ringbtn span { display: none; }
+  .w-now-title { font-size: 19px; }
+}
