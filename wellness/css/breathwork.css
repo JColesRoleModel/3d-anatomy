@@ -429,3 +429,21 @@
     align-items: flex-start;
   }
 }
+/* ---------- Open breathing: a slow orb, a quiet clock, start and stop ---------- */
+.brand-icon-open { color: #9fe3c0; }
+.open-breath { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px 8px 8px; text-align: center; }
+.open-orb { width: 168px; height: 168px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle, rgba(159, 227, 192, 0.18), rgba(159, 227, 192, 0.02) 70%);
+  border: 1px solid rgba(159, 227, 192, 0.35); }
+.open-orb span { width: 46%; height: 46%; border-radius: 50%; background: radial-gradient(circle, rgba(159, 227, 192, 0.85), rgba(167, 123, 255, 0.35));
+  box-shadow: 0 0 30px rgba(159, 227, 192, 0.45); }
+/* A slow drift, not a pacer: about 11 seconds a cycle, nothing to match */
+.open-breath.running .open-orb span { animation: open-drift 11s ease-in-out infinite; }
+@keyframes open-drift { 0%, 100% { transform: scale(0.85); opacity: 0.75; } 50% { transform: scale(1.35); opacity: 1; } }
+.open-clock { font: 600 56px/1 'Cormorant Garamond', Georgia, serif; color: #f6e3b4; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+.open-state { font-size: 15px; color: rgba(244, 239, 227, 0.7); min-height: 1.3em; }
+.open-actions { display: flex; gap: 12px; }
+.open-btn { min-width: 150px; min-height: 52px; font-size: 18px; }
+.open-btn.hidden { display: none; }
+.open-note { margin: 4px 0 0; font-size: 12.5px; color: rgba(244, 239, 227, 0.55); max-width: 34ch; }
+@media (prefers-reduced-motion: reduce) { .open-breath.running .open-orb span { animation: none; } }

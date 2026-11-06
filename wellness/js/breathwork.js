@@ -584,9 +584,91 @@ document.addEventListener("DOMContentLoaded", () => {
    * BRAND BAR NAVIGATION
    * ------------------------------------------------------ */
 
-  function showNostrilScreenFor(mode) {
-    // stop HV
+  /* --------------------------------------------------------
+   * OPEN BREATHING: an open-ended timer with start and stop. No pattern, sides or countdown. Recorded as Breathwork
+   * ("Open breathing"), so it counts toward Spirit. Time is saved every minute while running (so it shows up on the
+   * Rings and the Dashboard as you go), only counts while the page is showing, and resumes when you come back.
+   * ------------------------------------------------------ */
+  const openScreen = document.getElementById("openScreen");
+  const openBox = openScreen ? openScreen.querySelector(".open-breath") : null;
+  const openClock = document.getElementById("openClock");
+  const openState = document.getElementById("openState");
+  const openStartBtn = document.getElementById("openStartBtn");
+  const openStopBtn = document.getElementById("openStopBtn");
+  let openRunning = false, openCounted = 0, openSince = null, openTick = null, openSave = null, openWake = null;
+
+  const openSeconds = () => openCounted + (openSince != null ? (performance.now() - openSince) / 1000 : 0);
+  const fmtOpen = (s) => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60; return h ? `${h}:${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}` : `${m}:${String(r).padStart(2, "0")}`; };
+  async function keepAwake() { try { if ("wakeLock" in navigator && !document.hidden) openWake = await navigator.wakeLock.request("screen"); } catch (e) { /* not available here */ } }
+  function letSleep() { try { if (openWake) openWake.release(); } catch (e) {} openWake = null; }
+
+  function openStart() {
+    if (openRunning) return;
+    openRunning = true; openCounted = 0; openSince = performance.now();
+    if (window.timeTracker) {
+      window.timeTracker.startSession("Breathwork Toolkit", "Open breathing");
+      window.timeTracker.beginMovement("Open breathing");
+    }
+    openBox.classList.add("running");
+    openStartBtn.classList.add("hidden");
+    openStopBtn.classList.remove("hidden");
+    openState.textContent = "Breathing";
+    openTick = setInterval(() => { openClock.textContent = fmtOpen(openSeconds()); }, 500);
+    // Save the minute just breathed (saving pauses the tracker's clock, so start it again straight after)
+    openSave = setInterval(() => {
+      if (!window.timeTracker || openSince == null) return;
+      window.timeTracker.flushMovement();
+      window.timeTracker.resumeMovement();
+    }, 60000);
+    keepAwake();
+  }
+  function openStop() {
+    if (!openRunning) return;
+    openRunning = false;
+    if (openSince != null) { openCounted += (performance.now() - openSince) / 1000; openSince = null; }
+    clearInterval(openTick); clearInterval(openSave);
+    letSleep();
+    if (window.timeTracker && window.timeTracker.sessionStartTime) {
+      window.timeTracker.stopSession();
+      const t = window.timeTracker.getLastSessionDuration();
+      if (t > 0 && window.TimeStatsUI) TimeStatsUI.showQuickSummary("Open breathing", t);
+    }
+    openBox.classList.remove("running");
+    openStopBtn.classList.add("hidden");
+    openStartBtn.classList.remove("hidden");
+    openStartBtn.textContent = "Start again";
+    openClock.textContent = fmtOpen(openCounted);
+    openState.textContent = openCounted >= 1 ? `${fmtOpen(openCounted)} of open breathing, added to Spirit` : "Ready when you are";
+  }
+  if (openStartBtn) openStartBtn.addEventListener("click", openStart);
+  if (openStopBtn) openStopBtn.addEventListener("click", openStop);
+  // Away (screen locked, another app): the tracker has already saved the time; pause the clock. Back: carry on.
+  window.addEventListener("practice:away", () => {
+    if (!openRunning || openSince == null) return;
+    openCounted += (performance.now() - openSince) / 1000; openSince = null;
+    openState.textContent = "Paused while away";
+  });
+  window.addEventListener("practice:back", () => {
+    if (!openRunning || openSince != null) return;
+    openSince = performance.now();
+    if (window.timeTracker) window.timeTracker.resumeMovement();
+    openState.textContent = "Breathing";
+    keepAwake();
+  });
+
+  function showOpenScreen() {
+    altStop(true);
     resetHvUI();
+    nostrilScreen.classList.remove("active");
+    hyperScreen.classList.remove("active");
+    openScreen.classList.add("active");
+  }
+
+  function showNostrilScreenFor(mode) {
+    // stop HV and open breathing
+    resetHvUI();
+    openStop();
+    if (openScreen) openScreen.classList.remove("active");
     hyperScreen.classList.remove("active");
     nostrilScreen.classList.add("active");
     altStop(false);
@@ -594,8 +676,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showHyperScreen() {
-    // stop nostril
+    // stop nostril and open breathing
     altStop(true);
+    openStop();
+    if (openScreen) openScreen.classList.remove("active");
     nostrilScreen.classList.remove("active");
     hyperScreen.classList.add("active");
     resetHvUI();
@@ -607,7 +691,9 @@ document.addEventListener("DOMContentLoaded", () => {
       item.classList.add("active");
 
       const pattern = item.dataset.pattern;
-      if (pattern === "cyclical") {
+      if (pattern === "open") {
+        showOpenScreen();
+      } else if (pattern === "cyclical") {
         showHyperScreen();
       } else if (pattern === "solar") {
         showNostrilScreenFor("right");

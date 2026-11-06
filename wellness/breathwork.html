@@ -36,7 +36,7 @@
         <a class="back-btn home-btn" href="index.html"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M4 11.2 12 4.5l8 6.7M6.5 9.5v10h11v-10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Practice home</span></a>
         <h1 class="screen-title">Breathwork Toolkit</h1>
         <p class="screen-tagline">
-          Solar, Lunar, Alternate and Cyclical breath patterns for nervous system regulation.
+          Solar, Lunar, Alternate and Cyclical breath patterns for nervous system regulation, or Open breathing with no pattern at all.
         </p>
 
         <div class="breath-layout">
@@ -69,6 +69,16 @@
               <div class="brand-labels">
                 <span class="brand-label-main">Lunar</span>
                 <span class="brand-label-sub">Left nostril</span>
+              </div>
+            </button>
+
+            <button class="brand-item" data-pattern="open" type="button">
+              <div class="brand-icon brand-icon-open" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.6"/></svg>
+              </div>
+              <div class="brand-labels">
+                <span class="brand-label-main">Open</span>
+                <span class="brand-label-sub">Just breathe</span>
               </div>
             </button>
 
@@ -192,6 +202,26 @@
           </section>
 
           <!-- CYCLICAL HYPERVENTILATION MODULE -->
+          <!-- OPEN BREATHING: no pattern, no sides, no countdown; start, breathe, stop -->
+          <section id="openScreen" class="breath-screen">
+            <header class="breath-section-header">
+              <h2 class="breath-section-title">Open Breathing</h2>
+              <p class="breath-section-subtitle">
+                No pattern and no countdown. Press start, breathe however feels right, and stop when you're done.
+              </p>
+            </header>
+            <div class="open-breath">
+              <div class="open-orb" id="openOrb" aria-hidden="true"><span></span></div>
+              <div class="open-clock" id="openClock" aria-live="off">0:00</div>
+              <div class="open-state" id="openState">Ready when you are</div>
+              <div class="open-actions">
+                <button id="openStartBtn" class="btn primary-btn open-btn" type="button">Start</button>
+                <button id="openStopBtn" class="btn ghost-btn open-btn hidden" type="button">Stop</button>
+              </div>
+              <p class="open-note">Counts toward your Spirit ring. The screen stays on while it runs, where your device allows.</p>
+            </div>
+          </section>
+
           <section id="hyperScreen" class="breath-screen">
             <header class="breath-section-header">
               <h2 class="breath-section-title">Cyclical Hyperventilation</h2>
