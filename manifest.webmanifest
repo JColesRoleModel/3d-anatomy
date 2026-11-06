@@ -2,6 +2,7 @@
   "name": "Tree of Life: Neurological Research Institute",
   "short_name": "Tree of Life",
   "description": "Explore the human body in 3D, practice, watch, scroll and track your Body, Mind and Spirit rings, under a living night sky.",
+  "id": "tree-of-life-nri-app",
   "start_url": "home/",
   "scope": "./",
   "display": "standalone",
