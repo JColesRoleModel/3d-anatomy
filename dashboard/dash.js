@@ -1,17 +1,18 @@
 // Dashboard: a light screen to leave on (made for an older iPad on a stand). Clock and temperature with its place,
 // today's rings and streak with the week's seven small rings beneath, today's tasks, a card from the Scroll that
-// changes every minute, and the last five things completed. The top bar hides itself; tap the screen to bring it back. From 10pm to
-// 6am it drops to a dim clock.
+// changes every minute, and the last five things completed. The top bar hides itself; tap the screen to bring it
+// back. From 10pm to 6am it drops to a dim clock.
 //
-// Kept light on data: it listens only to the last 8 weeks of sessions (enough for the streak), reads practice records
-// for the same window every 10 minutes, reads the Scroll once a day, and uses its own small offline cache (sw.js).
+// Kept light on data: it listens live only to the last 8 weeks of sessions and practice records (enough for the
+// streak), reads the Scroll once a day, and uses its own small offline cache (sw.js). A line under the rings says
+// whether it's live and when the latest session ended.
 import { $, h, fill, onError, openModal, closeModal, signedInPage, account } from '../hub/page.js';
 import { RINGS, DEFAULT_GOALS, byDay, activityEntries, practiceEntries, allStreak, ringsSVG, today, fmtMin, dayKey, daysBack, sessionsOf, ago, ringOf } from '../hub/rings.js';
 import { groupByDue, sectionOf, formatDue } from '../tasks/logic.js';
 
 const NIGHT_FROM = 22, NIGHT_TO = 6;
 const WINDOW_DAYS = 56;
-const state = { uid: null, tasks: [], activity: [], sessions: [], goals: { ...DEFAULT_GOALS }, cards: [], cardsDay: null, unsubs: [], forceNight: null };
+const state = { live: false, heardAt: null, uid: null, tasks: [], activity: [], sessions: [], goals: { ...DEFAULT_GOALS }, cards: [], cardsDay: null, unsubs: [], forceNight: null };
 
 signedInPage({
   gateText: 'Sign in once on this screen. It stays signed in.',
@@ -22,13 +23,10 @@ signedInPage({
     const sub = (p) => p.then((u) => state.unsubs.push(u)).catch(onError);
     const since = () => daysBack(WINDOW_DAYS).getTime();
     sub(account.watchTasks(state.uid, (t) => { state.tasks = t; renderTasks(); }, onError));
-    sub(account.watchCollection(state.uid, 'activity', (d) => { state.activity = d; renderStats(); }, onError, 'startedAt', since()));
+    // Watch, Scroll and practice time all arrive live: a session finished on the phone shows here within seconds
+    sub(account.watchCollection(state.uid, 'activity', (d, meta) => { state.activity = d; heard(meta); renderStats(); }, onError, 'startedAt', since()));
+    sub(account.watchCollection(state.uid, 'sessions', (d, meta) => { state.sessions = d; heard(meta); renderStats(); }, onError, 'timestamp', since()));
     sub(account.watchCollection(state.uid, 'prefs', (d) => { state.goals = { ...DEFAULT_GOALS, ...(d.find((x) => x.id === 'main')?.goals || {}) }; renderStats(); }, onError));
-    const loadPractice = () => account.readCollectionSince(state.uid, 'sessions', 'timestamp', since())
-      .then((rows) => { state.sessions = rows; renderStats(); }).catch(() => {});
-    loadPractice();
-    const t = setInterval(loadPractice, 10 * 60000);
-    state.unsubs.push(() => clearInterval(t));
     loadCards();
   },
 });
@@ -56,6 +54,21 @@ $('#night').addEventListener('click', () => {
 });
 document.getElementById('d-night')?.addEventListener('click', () => { state.forceNight = true; tick(); });
 
+/* ---------- Live or not ---------- */
+function heard(meta) { state.live = !meta?.fromCache && navigator.onLine; state.heardAt = Date.now(); }
+function renderSync(all) {
+  const latest = all.length ? Math.max(...all.map((e) => e.at + e.seconds * 1000)) : null;
+  const t = (ts) => new Date(ts).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  const live = state.live && navigator.onLine;
+  const el = $('#sync');
+  el.classList.toggle('off', !live);
+  el.textContent = live
+    ? `● Live${latest ? ` · last session ended ${t(latest)}` : ''}`
+    : `○ Offline · showing what was here at ${t(state.heardAt || Date.now())}`;
+}
+addEventListener('online', () => { state.live = true; renderStats(); });
+addEventListener('offline', () => { state.live = false; renderStats(); });
+
 /* ---------- Rings, the week, and recently completed ---------- */
 function entries() { return [...activityEntries(state.activity), ...practiceEntries(state.sessions)]; }
 function renderStats() {
@@ -67,6 +80,7 @@ function renderStats() {
   $('#rings').innerHTML = ringsSVG({ body: pct('body'), mind: pct('mind'), spirit: pct('spirit') }, 220, 20);
   fill($('#rings-legend'), RINGS.map((r) => h('div', { class: 'd-leg', style: `--c:${r.color}` },
     h('span', {}, r.label), h('b', {}, fmtMin(t[r.id] || 0)), h('small', {}, `/ ${state.goals[r.id]}m`))));
+  renderSync(all);
   const s = allStreak(days, state.goals);
   $('#streak').textContent = s ? `${s} day${s === 1 ? '' : 's'} closing all three ✦` : 'Close all three to start a streak';
 

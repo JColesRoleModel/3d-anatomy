@@ -21,10 +21,8 @@ signedInPage({
       state.goals = { ...DEFAULT_GOALS, ...(docs.find((d) => d.id === 'main')?.goals || {}) };
       render(); renderGoals();
     }, onError).then((u) => state.unsubs.push(u)).catch(onError);
-    const loadPractice = () => account.listSessions(state.uid).then((rows) => { state.sessions = rows.map(([, s]) => s); render(); }).catch(() => {});
-    loadPractice();
-    const t = setInterval(loadPractice, 120000);
-    state.unsubs.push(() => clearInterval(t));
+    // Practice records arrive live too, so a routine done on another device shows up here within seconds
+    account.watchCollection(state.uid, 'sessions', (docs) => { state.sessions = docs; render(); }, onError).then((u) => state.unsubs.push(u)).catch(onError);
     renderGoals();
   },
 });

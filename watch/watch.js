@@ -52,7 +52,8 @@ signedInPage({
       renderToday(); maybeStarter();
     }, onError)
       .then((u) => state.unsubs.push(u)).catch(onError);
-    account.listSessions(state.uid).then((rows) => { state.sessions = rows.map(([, s]) => s); renderToday(); }).catch(() => {});
+    account.watchCollection(state.uid, 'sessions', (docs) => { state.sessions = docs; renderToday(); }, onError, 'timestamp', since.getTime())
+      .then((u) => state.unsubs.push(u)).catch(onError);
   },
 });
 

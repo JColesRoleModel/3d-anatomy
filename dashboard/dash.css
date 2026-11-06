@@ -107,3 +107,6 @@
 /* Each new card fades in (a one-off, not a loop) */
 .d-fade { animation: d-fade 0.8s ease-out; }
 @keyframes d-fade { from { opacity: 0; } }
+/* Live or offline, under the streak */
+.d-sync { grid-column: 1 / -1; text-align: center; font-size: 13px; color: var(--emerald); letter-spacing: 0.02em; margin-top: -2px; }
+.d-sync.off { color: var(--amber); }

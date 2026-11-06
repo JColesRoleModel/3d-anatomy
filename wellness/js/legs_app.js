@@ -60,7 +60,7 @@ let selectedRoutineKey = null;
 let selectedRoutineMovements = [];
 let prefs = {
   secondsPerMovement: 45,
-  restBetween: 3, // default rest between movements (3 seconds)
+  restBetween: 5, // default rest between movements (5 seconds)
   rounds: 2
 };
 
@@ -288,7 +288,7 @@ function pickRandomRoutine() {
 // Collect preferences from inputs and start the routine
 function collectPrefsAndStart() {
   const sec = parseInt(qs("#input-seconds").value, 10) || 45;
-  const rest = parseInt(qs("#input-rest").value, 10) || 3;
+  const rest = parseInt(qs("#input-rest").value, 10) || 5;
   const rounds = parseInt(qs("#input-rounds").value, 10) || 2;
 
   prefs.secondsPerMovement = Math.max(5, sec);
@@ -452,16 +452,20 @@ function finishRoutine() {
 
 // UI update for current movement and phase
 function updateMovementUI() {
-  const move = selectedRoutineMovements[currentMovementIndex];
+  // During the rest between movements, show the one coming up, so you can get into position before it starts
+  const upNext = currentPhase === "rest";
+  const shownIndex = upNext ? (currentMovementIndex + 1) % selectedRoutineMovements.length : currentMovementIndex;
+  const shownRound = upNext && currentMovementIndex + 1 >= selectedRoutineMovements.length ? currentRound + 1 : currentRound;
+  const move = selectedRoutineMovements[shownIndex];
   if (!move) return;
   const label = movementLabelFromFile(selectedRoutineKey, move.file);
-  qs("#current-movement-label").textContent = label;
+  qs("#current-movement-label").textContent = upNext ? `Up next: ${label}` : label;
   const img = qs("#current-movement-image");
   // Load current movement image immediately (not lazy)
   img.src = IMAGE_BASE_PATH + move.file;
   img.alt = label;
-  qs("#movement-count").textContent = `Movement ${currentMovementIndex + 1} of ${selectedRoutineMovements.length}`;
-  qs("#round-count").textContent = `Round ${currentRound} of ${prefs.rounds}`;
+  qs("#movement-count").textContent = `Movement ${shownIndex + 1} of ${selectedRoutineMovements.length}`;
+  qs("#round-count").textContent = `Round ${shownRound} of ${prefs.rounds}`;
   // Time tracking happens when movement completes
   updatePhaseLabel();
 }

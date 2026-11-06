@@ -13,7 +13,7 @@ let mudraSequence = [];
 let prefs = {
   count: 3,
   secondsPerMudra: 45,
-  restBetween: 3
+  restBetween: 5
 };
 
 let isRunning = false;
@@ -182,7 +182,7 @@ function handlePhaseComplete() {
     currentPhase = "rest";
     secondsRemaining = prefs.restBetween;
     if (phaseBar) phaseBar.startPhase("rest", prefs.restBetween);
-    updatePhaseLabel();
+    updateMudraUI(); // shows the mudra coming up
     runTimerTick();
     return;
   }
@@ -244,19 +244,22 @@ function finishSession() {
 }
 
 function updateMudraUI() {
-  const current = mudraSequence[currentIndex];
+  // During the rest between mudras, show the one coming up, so you can form it before the hold starts
+  const upNext = currentPhase === "rest" && currentIndex + 1 < mudraSequence.length;
+  const shownIndex = upNext ? currentIndex + 1 : currentIndex;
+  const current = mudraSequence[shownIndex];
   const labelEl = qs("#current-mudra-label");
   const imgEl = qs("#current-mudra-image");
   const countEl = qs("#mudra-count");
 
   if (current) {
-    if (labelEl) labelEl.textContent = current.label;
+    if (labelEl) labelEl.textContent = upNext ? `Up next: ${current.label}` : current.label;
     if (imgEl) {
       imgEl.src = IMAGE_BASE_PATH + current.file;
       imgEl.alt = current.label;
     }
     if (countEl) {
-      countEl.textContent = `Mudra ${currentIndex + 1} of ${mudraSequence.length}`;
+      countEl.textContent = `Mudra ${shownIndex + 1} of ${mudraSequence.length}`;
     }
     // Time tracking happens when mudra completes
   } else {

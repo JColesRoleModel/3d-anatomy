@@ -161,7 +161,7 @@ let selectedRoutineKey = null;
 let selectedRoutineMovements = [];
 let prefs = {
   secondsPerMovement: 45,
-  restBetween: 3,
+  restBetween: 5,
   rounds: 2
 };
 
@@ -505,15 +505,19 @@ function finishRoutine() {
 }
 
 function updateMovementUI() {
-  const move = selectedRoutineMovements[currentMovementIndex];
+  // During the rest between movements, show the one coming up, so you can get into position before it starts
+  const upNext = currentPhase === "rest";
+  const shownIndex = upNext ? (currentMovementIndex + 1) % selectedRoutineMovements.length : currentMovementIndex;
+  const shownRound = upNext && currentMovementIndex + 1 >= selectedRoutineMovements.length ? currentRound + 1 : currentRound;
+  const move = selectedRoutineMovements[shownIndex];
   if (!move) return;
   const label = movementLabelFromFile(selectedRoutineKey, move.file);
-  qs("#current-movement-label").textContent = label;
+  qs("#current-movement-label").textContent = upNext ? `Up next: ${label}` : label;
   const imgEl = qs("#current-movement-image");
   imgEl.src = IMAGE_BASE_PATH + move.file;
   imgEl.alt = label;
-  qs("#movement-count").textContent = `Movement ${currentMovementIndex + 1} of ${selectedRoutineMovements.length}`;
-  qs("#round-count").textContent = `Round ${currentRound} of ${prefs.rounds}`;
+  qs("#movement-count").textContent = `Movement ${shownIndex + 1} of ${selectedRoutineMovements.length}`;
+  qs("#round-count").textContent = `Round ${shownRound} of ${prefs.rounds}`;
   // Time tracking happens when movement completes, not here
   updatePhaseLabel();
 }
@@ -629,7 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
     prefs.secondsPerMovement = Math.max(5, parseInt(secInput.value, 10) || 45);
   });
   restInput.addEventListener("change", () => {
-    prefs.restBetween = Math.max(0, parseInt(restInput.value, 10) || 3);
+    prefs.restBetween = Math.max(0, parseInt(restInput.value, 10) || 5);
   });
   roundsInput.addEventListener("change", () => {
     prefs.rounds = Math.max(1, parseInt(roundsInput.value, 10) || 2);
@@ -642,7 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rest = parseInt(restInput.value, 10);
     const rounds = parseInt(roundsInput.value, 10);
     prefs.secondsPerMovement = isNaN(sec) ? 45 : Math.max(5, sec);
-    prefs.restBetween = isNaN(rest) ? 3 : Math.max(0, rest);
+    prefs.restBetween = isNaN(rest) ? 5 : Math.max(0, rest);
     prefs.rounds = isNaN(rounds) ? 2 : Math.max(1, rounds);
     startRoutine();
     switchScreen("screen-player");
