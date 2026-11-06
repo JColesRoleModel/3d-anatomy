@@ -49,13 +49,14 @@
   <script type="module">
     import { initHub, icon } from '../hub/nav.js';
     initHub();
+    // Links are from this page (home/) to its sibling folders, hence ../
     const TILES = [
-      ['rings/', 'rings', 'Rings', 'Body, Mind and Spirit today, your streaks and every session.', true],
-      ['watch/', 'play', 'Watch', 'Your library of videos and audiobooks, timed to the second.'],
-      ['wellness/', 'lotus', 'Practice', 'Innervation, breathwork, neuro-ocular and mudras.'],
-      ['scroll/', 'scroll', 'Scroll', 'A positive doomscroll of the cards you chose.'],
-      ['tasks/', 'check', 'Tasks', 'Due dates and general to-dos, on every device.'],
-      ['dashboard/', 'screen', 'Dashboard', 'A light screen to leave on: clock, rings, today.'],
+      ['../rings/', 'rings', 'Rings', 'Body, Mind and Spirit today, your streaks and every session.', true],
+      ['../watch/', 'play', 'Watch', 'Your library of videos and audiobooks, timed to the second.'],
+      ['../wellness/', 'lotus', 'Practice', 'Innervation, breathwork, neuro-ocular and mudras.'],
+      ['../scroll/', 'scroll', 'Scroll', 'A positive doomscroll of the cards you chose.'],
+      ['../tasks/', 'check', 'Tasks', 'Due dates and general to-dos, on every device.'],
+      ['../dashboard/', 'screen', 'Dashboard', 'A light screen to leave on: clock, rings, today.'],
       ['../?view=3d', 'body', '3D Anatomy', 'The body in 3D, layer by layer. Needs a recent device.'],
     ];
     document.getElementById('tiles').innerHTML = TILES.map(([href, ic, label, text, big]) =>
