@@ -40,10 +40,17 @@ signedInPage({
       state.library = docs;
       if (!meta.fromCache) state.loaded = true;
       render();
+      maybeStarter();
     }, onError).then((u) => state.unsubs.push(u)).catch(onError);
     account.watchCollection(state.uid, 'activity', (docs) => { state.activity = docs; renderToday(); }, onError, 'startedAt', since.getTime())
       .then((u) => state.unsubs.push(u)).catch(onError);
-    account.watchCollection(state.uid, 'prefs', (docs) => { const g = docs.find((d) => d.id === 'main')?.goals; if (g) state.goals = { ...DEFAULT_GOALS, ...g }; renderToday(); }, onError)
+    account.watchCollection(state.uid, 'prefs', (docs, meta) => {
+      const main = docs.find((d) => d.id === 'main') || {};
+      if (main.goals) state.goals = { ...DEFAULT_GOALS, ...main.goals };
+      state.prefs = main;
+      if (!meta.fromCache) state.prefsLoaded = true;
+      renderToday(); maybeStarter();
+    }, onError)
       .then((u) => state.unsubs.push(u)).catch(onError);
     account.listSessions(state.uid).then((rows) => { state.sessions = rows.map(([, s]) => s); renderToday(); }).catch(() => {});
   },
@@ -71,7 +78,7 @@ function render() {
     h('button', { type: 'button', class: 'w-filter' + (state.filter === r.id ? ' on' : ''), style: `--c:${r.color}`, role: 'tab',
       onclick: () => { state.filter = r.id; render(); } }, r.id === 'all' ? '' : h('i', { class: 'w-dot' }), `${r.label} `, h('span', { class: 't-count' }, counts[r.id] || 0))));
 
-  $('#starter').classList.toggle('hidden', !(state.loaded && !lib.length));
+  $('#starter').classList.toggle('hidden', !(state.loaded && !lib.length && state.prefs?.starterWatch));
 
   const q = state.search.trim().toLowerCase();
   const shown = lib
@@ -111,7 +118,15 @@ function card(v) {
 
 $('#search').addEventListener('input', (e) => { state.search = e.target.value; render(); });
 
-$('#starter-load').addEventListener('click', async () => {
+// The first time the library is empty, it fills itself with the starter list (once per account: emptying it on
+// purpose later leaves it empty, with a button to load the list again).
+let starting = false;
+function maybeStarter() {
+  if (starting || !state.loaded || !state.prefsLoaded || state.library.length || state.prefs?.starterWatch) return;
+  starting = true;
+  loadStarter().finally(() => { starting = false; });
+}
+async function loadStarter() {
   const seed = await fetch('seed.json').then((r) => r.json());
   const have = new Set(state.library.map((v) => v.videoId));
   const now = Date.now();
@@ -120,8 +135,10 @@ $('#starter-load').addEventListener('click', async () => {
     durationSec: null, positionSec: 0, playedSec: 0, plays: 0, lastPlayedAt: null, addedAt: now - i,
   }]);
   account.putMany(state.uid, 'library', entries, onError);
-  toast(`Loaded ${entries.length} videos`);
-});
+  account.putDoc(state.uid, 'prefs', 'main', { starterWatch: true }, onError, true);
+  toast(`Loaded ${entries.length} videos and audiobooks`);
+}
+$('#starter-load').addEventListener('click', loadStarter);
 
 /* ---------- Player ---------- */
 function loadYT() {

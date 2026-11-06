@@ -46,7 +46,8 @@ export const icon = (name, size = 20) =>
 
 // The parts of the site, listed at the bottom of the side menu on every page. "soon" ones show as what's coming.
 const SECTIONS = [
-  { id: 'anatomy', label: '3D Anatomy', href: '', icon: 'body' },
+  { id: 'home', label: 'Home', href: 'home/', icon: 'home' },
+  { id: 'anatomy', label: '3D Anatomy', href: '?view=3d', icon: 'body' },
   { id: 'practice', label: 'Practice', href: 'wellness/', icon: 'lotus' },
   { id: 'watch', label: 'Watch', href: 'watch/', icon: 'play' },
   { id: 'scroll', label: 'Scroll', href: 'scroll/', icon: 'scroll' },
@@ -96,9 +97,9 @@ export function initHub({ tools = [] } = {}) {
   el.innerHTML = `
     <div class="hub-left">
       <button type="button" class="hub-icon hub-menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="hub-menu" title="Menu">${icon('menu')}</button>
-      <a class="hub-brand" href="${base}" aria-label="Tree of Life home">
+      <a class="hub-brand" href="${base}home/" aria-label="Tree of Life home">
         <img class="hub-logo" src="${base}icons/brand/tree-of-life.webp" alt="" width="160" height="172">
-        <span class="hub-name"><span class="hub-title">${current && current.id !== 'anatomy' ? esc(current.label) : 'Tree of Life:'}</span><span class="hub-sub">${current && current.id !== 'anatomy' ? 'Tree of Life' : 'Neurological Research Institute'}</span></span>
+        <span class="hub-name"><span class="hub-title">${current && !['anatomy', 'home'].includes(current.id) ? esc(current.label) : 'Tree of Life:'}</span><span class="hub-sub">${current && !['anatomy', 'home'].includes(current.id) ? 'Tree of Life' : 'Neurological Research Institute'}</span></span>
       </a>
     </div>
     <nav class="hub-icons" aria-label="Page">
@@ -135,8 +136,8 @@ export function initHub({ tools = [] } = {}) {
       </div>
       <div class="hub-stats" id="hub-stats"></div>
       <div class="hub-links">
-        <a class="hub-link" href="${base}wellness/index.html#stats" data-stats>${icon('stats', 18)}<span>Practice stats</span></a>
-        <a class="hub-link" href="${base}#saves" data-saves>${icon('bookmark', 18)}<span>Saved views</span></a>
+        <a class="hub-link" href="${base}rings/#practice" data-stats>${icon('rings', 18)}<span>Rings &amp; stats</span></a>
+        <a class="hub-link" href="${base}?view=3d#saves" data-saves>${icon('bookmark', 18)}<span>Saved views</span></a>
       </div>
       <div id="hub-acct-out">
         <p class="hub-small">Sign in to keep your saved views and practice history in your account, on every device you use.</p>
@@ -191,9 +192,8 @@ export function initHub({ tools = [] } = {}) {
     if (t) { close(); $(t.dataset.tool)?.click(); }
   });
   // On the page that has them, these open in place instead of loading the page again.
-  acct.querySelector('[data-stats]').addEventListener('click', (e) => {
-    if (window.timeStatsUI) { e.preventDefault(); close(); window.timeStatsUI.open(); }
-  });
+  // The practice pages' own Stats buttons open the Rings page too, so there is one set of numbers for everything.
+  if (window.timeStatsUI) window.timeStatsUI.open = () => { location.href = `${base}rings/#practice`; };
   acct.querySelector('[data-saves]').addEventListener('click', (e) => {
     const b = $('btn-saves');
     if (b) { e.preventDefault(); close(); b.click(); }

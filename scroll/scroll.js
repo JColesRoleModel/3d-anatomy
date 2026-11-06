@@ -32,6 +32,12 @@ signedInPage({
       state.cards = docs;
       if (!meta.fromCache) state.loaded = true;
       if (first && docs.length) reshuffle(); else render();
+      maybeStarter();
+    }, onError).then((u) => state.unsubs.push(u)).catch(onError);
+    account.watchCollection(state.uid, 'prefs', (docs, meta) => {
+      state.prefs = docs.find((d) => d.id === 'main') || {};
+      if (!meta.fromCache) state.prefsLoaded = true;
+      render(); maybeStarter();
     }, onError).then((u) => state.unsubs.push(u)).catch(onError);
     account.watchCollection(state.uid, 'activity', (docs) => { state.activity = docs.filter((a) => a.source === 'scroll'); if (state.view === 'stats') renderStats(); }, onError)
       .then((u) => state.unsubs.push(u)).catch(onError);
@@ -42,7 +48,6 @@ signedInPage({
 /* ---------- Session time: visible + active ---------- */
 function startSession() {
   timer = new SessionTimer({ account, uid: state.uid, source: 'scroll', ring: 'mind', title: 'The Scroll', onError, onSave: flushCards });
-  active();
 }
 function endSession() {
   if (!timer) return;
@@ -52,11 +57,17 @@ function endSession() {
   flushCards();
   timer = null;
 }
-function active() {
+// The clock starts when you scroll; taps and keys only keep a running clock going.
+function scrolled() {
   lastActive = Date.now();
-  if (timer && !document.hidden && state.view !== 'stats') timer.start();
+  if (!timer || document.hidden || state.view === 'stats' || !state.cards.length) return;
+  const was = timer.running;
+  timer.start();
+  if (!was) reopenVisible(); // count the cards on screen from now
 }
-['scroll', 'pointerdown', 'keydown', 'wheel', 'touchmove'].forEach((ev) => addEventListener(ev, active, { passive: true }));
+function active() { if (timer?.running) lastActive = Date.now(); }
+['scroll', 'wheel', 'touchmove'].forEach((ev) => addEventListener(ev, scrolled, { passive: true }));
+['pointerdown', 'keydown'].forEach((ev) => addEventListener(ev, active, { passive: true }));
 setInterval(() => {
   if (!timer) return;
   if (timer.running && Date.now() - lastActive > IDLE_MS) { closeVisible(); timer.pause(); }
@@ -64,7 +75,7 @@ setInterval(() => {
   $('#live').classList.toggle('on', timer.running);
   timer.extra = sessionExtra();
 }, 500);
-document.addEventListener('visibilitychange', () => { if (document.hidden) { closeVisible(); flushCards(); } else { active(); reopenVisible(); } });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { closeVisible(); flushCards(); } });
 addEventListener('pagehide', () => endSession());
 
 function sessionExtra() { return { cardsSeen: sessionSeen.size, likes, saves, maxDepth }; }
@@ -121,8 +132,15 @@ function more() {
   state.shown.push(...next);
   const byId = new Map(state.cards.map((c) => [c.id, c]));
   $('#feed').append(...next.map((id) => byId.get(id)).filter(Boolean).map(cardEl));
+  requestAnimationFrame(fillScreen);
 }
-new IntersectionObserver((e) => { if (e[0].isIntersecting && state.view === 'feed' && state.cards.length) more(); }, { rootMargin: '600px' }).observe($('#more'));
+// Cards load by themselves: whenever the end of the feed comes within a screen of view, add more (and keep adding
+// until the page is longer than the screen, so a tall screen is never left waiting for a scroll that can't happen).
+function fillScreen() {
+  if (state.view !== 'feed' || !state.cards.length) return;
+  if ($('#more').getBoundingClientRect().top < innerHeight + 600) more();
+}
+new IntersectionObserver((e) => { if (e[0].isIntersecting) fillScreen(); }, { rootMargin: '600px' }).observe($('#more'));
 // How deep this visit went: the furthest card down the feed that made it on screen
 addEventListener('scroll', () => {
   if (state.view !== 'feed') return;
@@ -168,7 +186,7 @@ async function copy(c) {
 
 /* ---------- Views ---------- */
 function render() {
-  $('#starter').classList.toggle('hidden', !(state.loaded && !state.cards.length));
+  $('#starter').classList.toggle('hidden', !(state.loaded && !state.cards.length && state.prefs?.starterScroll));
   $('#saved-count').textContent = state.cards.filter((c) => c.saved).length;
   if (state.view === 'saved') renderSaved();
   if (state.view === 'stats') renderStats();
@@ -177,7 +195,7 @@ $$('.s-tab').forEach((t) => t.addEventListener('click', () => {
   state.view = t.dataset.view;
   $$('.s-tab').forEach((x) => x.classList.toggle('on', x === t));
   ['feed', 'saved', 'stats'].forEach((v) => $(`#view-${v}`).classList.toggle('hidden', v !== state.view));
-  if (state.view === 'stats') { closeVisible(); timer?.pause(); } else active();
+  if (state.view === 'stats') { closeVisible(); timer?.pause(); }
   render();
 }));
 function renderSaved() {
@@ -209,12 +227,21 @@ function renderStats() {
 }
 
 /* ---------- Starter cards and adding ---------- */
-$('#starter-load').addEventListener('click', async () => {
+// The first time the Scroll is empty it fills itself with the starter cards (once per account: emptying it on purpose
+// later leaves it empty, with a button to load them again).
+let starting = false;
+function maybeStarter() {
+  if (starting || !state.loaded || !state.prefsLoaded || state.cards.length || state.prefs?.starterScroll) return;
+  starting = true;
+  loadStarter().finally(() => { starting = false; });
+}
+async function loadStarter() {
   const seed = await fetch('seed.json').then((r) => r.json());
   const now = Date.now();
   account.putMany(state.uid, 'scroll', seed.map(({ id, ...c }, i) => [id, { ...c, addedAt: now - i, views: 0, dwellMs: 0, liked: false, saved: false }]), onError);
-  toast(`Loaded ${seed.length} cards`);
-});
+  account.putDoc(state.uid, 'prefs', 'main', { starterScroll: true }, onError, true);
+}
+$('#starter-load').addEventListener('click', loadStarter);
 function openAdd() { if (!state.uid) return document.querySelector('.hub-user-btn')?.click(); $('#add-hint').textContent = ''; openModal($('#add')); $('#add-text').focus(); }
 document.getElementById('s-add')?.addEventListener('click', openAdd);
 $('#add-form').addEventListener('submit', (e) => {

@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="../hub/page.css">
   <link rel="stylesheet" href="dash.css">
   <link rel="icon" type="image/png" href="../icons/icon-192.png">
-  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0b0a1f">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,7 +17,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
 </head>
 <body class="d-body">
-  <div class="sky" aria-hidden="true"><div class="d-twinkle"></div></div>
+  <div class="sky" aria-hidden="true"></div>
   <header id="hub-nav" data-section="dashboard" data-base="../"></header>
 
   <main class="d-main">
@@ -41,6 +41,10 @@
           <div class="d-rings-svg" id="rings"></div>
           <div class="d-rings-legend" id="rings-legend"></div>
           <div class="d-streak" id="streak"></div>
+          <div class="d-week">
+            <div class="d-week-label" id="week-label"></div>
+            <div class="d-week-days" id="week"></div>
+          </div>
         </section>
 
         <section class="d-card d-tasks">
@@ -50,9 +54,9 @@
 
         <section class="d-card d-quote" id="quote"></section>
 
-        <section class="d-card d-next">
-          <h2 class="d-h2">Up next</h2>
-          <div id="next"></div>
+        <section class="d-card d-recent">
+          <h2 class="d-h2">Recently completed</h2>
+          <div class="d-recent-list" id="recent"></div>
         </section>
       </div>
     </section>
@@ -86,6 +90,6 @@
     initHub({ tools: [{ id: 'd-night', label: 'Night mode now', icon: 'screen' }] });
   </script>
   <script type="module" src="dash.js"></script>
-  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});</script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

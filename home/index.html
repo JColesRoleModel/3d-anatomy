@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tree of Life: Neurological Research Institute</title>
+  <meta name="description" content="Explore the body in 3D, practice, watch, scroll, keep tasks, and track your Body, Mind and Spirit rings.">
+  <link rel="stylesheet" href="../hub/nav.css">
+  <link rel="stylesheet" href="../hub/page.css">
+  <link rel="icon" type="image/png" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b0a1f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tree of Life">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+  <style>
+    .home { max-width: 980px; margin: 0 auto; padding: 8px 16px calc(env(safe-area-inset-bottom, 0px) + 32px); }
+    .home-hero { text-align: center; margin: 4vh 0 26px; }
+    .home-hero img { width: 92px; height: auto; filter: drop-shadow(0 0 14px rgba(230, 189, 106, 0.5)); }
+    .home-hero h1 { margin: 10px 0 4px; font: 700 clamp(34px, 6vw, 52px)/1 var(--serif); color: var(--cream); text-shadow: 0 0 20px rgba(230, 189, 106, 0.35); }
+    .home-hero p { margin: 0; color: var(--muted); }
+    .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+    .home-tile {
+      display: flex; flex-direction: column; gap: 8px; padding: 18px; min-height: 132px; border-radius: 20px; text-decoration: none; color: var(--text);
+      border: 1px solid var(--line); background: var(--panel); -webkit-backdrop-filter: var(--glass); backdrop-filter: var(--glass); box-shadow: var(--glow);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .home-tile:hover { border-color: rgba(230, 189, 106, 0.6); transform: translateY(-2px); }
+    .home-tile svg { color: var(--gold); }
+    .home-tile b { font: 700 24px/1 var(--serif); color: var(--cream); }
+    .home-tile span { font-size: 14px; color: var(--muted); line-height: 1.35; }
+    .home-tile.big { grid-column: span 2; }
+    @media (max-width: 520px) { .home-grid { grid-template-columns: 1fr 1fr; } .home-tile { min-height: 116px; padding: 14px; } .home-tile b { font-size: 20px; } .home-tile span { font-size: 12.5px; } .home-tile.big { grid-column: span 2; } }
+  </style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header id="hub-nav" data-section="home" data-base="../"></header>
+  <main class="home">
+    <div class="home-hero">
+      <img src="../icons/brand/tree-of-life.webp" alt="" width="160" height="172">
+      <h1>Where to?</h1>
+      <p>Tree of Life: Neurological Research Institute</p>
+    </div>
+    <nav class="home-grid" id="tiles" aria-label="Sections"></nav>
+  </main>
+  <script type="module">
+    import { initHub, icon } from '../hub/nav.js';
+    initHub();
+    const TILES = [
+      ['rings/', 'rings', 'Rings', 'Body, Mind and Spirit today, your streaks and every session.', true],
+      ['watch/', 'play', 'Watch', 'Your library of videos and audiobooks, timed to the second.'],
+      ['wellness/', 'lotus', 'Practice', 'Innervation, breathwork, neuro-ocular and mudras.'],
+      ['scroll/', 'scroll', 'Scroll', 'A positive doomscroll of the cards you chose.'],
+      ['tasks/', 'check', 'Tasks', 'Due dates and general to-dos, on every device.'],
+      ['dashboard/', 'screen', 'Dashboard', 'A light screen to leave on: clock, rings, today.'],
+      ['../?view=3d', 'body', '3D Anatomy', 'The body in 3D, layer by layer. Needs a recent device.'],
+    ];
+    document.getElementById('tiles').innerHTML = TILES.map(([href, ic, label, text, big]) =>
+      `<a class="home-tile${big ? ' big' : ''}" href="${href}">${icon(ic, 26)}<b>${label}</b><span>${text}</span></a>`).join('');
+  </script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});</script>
+</body>
+</html>

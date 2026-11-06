@@ -28,31 +28,53 @@
     </section>
 
     <section class="hidden r-app" id="app">
-      <div class="t-panel r-today">
-        <div class="r-big" id="big"></div>
-        <div class="r-legend" id="legend"></div>
-      </div>
-
-      <div class="r-row">
-        <section class="t-panel r-week">
-          <h2 class="r-h2">This week</h2>
-          <div class="r-days" id="week"></div>
-        </section>
+      <!-- Today -->
+      <div class="r-row r-row-top">
+        <div class="t-panel r-today">
+          <div class="r-big" id="big"></div>
+          <div class="r-legend" id="legend"></div>
+        </div>
         <section class="t-panel r-streaks">
           <h2 class="r-h2">Streaks</h2>
           <div class="r-streak-list" id="streaks"></div>
         </section>
       </div>
 
-      <section class="t-panel">
-        <h2 class="r-h2">Last 12 weeks</h2>
-        <div class="r-heat" id="heat"></div>
-        <p class="r-heat-key">Each square is a day: brighter means more rings closed. <span id="totals"></span></p>
+      <!-- Any stretch of time -->
+      <section class="t-panel r-range-panel" id="history">
+        <div class="r-range-head">
+          <div class="t-seg r-range-tabs" id="range-tabs" role="tablist">
+            <button type="button" class="t-seg-btn" data-range="week">Week</button>
+            <button type="button" class="t-seg-btn" data-range="month">Month</button>
+            <button type="button" class="t-seg-btn" data-range="all">All time</button>
+            <button type="button" class="t-seg-btn" data-range="custom">Dates</button>
+          </div>
+          <div class="r-range-nav" id="range-nav">
+            <button class="t-btn t-icon" id="prev" type="button" aria-label="Earlier">‹</button>
+            <b id="range-label"></b>
+            <button class="t-btn t-icon" id="next" type="button" aria-label="Later">›</button>
+          </div>
+          <div class="r-range-dates hidden" id="range-dates">
+            <label>From <input class="t-input" type="date" id="from"></label>
+            <label>To <input class="t-input" type="date" id="to"></label>
+          </div>
+        </div>
+
+        <div class="r-totals" id="totals"></div>
+        <div class="r-chart" id="chart"></div>
+
+        <h2 class="r-h2" id="practice">Where the time went</h2>
+        <div class="r-breakdown" id="breakdown"></div>
+
+        <h2 class="r-h2">Every session</h2>
+        <p class="r-note">Tap a practice session to see each movement and its time.</p>
+        <div class="r-days-log" id="log"></div>
       </section>
 
       <section class="t-panel">
-        <h2 class="r-h2">Today, minute by minute</h2>
-        <div class="r-log" id="log"></div>
+        <h2 class="r-h2">Last 12 weeks</h2>
+        <div class="r-heat" id="heat"></div>
+        <p class="r-heat-key">Each square is a day: brighter means more rings closed.</p>
       </section>
 
       <section class="t-panel">

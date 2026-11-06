@@ -144,6 +144,12 @@ export async function watchCollection(uid, name, onData, onError, sinceField = n
   const src = sinceField ? fb.query(colOf(uid, name), fb.where(sinceField, '>=', since)) : colOf(uid, name);
   return fb.onSnapshot(src, (snap) => onData(snap.docs.map((d) => ({ id: d.id, ...d.data() })), { fromCache: snap.metadata.fromCache }), onError);
 }
+// Only the documents whose `field` is at least `since`, e.g. the last few weeks of practice records.
+export async function readCollectionSince(uid, name, field, since) {
+  await load();
+  const snap = await fb.getDocs(fb.query(colOf(uid, name), fb.where(field, '>=', since)));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
 export async function readCollection(uid, name) {
   await load();
   const snap = await fb.getDocs(colOf(uid, name));

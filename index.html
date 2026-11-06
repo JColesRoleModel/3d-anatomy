@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <script>
+    // The site's front door is the Home page, which asks where to go; the 3D scene opens with ?view=3d. Sent on before
+    // anything heavy loads, so a device that can't run the 3D scene never downloads it.
+    if (!/[?&]view=/.test(location.search)) location.replace('home/' + location.hash);
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <title>Tree of Life: Neurological Research Institute</title>
   <meta name="description" content="Explore the human body in 3D, layer by layer, with its occult anatomy, under a living night sky. From the Tree of Life: Neurological Research Institute.">

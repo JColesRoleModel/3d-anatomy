@@ -52,12 +52,44 @@ export function practiceEntries(cloudSessions = []) {
     const key = `${s.timestamp}|${s.section}|${s.movement}|${s.duration}`;
     if (seen.has(key) || !(Number(s.duration) > 0)) continue;
     seen.add(key);
-    out.push({ source: 'practice', ring: practiceRing(s.section), seconds: Number(s.duration), at: Number(s.timestamp), title: s.movement || s.routine || s.section, section: s.section });
+    out.push({ source: 'practice', ring: practiceRing(s.section), seconds: Number(s.duration), at: Number(s.timestamp), title: s.movement || s.routine || s.section, section: s.section, routine: s.routine || null, movement: s.movement || null });
   }
   return out;
 }
 export function activityEntries(docs = []) {
   return docs.filter((a) => a.seconds > 0).map((a) => ({ source: a.source, ring: a.ring, seconds: a.seconds, at: a.startedAt, title: a.title, ref: a.ref }));
+}
+
+/**
+ * Turns entries into sessions you'd recognize, newest first. Practice is recorded one movement at a time, so
+ * movements of the same section and routine less than 15 minutes apart become one session, keeping each movement
+ * (with its time) in `parts`. Each session: { source, ring, title, sub, seconds, start, end, parts }.
+ */
+export function sessionsOf(entries) {
+  const sorted = [...entries].sort((a, b) => a.at - b.at);
+  const out = [];
+  for (const e of sorted) {
+    const end = e.at + e.seconds * 1000;
+    const last = out[out.length - 1];
+    if (e.source === 'practice' && last && last.source === 'practice' && last.section === e.section && last.routine === e.routine && e.at - last.end < 15 * 60000) {
+      last.seconds += e.seconds; last.end = Math.max(last.end, end); last.parts.push(e);
+      continue;
+    }
+    out.push(e.source === 'practice'
+      ? { source: 'practice', ring: e.ring, section: e.section, routine: e.routine, title: e.section, sub: e.routine && e.routine !== e.section ? e.routine : '', seconds: e.seconds, start: e.at, end, parts: [e] }
+      : { source: e.source, ring: e.ring, title: e.title || (e.source === 'scroll' ? 'The Scroll' : 'Video'), sub: '', seconds: e.seconds, start: e.at, end, parts: [] });
+  }
+  return out.reverse();
+}
+
+export function ago(ts) {
+  const m = Math.round((Date.now() - ts) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const hr = Math.round(m / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const d = Math.round(hr / 24);
+  return d === 1 ? 'yesterday' : `${d} days ago`;
 }
 
 /** { 'YYYY-MM-DD': { body, mind, spirit, total } } in seconds */
