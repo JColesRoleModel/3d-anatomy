@@ -3,7 +3,7 @@
 // totals, a chart of the trend, where the time went (practice by section and routine, each video, the Scroll), and
 // every session with its time and length, practice down to each movement. Then the last 12 weeks and the goals.
 import { $, $$, h, fill, toast, onError, signedInPage, account } from '../hub/page.js';
-import { RINGS, ringOf, DEFAULT_GOALS, byDay, activityEntries, practiceEntries, streak, allStreak, ringsSVG, dayKey, daysBack, today, fmtMin, fmtClock, sessionsOf } from '../hub/rings.js';
+import { RINGS, ringOf, DEFAULT_GOALS, byDay, activityEntries, practiceEntries, streak, allStreak, ringsSVG, dayKey, daysBack, today, fmtExact, fmtClock, sessionsOf } from '../hub/rings.js';
 
 const DAY = 864e5;
 const SOURCE = { watch: 'Watch', scroll: 'Scroll', practice: 'Practice' };
@@ -30,6 +30,12 @@ signedInPage({
 const allEntries = () => [...activityEntries(state.activity), ...practiceEntries(state.sessions)];
 const startOfDay = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 const fmtDate = (d, o = { month: 'short', day: 'numeric' }) => new Date(d).toLocaleDateString(undefined, o);
+// Big numbers to the second, with the seconds a step smaller beside them ("8m 32s")
+function big(seconds) {
+  const parts = fmtExact(seconds).split(' ');
+  const last = parts.length > 1 ? parts.pop() : null;
+  return h('b', {}, parts.join(' '), last ? h('span', { class: 'r-sec' }, ` ${last}`) : null);
+}
 const fmtTime = (ts) => new Date(ts).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 
 /* ---------- Which stretch of time ---------- */
@@ -81,7 +87,7 @@ function renderToday(days) {
   $('#big').innerHTML = ringsSVG({ body: pct('body'), mind: pct('mind'), spirit: pct('spirit') }, 210, 18);
   fill($('#legend'), RINGS.map((r) => h('div', { class: 'r-leg', style: `--c:${r.color}` },
     h('div', { class: 'r-leg-label' }, r.label),
-    h('div', { class: 'r-leg-num' }, h('b', {}, fmtMin(t[r.id] || 0)), ` / ${state.goals[r.id]}m`),
+    h('div', { class: 'r-leg-num' }, big(t[r.id] || 0), ` / ${state.goals[r.id]}m`),
     h('div', { class: 'r-leg-pct' }, (t[r.id] || 0) >= state.goals[r.id] * 60 ? 'Closed ✦' : `${Math.round(pct(r.id) * 100)}%`))));
   fill($('#streaks'),
     h('div', { class: 'r-streak all' }, h('b', {}, allStreak(days, state.goals)), h('span', {}, 'days closing all three')),
@@ -108,9 +114,9 @@ function renderRange(all) {
   const metDays = (id) => Object.values(days).filter((d) => (d[id] || 0) >= state.goals[id] * 60).length;
   fill($('#totals'),
     RINGS.map((r) => h('div', { class: 'r-tot', style: `--c:${r.color}` },
-      h('span', {}, r.label), h('b', {}, fmtMin(tot[r.id])),
-      h('small', {}, `${fmtMin(tot[r.id] / dayCount)} a day · goal met ${metDays(r.id)} of ${dayCount} day${dayCount === 1 ? '' : 's'}`))),
-    h('div', { class: 'r-tot all' }, h('span', {}, 'Total'), h('b', {}, fmtMin(tot.body + tot.mind + tot.spirit)),
+      h('span', {}, r.label), big(tot[r.id]),
+      h('small', {}, `${fmtExact(tot[r.id] / dayCount)} a day · goal met ${metDays(r.id)} of ${dayCount} day${dayCount === 1 ? '' : 's'}`))),
+    h('div', { class: 'r-tot all' }, h('span', {}, 'Total'), big(tot.body + tot.mind + tot.spirit),
       h('small', {}, `${sessions.length} session${sessions.length === 1 ? '' : 's'} · ${Object.keys(days).length} active day${Object.keys(days).length === 1 ? '' : 's'}`)));
 
   renderChart(start, new Date(lastDay), days);
@@ -146,7 +152,7 @@ function renderChart(start, end, days) {
     RINGS.forEach((r) => {
       const m = (b.v[r.id] || 0) / 60;
       if (m <= 0) return;
-      bars += `<rect x="${x.toFixed(1)}" y="${y(acc + m).toFixed(1)}" width="${w.toFixed(1)}" height="${(y(acc) - y(acc + m)).toFixed(1)}" fill="${r.color}" rx="2"><title>${fmtDate(b.d)}${weekly ? ' week' : ''}: ${r.label} ${fmtMin(m * 60)}</title></rect>`;
+      bars += `<rect x="${x.toFixed(1)}" y="${y(acc + m).toFixed(1)}" width="${w.toFixed(1)}" height="${(y(acc) - y(acc + m)).toFixed(1)}" fill="${r.color}" rx="2"><title>${fmtDate(b.d)}${weekly ? ' week' : ''}: ${r.label} ${fmtExact(m * 60)}</title></rect>`;
       acc += m;
     });
     if (i % step === 0) {
@@ -175,14 +181,14 @@ function renderBreakdown(entries) {
     }
     const rows = [...groups.values()].sort((a, b) => b.seconds - a.seconds);
     return h('div', { class: 'r-bd', style: `--c:${r.color}` },
-      h('div', { class: 'r-bd-head' }, h('b', {}, r.label), h('span', {}, fmtMin(total))),
+      h('div', { class: 'r-bd-head' }, h('b', {}, r.label), h('span', {}, fmtExact(total))),
       rows.length ? rows.map((g) => h('div', { class: 'r-bd-row' },
         h('div', { class: 'r-bd-line' },
           h('span', { class: 'r-bd-label' }, g.label, h('small', {}, ` · ${SOURCE[g.source]}${g.source === 'practice' ? ` · ${g.count} movement${g.count === 1 ? '' : 's'}` : ''}`)),
-          h('span', { class: 'r-bd-time' }, fmtMin(g.seconds))),
+          h('span', { class: 'r-bd-time' }, fmtExact(g.seconds))),
         h('span', { class: 'w-bar' }, h('i', { style: `width:${Math.round((g.seconds / (total || 1)) * 100)}%` })),
         g.routines.size > 1 || (g.routines.size === 1 && !g.routines.has('—')) ? h('div', { class: 'r-bd-routines' },
-          [...g.routines].sort((a, b) => b[1] - a[1]).map(([name, s]) => h('span', {}, `${name === '—' ? 'Other' : name} ${fmtMin(s)}`))) : null))
+          [...g.routines].sort((a, b) => b[1] - a[1]).map(([name, s]) => h('span', {}, `${name === '—' ? 'Other' : name} ${fmtExact(s)}`))) : null))
         : h('p', { class: 'r-none' }, 'Nothing in this stretch.'));
   }));
 }
@@ -202,12 +208,12 @@ function renderLog(sessions) {
       list.forEach((s) => { sums[s.ring] += s.seconds; });
       return h('div', { class: 'r-logday' },
         h('div', { class: 'r-logday-head' }, h('b', {}, fmtDate(new Date(k + 'T12:00'), { weekday: 'long', month: 'short', day: 'numeric' })),
-          h('span', {}, RINGS.filter((r) => sums[r.id]).map((r) => h('i', { style: `--c:${r.color}` }, `${r.label} ${fmtMin(sums[r.id])}`)))),
+          h('span', {}, RINGS.filter((r) => sums[r.id]).map((r) => h('i', { style: `--c:${r.color}` }, `${r.label} ${fmtExact(sums[r.id])}`)))),
         list.map((s) => {
           const r = ringOf(s.ring);
           const head = [h('span', { class: 'r-time' }, `${fmtTime(s.start)}–${fmtTime(s.end)}`), h('span', { class: 'r-dot' }),
             h('span', { class: 'r-what' }, h('b', {}, s.title), h('small', {}, [SOURCE[s.source], r.label, s.sub, s.parts.length > 1 ? `${s.parts.length} movements` : ''].filter(Boolean).join(' · '))),
-            h('span', { class: 'r-dur' }, fmtMin(s.seconds))];
+            h('span', { class: 'r-dur' }, fmtExact(s.seconds))];
           if (s.source !== 'practice' || !s.parts.length) return h('div', { class: 'r-entry', style: `--c:${r.color}` }, head);
           return h('details', { class: 'r-entry r-entry-p', style: `--c:${r.color}`, open: openSessions.has(s.start), ontoggle: (e) => { if (e.target.open) openSessions.add(s.start); else openSessions.delete(s.start); } }, h('summary', {}, head),
             h('div', { class: 'r-parts' }, s.parts.map((p) => h('div', { class: 'r-part' },
@@ -226,7 +232,7 @@ function renderHeat(days) {
     if (day > now) return h('i', { class: 'r-cell future' });
     const v = days[dayKey(day.getTime())] || {};
     const closed = RINGS.filter((r) => (v[r.id] || 0) >= state.goals[r.id] * 60).length;
-    return h('i', { class: `r-cell c${closed}${(v.total || 0) > 0 ? ' any' : ''}`, title: `${day.toLocaleDateString()}: ${fmtMin(v.total || 0)}, ${closed} of 3 rings closed` });
+    return h('i', { class: `r-cell c${closed}${(v.total || 0) > 0 ? ' any' : ''}`, title: `${day.toLocaleDateString()}: ${fmtExact(v.total || 0)}, ${closed} of 3 rings closed` });
   }))));
 }
 
