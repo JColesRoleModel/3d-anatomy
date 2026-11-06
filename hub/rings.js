@@ -36,6 +36,14 @@ export function fmtMin(seconds) {
   if (m < 60) return `${m}m`;
   return `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m`;
 }
+// To the second, for places that should be exact: "45s", "8m 32s", "1h 05m 12s".
+export function fmtExact(seconds) {
+  seconds = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = seconds % 60;
+  if (h) return `${h}h ${pad(m)}m ${pad(s)}s`;
+  if (m) return `${m}m ${pad(s)}s`;
+  return `${s}s`;
+}
 export function fmtClock(seconds) {
   seconds = Math.max(0, Math.floor(seconds));
   const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = seconds % 60;

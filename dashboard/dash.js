@@ -7,7 +7,7 @@
 // streak), reads the Scroll once a day, and uses its own small offline cache (sw.js). A line under the rings says
 // whether it's live and when the latest session ended.
 import { $, h, fill, onError, openModal, closeModal, signedInPage, account } from '../hub/page.js';
-import { RINGS, DEFAULT_GOALS, byDay, activityEntries, practiceEntries, allStreak, ringsSVG, today, fmtMin, dayKey, daysBack, sessionsOf, ago, ringOf } from '../hub/rings.js';
+import { RINGS, DEFAULT_GOALS, byDay, activityEntries, practiceEntries, allStreak, ringsSVG, today, fmtExact, dayKey, daysBack, sessionsOf, ago, ringOf } from '../hub/rings.js';
 import { groupByDue, sectionOf, formatDue } from '../tasks/logic.js';
 
 const NIGHT_FROM = 22, NIGHT_TO = 6;
@@ -54,6 +54,13 @@ $('#night').addEventListener('click', () => {
 });
 document.getElementById('d-night')?.addEventListener('click', () => { state.forceNight = true; tick(); });
 
+// Time to the second for the ring numbers: the minutes large, the seconds a little smaller beside them ("8m 32s").
+function exact(seconds) {
+  const [big, ...rest] = fmtExact(seconds).split(' ');
+  const tail = rest.join(' ');
+  return h('b', {}, big, tail ? h('span', { class: 'd-sec' }, ` ${tail}`) : null);
+}
+
 /* ---------- Live or not ---------- */
 function heard(meta) { state.live = !meta?.fromCache && navigator.onLine; state.heardAt = Date.now(); }
 function renderSync(all) {
@@ -79,7 +86,7 @@ function renderStats() {
   const pct = (id, d = t) => (d[id] || 0) / 60 / state.goals[id];
   $('#rings').innerHTML = ringsSVG({ body: pct('body'), mind: pct('mind'), spirit: pct('spirit') }, 220, 20);
   fill($('#rings-legend'), RINGS.map((r) => h('div', { class: 'd-leg', style: `--c:${r.color}` },
-    h('span', {}, r.label), h('b', {}, fmtMin(t[r.id] || 0)), h('small', {}, `/ ${state.goals[r.id]}m`))));
+    h('span', {}, r.label), exact(t[r.id] || 0), h('small', {}, `/ ${state.goals[r.id]}m`))));
   renderSync(all);
   const s = allStreak(days, state.goals);
   $('#streak').textContent = s ? `${s} day${s === 1 ? '' : 's'} closing all three ✦` : 'Close all three to start a streak';
@@ -101,7 +108,7 @@ function renderStats() {
   fill($('#recent'), recent.length ? recent.map((x) => h('div', { class: 'd-done-row', style: `--c:${ringOf(x.ring).color}` },
     h('span', { class: 'd-done-dot' }),
     h('span', { class: 'd-done-title' }, x.title, x.sub ? h('small', {}, ` · ${x.sub}`) : null),
-    h('span', { class: 'd-done-dur' }, fmtMin(x.seconds)),
+    h('span', { class: 'd-done-dur' }, fmtExact(x.seconds)),
     h('span', { class: 'd-done-when' }, ago(x.end))))
     : [h('p', { class: 'd-empty' }, 'Nothing yet. Watch, scroll or practice and it shows up here.')]);
 }

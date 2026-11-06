@@ -113,3 +113,6 @@
 
 /* The card: gold, bold and large, on a darker panel so it reads from across a room */
 .d-body .d-quote { background: rgba(9, 7, 24, 0.92); border-color: rgba(230, 189, 106, 0.35); }
+/* Seconds beside the ring minutes, a step smaller */
+.d-leg b .d-sec { font-size: 0.62em; color: var(--text); opacity: 0.85; }
+.d-done-dur { white-space: nowrap; }
