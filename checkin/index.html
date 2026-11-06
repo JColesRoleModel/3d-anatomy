@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Check-in - Tree of Life NRI</title>
+  <link rel="stylesheet" href="../hub/nav.css">
+  <link rel="stylesheet" href="../hub/page.css">
+  <link rel="stylesheet" href="checkin.css">
+  <link rel="icon" type="image/png" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b0a1f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tree of Life">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header id="hub-nav" data-section="checkin" data-base="../"></header>
+
+  <main class="t-main">
+    <section class="t-gate" id="gate">
+      <h1 class="t-title">Check-in</h1>
+      <p class="t-lede" id="gate-text">Opening your check-ins…</p>
+      <button class="t-btn t-primary hidden" id="gate-signin" type="button">Sign in</button>
+    </section>
+
+    <section class="hidden" id="app">
+      <!-- Start -->
+      <div id="home" class="c-home">
+        <section class="t-panel c-start">
+          <h1 class="t-title">Check-in</h1>
+          <p class="t-lede">How you feel, then a few short tests. Whenever suits you: the time of day is saved with it.</p>
+          <div class="c-label">Right now is</div>
+          <div class="t-seg c-context" id="context" role="radiogroup" aria-label="When"></div>
+          <div class="c-kinds">
+            <button class="t-btn t-primary c-kind" type="button" data-kind="quick"><b>Quick</b><span>Feel, math, reaction, breath · about 3 min</span></button>
+            <button class="t-btn c-kind" type="button" data-kind="full"><b>Full</b><span>Everything, with eyes, neck and mudras · about 8 min</span></button>
+          </div>
+          <div class="c-label">Or just one</div>
+          <div class="c-singles" id="singles"></div>
+        </section>
+
+        <section class="t-panel" id="latest-panel">
+          <h2 class="c-h2" id="latest-title">Your last check-in</h2>
+          <div id="latest"></div>
+        </section>
+
+        <section class="t-panel">
+          <h2 class="c-h2">Every check-in</h2>
+          <div class="c-history" id="history"></div>
+        </section>
+      </div>
+
+      <!-- A check-in in progress -->
+      <section id="run" class="t-panel c-run hidden" aria-live="polite">
+        <div class="c-run-head">
+          <div class="c-run-title"><b id="run-name"></b><span id="run-count"></span></div>
+          <button class="t-btn c-small" id="run-skip" type="button">Skip</button>
+          <button class="t-btn c-small" id="run-stop" type="button">Stop</button>
+        </div>
+        <div class="c-progress"><div id="run-bar"></div></div>
+        <div class="c-stage" id="stage"></div>
+      </section>
+    </section>
+  </main>
+
+  <!-- Stopping part way -->
+  <div class="t-modal hidden" id="stop">
+    <div class="t-modal-back" data-close></div>
+    <div class="t-modal-card t-confirm" role="dialog" aria-modal="true" aria-labelledby="stop-title">
+      <div class="t-modal-head"><h2 id="stop-title">Stop the check-in?</h2></div>
+      <p>The parts you finished can be kept.</p>
+      <div class="t-modal-foot c-stop-foot">
+        <button class="t-btn" type="button" id="stop-discard">Throw away</button>
+        <button class="t-btn" type="button" data-close>Keep going</button>
+        <button class="t-btn t-primary" type="button" id="stop-save">Save what's done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="t-toast hidden" id="toast" role="status" aria-live="polite"></div>
+  <script type="module">
+    import { initHub } from '../hub/nav.js';
+    initHub();
+  </script>
+  <script type="module" src="checkin.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});</script>
+</body>
+</html>

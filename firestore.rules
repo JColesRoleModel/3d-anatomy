@@ -60,6 +60,15 @@ service cloud.firestore {
         && (!('text' in request.resource.data) || (request.resource.data.text is string && request.resource.data.text.size() <= 2000))
         && request.resource.data.size() <= 20;
     }
+    // Check-ins: how you felt and the scores of the short tests, one document per check-in (with every raw trial).
+    match /users/{uid}/checkins/{checkinId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.startedAt is number
+        && request.resource.data.kind in ['quick', 'full', 'single']
+        && (!('modules' in request.resource.data) || request.resource.data.modules is map)
+        && request.resource.data.size() <= 16;
+    }
     // Settings, such as the ring goals. Pages listen to the whole (one-document) collection, so reading must not
     // depend on the document's name, or Firestore refuses the listen; writing is limited to the one document, 'main'.
     match /users/{uid}/prefs/{docId} {

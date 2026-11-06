@@ -53,6 +53,7 @@ const SECTIONS = [
   { id: 'scroll', label: 'Scroll', href: 'scroll/', icon: 'scroll' },
   { id: 'tasks', label: 'Tasks', href: 'tasks/', icon: 'check' },
   { id: 'rings', label: 'Rings', href: 'rings/', icon: 'rings' },
+  { id: 'checkin', label: 'Check-in', href: 'checkin/', icon: 'pulse' },
   { id: 'dashboard', label: 'Dashboard', href: 'dashboard/', icon: 'screen' },
 ];
 export const SITE_SECTIONS = SECTIONS;

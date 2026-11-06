@@ -1,0 +1,115 @@
+/* Check-in. Shares the look in hub/page.css. */
+.c-home { display: flex; flex-direction: column; gap: 14px; max-width: 760px; width: 100%; margin: 0 auto; }
+.c-start { display: flex; flex-direction: column; gap: 12px; padding: 18px; }
+.c-label { font-size: 13px; color: var(--muted); letter-spacing: 0.02em; }
+.c-h2 { margin: 0 0 10px; font: 700 24px/1.1 var(--serif); color: var(--cream); }
+.c-when { margin: -6px 0 8px; color: var(--gold); font-size: 14px; }
+.c-note { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+.c-context { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 520px) { .c-context { grid-template-columns: 1fr 1fr; } }
+.c-kinds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .c-kinds { grid-template-columns: 1fr; } }
+.c-kind { flex-direction: column; align-items: flex-start; min-height: 74px; padding: 12px 18px; border-radius: 18px; text-align: left; }
+.c-kind b { font: 700 24px/1 var(--serif); color: var(--cream); }
+.c-kind span { font-size: 13px; color: var(--muted); font-weight: 400; }
+.c-singles { display: flex; flex-wrap: wrap; gap: 8px; }
+.c-single, .c-small { min-height: 36px; padding: 0 14px; font-size: 14px; }
+
+/* Results: this time against the averages */
+.c-results { display: flex; flex-direction: column; }
+.c-res { display: grid; grid-template-columns: minmax(0, 1.6fr) 1fr 1fr 1fr; gap: 8px; align-items: baseline; padding: 7px 2px; border-top: 1px solid var(--line); font-size: 14px; }
+.c-res-head { border-top: 0; color: var(--muted); font-size: 12px; padding-top: 0; }
+.c-res-label { color: var(--muted); }
+.c-res-now { color: var(--cream); font-weight: 600; }
+.c-res-now.better i { color: var(--emerald); font-style: normal; }
+.c-res-now.worse i { color: var(--amber); font-style: normal; }
+.c-res small { color: var(--muted); font-size: 11px; }
+@media (max-width: 520px) { .c-res { grid-template-columns: minmax(0, 1.3fr) 1fr 0.9fr 0.9fr; font-size: 13px; gap: 6px; } }
+
+/* History */
+.c-history { display: flex; flex-direction: column; gap: 6px; }
+.c-hist { border: 1px solid var(--line); border-radius: 14px; background: rgba(11, 10, 31, 0.35); }
+.c-hist.open { border-color: rgba(230, 189, 106, 0.4); }
+.c-hist-row { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; padding: 10px 12px; }
+.c-hist-row b { color: var(--cream); font-weight: 600; }
+.c-tag { color: var(--gold); font-size: 13px; justify-self: end; }
+.c-hist-bits { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
+.c-hist-body { padding: 0 12px 12px; }
+.c-del { margin-top: 10px; color: var(--red); }
+
+/* A check-in in progress: fills the screen, no scrolling */
+.c-run { display: flex; flex-direction: column; gap: 10px; max-width: 760px; width: 100%; margin: 0 auto; min-height: calc(100dvh - 120px); padding: 14px; }
+.c-run-head { display: flex; align-items: center; gap: 8px; }
+.c-run-title { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.c-run-title b { font: 700 24px/1.1 var(--serif); color: var(--cream); }
+.c-run-title span { font-size: 12px; color: var(--muted); }
+.c-progress { height: 4px; border-radius: 4px; background: rgba(246, 227, 180, 0.1); overflow: hidden; }
+.c-progress div { height: 100%; width: 0; background: var(--gold); transition: width 0.4s; }
+.c-stage { flex: 1; display: flex; flex-direction: column; gap: 14px; justify-content: center; min-height: 0; }
+.c-step-title { margin: 0; font: 700 30px/1.1 var(--serif); color: var(--cream); text-align: center; }
+.c-step-sub { margin: 0 auto; max-width: 46ch; color: var(--text); opacity: 0.85; text-align: center; }
+.c-go { align-self: center; min-width: 200px; min-height: 52px; font-size: 18px; }
+.c-two { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.c-two .c-go { min-width: 0; }
+.c-safety { margin: 0 auto; max-width: 46ch; text-align: center; color: var(--amber); font-size: 14px; }
+.c-timeup { font: 700 40px/1 var(--serif); color: var(--cream); text-align: center; }
+
+/* 1 to 4 ratings */
+.c-rate { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.c-rate-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 76px; padding: 6px 4px; border-radius: 16px; cursor: pointer;
+  border: 1px solid var(--line); background: rgba(246, 227, 180, 0.05); color: var(--text);
+}
+.c-rate-btn b { font: 700 26px/1 var(--serif); font-variant-numeric: lining-nums; }
+.c-rate-btn span { font-size: 13px; line-height: 1.15; text-align: center; }
+.c-rate-btn.r1 b { color: var(--emerald); }
+.c-rate-btn.r2 b { color: var(--cream); }
+.c-rate-btn.r3 b { color: var(--amber); }
+.c-rate-btn.r4 b { color: var(--red); }
+.c-rate-btn:hover, .c-rate-btn[aria-pressed="true"] { border-color: rgba(230, 189, 106, 0.75); background: rgba(230, 189, 106, 0.18); }
+.c-rate-sm .c-rate-btn { min-height: 46px; border-radius: 12px; flex-direction: row; gap: 6px; }
+.c-rate-sm .c-rate-btn b { font-size: 18px; }
+.c-feel-row { display: flex; flex-direction: column; gap: 4px; }
+.c-feel-label { font-size: 13px; color: var(--muted); }
+.c-sleep { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.c-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.c-chip { min-height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer; border: 1px solid var(--line); background: rgba(246, 227, 180, 0.04); color: var(--muted); font-size: 14px; }
+.c-chip[aria-pressed="true"] { color: var(--cream); border-color: rgba(230, 189, 106, 0.75); background: rgba(230, 189, 106, 0.2); }
+
+/* Mental math */
+.c-timer { height: 6px; border-radius: 6px; background: rgba(246, 227, 180, 0.1); overflow: hidden; }
+.c-timer div { height: 100%; width: 100%; background: var(--gold); }
+.c-math-q { font: 700 52px/1 var(--serif); color: var(--cream); text-align: center; font-variant-numeric: lining-nums; }
+.c-math-a { min-height: 54px; font: 600 40px/54px var(--sans); text-align: center; color: var(--gold); border-bottom: 2px solid var(--line); width: 160px; margin: 0 auto; }
+.c-math-a.right { animation: c-right 0.35s; }
+.c-math-a.wrong { animation: c-wrong 0.35s; }
+@keyframes c-right { from { border-color: var(--emerald); } }
+@keyframes c-wrong { from { border-color: var(--red); } }
+.c-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 360px; width: 100%; margin: 0 auto; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.c-key { min-height: 58px; border-radius: 14px; font-size: 24px; cursor: pointer; border: 1px solid var(--line); background: rgba(246, 227, 180, 0.06); color: var(--text); }
+.c-key:active { background: rgba(230, 189, 106, 0.25); }
+.c-key.ok { background: rgba(230, 189, 106, 0.22); border-color: rgba(230, 189, 106, 0.6); color: var(--cream); }
+
+/* Reaction time, tap pads */
+.c-react, .c-tap-pad {
+  flex: 1; min-height: 320px; border-radius: 22px; border: 1px solid var(--line); background: rgba(11, 10, 31, 0.45);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer;
+}
+.c-react-dot { width: 140px; height: 140px; border-radius: 50%; background: rgba(172, 166, 198, 0.25); }
+.c-react.go .c-react-dot { background: var(--gold); box-shadow: 0 0 40px rgba(230, 189, 106, 0.7); }
+.c-react.early .c-react-dot { background: rgba(255, 138, 122, 0.5); }
+.c-react-msg { font: 700 30px/1 var(--serif); color: var(--cream); }
+.c-react-count { font-size: 13px; color: var(--muted); }
+.c-clock { font: 700 64px/1 var(--serif); color: var(--cream); font-variant-numeric: tabular-nums; }
+.c-tap-pad span, .c-tap-left { color: var(--muted); text-align: center; padding: 0 16px; }
+.c-tap-pad.hit { animation: c-hit 0.15s; }
+@keyframes c-hit { from { background: rgba(230, 189, 106, 0.2); } }
+
+/* Eye movements: a dot moving across a dark field */
+.c-arena { position: relative; flex: 1; min-height: 340px; border-radius: 22px; background: rgba(5, 3, 20, 0.6); border: 1px solid var(--line); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+.c-dot { position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 18px rgba(230, 189, 106, 0.8); will-change: transform; }
+.c-dot-tap { width: 36px; height: 36px; }
+
+.c-stop-foot { flex-wrap: wrap; }
