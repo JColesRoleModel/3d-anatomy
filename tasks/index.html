@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tasks - Tree of Life NRI</title>
+  <link rel="stylesheet" href="../hub/nav.css">
+  <link rel="stylesheet" href="tasks.css">
+  <link rel="icon" type="image/png" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b0a1f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tasks">
+  <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+  <script>
+    // Background and its dimness are per device; set them before the page draws so it doesn't flash.
+    try {
+      const bg = localStorage.getItem('tolnri.tasks.bg'), dim = localStorage.getItem('tolnri.tasks.dim');
+      if (bg === 'landscape') document.documentElement.classList.add('bg-landscape');
+      if (dim !== null) document.documentElement.style.setProperty('--dim', dim / 100);
+    } catch {}
+  </script>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header id="hub-nav" data-section="tasks" data-base="../"></header>
+
+  <main class="t-main">
+    <!-- Signed out, or still loading -->
+    <section class="t-gate" id="gate">
+      <h1 class="t-title">Tasks</h1>
+      <p class="t-lede" id="gate-text">Opening your tasks…</p>
+      <button class="t-btn t-primary hidden" id="gate-signin" type="button">Sign in</button>
+    </section>
+
+    <!-- Signed in -->
+    <section class="hidden" id="app">
+      <form class="t-panel t-quick" id="quick" autocomplete="off">
+        <div class="t-quick-top">
+          <input id="quick-title" class="t-input t-quick-input" placeholder="Add a task…" enterkeyhint="done" aria-label="New task">
+          <button class="t-btn t-primary" type="submit">Add</button>
+        </div>
+        <div class="t-chips" role="radiogroup" aria-label="When">
+          <button type="button" class="t-chip" data-when="none" role="radio">General</button>
+          <button type="button" class="t-chip" data-when="today" role="radio">Today</button>
+          <button type="button" class="t-chip" data-when="tomorrow" role="radio">Tomorrow</button>
+          <label class="t-chip t-chip-date" data-when="pick" role="radio">
+            <span id="quick-date-label">Pick a date</span>
+            <input type="date" id="quick-date" aria-label="Pick a due date">
+          </label>
+        </div>
+      </form>
+
+      <div class="t-panel t-toolbar">
+        <input id="search" class="t-input" type="search" placeholder="Search tasks" autocomplete="off" aria-label="Search tasks">
+        <label class="t-check"><input id="toggle-completed" type="checkbox"><span>Show done</span></label>
+        <details class="t-look">
+          <summary>Background</summary>
+          <div class="t-look-body">
+            <div class="t-seg" role="radiogroup" aria-label="Background">
+              <button type="button" class="t-seg-btn" data-bg="sky" role="radio">Night sky</button>
+              <button type="button" class="t-seg-btn" data-bg="landscape" role="radio">Landscape</button>
+            </div>
+            <label class="t-range">Dim <input type="range" id="dim" min="0" max="90" step="5"><output id="dim-val"></output></label>
+          </div>
+        </details>
+      </div>
+
+      <nav class="t-tabs" role="tablist">
+        <button class="t-tab" data-tab="due" role="tab" type="button"><i class="dot gold"></i>Due <span class="t-count" id="tab-count-due">0</span></button>
+        <button class="t-tab" data-tab="general" role="tab" type="button"><i class="dot violet"></i>General <span class="t-count" id="tab-count-general">0</span></button>
+      </nav>
+
+      <div class="t-columns">
+        <section class="t-col" data-col="due">
+          <header class="t-col-head">
+            <h2><i class="dot gold"></i>Due <span class="t-count" id="count-due">0</span></h2>
+          </header>
+          <div class="t-list" id="list-due"></div>
+        </section>
+        <section class="t-col" data-col="general">
+          <header class="t-col-head">
+            <h2><i class="dot violet"></i>General <span class="t-count" id="count-general">0</span></h2>
+            <div class="t-col-tools">
+              <select class="t-select" id="sort-general" aria-label="Sort general tasks">
+                <option value="old">Oldest first</option>
+                <option value="new">Newest first</option>
+                <option value="az">A → Z</option>
+                <option value="za">Z → A</option>
+                <option value="timeLow">Quickest first</option>
+                <option value="timeHigh">Longest first</option>
+                <option value="random">Random</option>
+              </select>
+              <button class="t-btn t-icon" id="shuffle-general" type="button" title="Shuffle" aria-label="Shuffle">🎲</button>
+            </div>
+          </header>
+          <div class="t-list" id="list-general"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add / edit -->
+  <div class="t-modal hidden" id="modal">
+    <div class="t-modal-back" id="modal-back"></div>
+    <form class="t-modal-card" id="modal-form" role="dialog" aria-modal="true" aria-labelledby="modal-title" autocomplete="off">
+      <div class="t-modal-head">
+        <h2 id="modal-title">New task</h2>
+        <button class="t-btn t-icon" id="modal-x" type="button" aria-label="Close">✕</button>
+      </div>
+      <label class="t-field"><span>Task</span><input class="t-input" id="task-title" maxlength="300" placeholder="Call the supplier"></label>
+      <div class="t-seg" role="radiogroup" aria-label="Column">
+        <button type="button" class="t-seg-btn" data-section="due" role="radio">Has a due date</button>
+        <button type="button" class="t-seg-btn" data-section="general" role="radio">General</button>
+      </div>
+      <div class="t-grid2" id="due-wrap">
+        <label class="t-field"><span>Due date</span><input class="t-input" type="date" id="task-due"></label>
+        <label class="t-field"><span>Time (optional)</span><input class="t-input" type="time" id="task-time"></label>
+      </div>
+      <label class="t-check"><input id="has-est" type="checkbox"><span>Estimated time</span></label>
+      <label class="t-field hidden" id="est-wrap"><span>Minutes</span><input class="t-input" id="task-est" inputmode="numeric" placeholder="25"></label>
+      <label class="t-field"><span>Notes (optional)</span><textarea class="t-input t-textarea" id="task-notes" maxlength="5000"></textarea></label>
+      <p class="t-hint" id="modal-hint" role="alert"></p>
+      <div class="t-modal-foot">
+        <button class="t-btn" id="btn-cancel" type="button">Cancel</button>
+        <button class="t-btn t-primary" id="btn-save" type="submit">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Import confirmation (in place of the browser's confirm box) -->
+  <div class="t-modal hidden" id="confirm">
+    <div class="t-modal-back" data-close></div>
+    <div class="t-modal-card t-confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-text">
+      <p id="confirm-text"></p>
+      <div class="t-modal-foot">
+        <button class="t-btn" type="button" data-close>Cancel</button>
+        <button class="t-btn t-primary" type="button" id="confirm-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+  <div class="t-toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module">
+    import { initHub } from '../hub/nav.js';
+    initHub({ tools: [
+      { id: 't-add', label: 'Add task', icon: 'plus' },
+      { id: 't-export', label: 'Export tasks', icon: 'download', desktopOnly: true },
+      { id: 't-import', label: 'Import tasks', icon: 'upload', desktopOnly: true },
+      { id: 't-clear', label: 'Clear done tasks', icon: 'broom', desktopOnly: true },
+    ] });
+  </script>
+  <script type="module" src="tasks.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});</script>
+</body>
+</html>

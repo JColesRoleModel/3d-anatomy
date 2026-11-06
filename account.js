@@ -1,5 +1,5 @@
-// Accounts: sign-in (Google, or email and password) and each person's saved views in Firestore, under
-// users/<their id>/saves. The Firebase code (vendor/firebase.js) only loads when someone signs in, or was signed in
+// Accounts: sign-in (Google, or email and password) and each person's data in Firestore, under users/<their id>/
+// (saved views, practice records, tasks). The Firebase code (vendor/firebase.js) only loads when someone signs in, or was signed in
 // on this device before, so the app stays as light as ever for everyone else.
 import { firebaseConfig } from './firebase-config.js';
 const here = new URL('.', import.meta.url).href; // so pages in subfolders (wellness/) load the same files
@@ -18,7 +18,13 @@ function load() {
       persistence: [fb.indexedDBLocalPersistence, fb.browserLocalPersistence],
       popupRedirectResolver: fb.browserPopupRedirectResolver,
     });
-    db = fb.getFirestore(app);
+    // A copy of the account's data stays on the device, so lists (like Tasks) open at once and changes made offline
+    // sync when the connection is back. Browsers that refuse storage (some private windows) fall back to memory.
+    try {
+      db = fb.initializeFirestore(app, { localCache: fb.persistentLocalCache({ tabManager: fb.persistentMultipleTabManager() }) });
+    } catch {
+      db = fb.initializeFirestore(app, { localCache: fb.memoryLocalCache() });
+    }
     if (EMULATOR) {
       fb.connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
       fb.connectFirestoreEmulator(db, '127.0.0.1', 8080);
@@ -97,6 +103,36 @@ export async function deleteSessions(uid, ids) {
     const batch = fb.writeBatch(db);
     for (const id of ids.slice(i, i + 400)) batch.delete(fb.doc(sessionsOf(uid), id));
     await batch.commit();
+  }
+}
+
+// Tasks (the to-do list that was DoubleDoIt): one document per task under users/<their id>/tasks, kept live with a
+// listener. Call watchTasks first; the write helpers below assume Firebase has loaded. Writes are not awaited: they
+// apply on the device at once and only resolve when the server confirms, which never happens while offline.
+const tasksOf = (uid) => fb.collection(db, 'users', uid, 'tasks');
+export async function watchTasks(uid, onData, onError) {
+  await load();
+  return fb.onSnapshot(tasksOf(uid), { includeMetadataChanges: true }, (snap) => {
+    onData(snap.docs.map((d) => ({ id: d.id, ...d.data() })), { fromCache: snap.metadata.fromCache, pending: snap.metadata.hasPendingWrites });
+  }, onError);
+}
+export function createTask(uid, data, onError) {
+  const ref = fb.doc(tasksOf(uid));
+  fb.setDoc(ref, data).catch(onError);
+  return ref.id;
+}
+export function patchTask(uid, id, patch, onError) {
+  fb.updateDoc(fb.doc(tasksOf(uid), id), { ...patch, updatedAt: Date.now() }).catch(onError);
+}
+export function removeTask(uid, id, onError) {
+  fb.deleteDoc(fb.doc(tasksOf(uid), id)).catch(onError);
+}
+export function bulkTasks(uid, creates = [], deletes = [], onError) { // 400 writes per batch
+  const ops = [...creates.map((data) => (b) => b.set(fb.doc(tasksOf(uid)), data)), ...deletes.map((id) => (b) => b.delete(fb.doc(tasksOf(uid), id)))];
+  for (let i = 0; i < ops.length; i += 400) {
+    const batch = fb.writeBatch(db);
+    ops.slice(i, i + 400).forEach((op) => op(batch));
+    batch.commit().catch(onError);
   }
 }
 

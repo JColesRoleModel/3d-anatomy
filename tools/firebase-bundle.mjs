@@ -1,6 +1,7 @@
-// Bundles the parts of the Firebase web SDK the app uses (sign-in, and the small "lite" Firestore client) into one
-// ES module, vendor/firebase.js, so the site keeps its no-build, no-CDN setup. Run after changing the version in
-// package.json:  node tools/firebase-bundle.mjs
+// Bundles the parts of the Firebase web SDK the app uses (sign-in, and the full Firestore client with its offline
+// cache and live listeners, which Tasks needs) into one ES module, vendor/firebase.js, so the site keeps its
+// no-build, no-CDN setup. It only loads once someone signs in. Run after changing the version in package.json:
+//   node tools/firebase-bundle.mjs
 import { build } from 'esbuild';
 import { readFileSync } from 'fs';
 
@@ -15,7 +16,10 @@ await build({
         signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail,
         onAuthStateChanged, signOut,
       } from 'firebase/auth';
-      export { getFirestore, connectFirestoreEmulator, collection, doc, getDocs, setDoc, deleteDoc, writeBatch } from 'firebase/firestore/lite';
+      export {
+        initializeFirestore, persistentLocalCache, persistentMultipleTabManager, memoryLocalCache, connectFirestoreEmulator,
+        collection, doc, getDocs, setDoc, updateDoc, deleteDoc, writeBatch, onSnapshot,
+      } from 'firebase/firestore';
     `,
     resolveDir: '.',
     loader: 'js',

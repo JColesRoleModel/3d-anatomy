@@ -21,6 +21,15 @@ service cloud.firestore {
         && request.resource.data.duration is number && request.resource.data.duration > 0 && request.resource.data.duration <= 3600
         && request.resource.data.timestamp is number;
     }
+    // Tasks (the to-do list): due-date and general tasks.
+    match /users/{uid}/tasks/{taskId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 300
+        && (!('notes' in request.resource.data) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 5000))
+        && (!('section' in request.resource.data) || request.resource.data.section in ['due', 'general']);
+    }
     // Nothing else can be read or written.
     match /{document=**} {
       allow read, write: if false;

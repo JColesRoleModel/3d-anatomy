@@ -51,7 +51,13 @@ The movement is illustrative. The collarbone, shoulder blade and arm move as rig
 
 ## Site menu and account
 
-`hub/nav.js` and `hub/nav.css` draw the same top bar on every page: the logo, one icon per part of the site, the page's own tools, a Menu button that drops down everything with its name, and the account button. A page adds `<header id="hub-nav" data-section="…" data-base="…">` and calls `initHub({ tools })`. New parts of the site go in `SECTIONS` in `hub/nav.js` (Watch and Health are listed there as coming soon). The account (Firebase project `tree-of-life-nri`, `account.js`) is one sign-in for the whole site: saved views live under `users/<uid>/saves` and practice records under `users/<uid>/sessions` (see `firestore.rules`).
+`hub/nav.js` and `hub/nav.css` draw the same top bar on every page: the logo, one icon per part of the site, the page's own tools, a Menu button that drops down everything with its name, and the account button. A page adds `<header id="hub-nav" data-section="…" data-base="…">` and calls `initHub({ tools })`. New parts of the site go in `SECTIONS` in `hub/nav.js` (Watch and Health are listed there as coming soon). The account (Firebase project `tree-of-life-nri`, `account.js`) is one sign-in for the whole site: saved views live under `users/<uid>/saves`, practice records under `users/<uid>/sessions`, and tasks under `users/<uid>/tasks` (see `firestore.rules`).
+
+## Tasks
+
+`tasks/` is the to-do list that used to be DoubleDoIt (doubledoit.web.app), moved in so everything shares one account. Two columns: **Due**, anything with a date, grouped Overdue / Today / Tomorrow / This week / Later; and **General**, sortable and shuffleable. A quick-add bar has General / Today / Tomorrow / Pick a date chips. Tasks live under `users/<uid>/tasks`, sync live between devices, and work offline. The top bar's tools add a task, export or import JSON (DoubleDoIt's export files import as-is), and clear done tasks. The background can be the night sky or the landscape picture, with a dimness slider, set per device. `tasks/logic.js` holds the date and sorting rules, with no page or Firebase code.
+
+`watch/test.html` is a one-video test for the coming Watch section: it checks whether YouTube shows ads in the site, and counts only the seconds a video actually plays.
 
 ## Wellness practice
 
@@ -76,7 +82,7 @@ node tools/catalog.mjs data/catalog.json
 `tools/meta/` holds the structure lists that `build.mjs` writes next to each model.
 
 ### Accounts
-Saved views sync to a person's account through Firebase (project `tree-of-life-nri`). `firebase-config.js` holds the web app config, `firestore.rules` the security rules (paste them into the Firebase console under Firestore > Rules), and `vendor/firebase.js` the SDK, bundled by `node tools/firebase-bundle.mjs`.
+Saved views sync to a person's account through Firebase (project `tree-of-life-nri`). `firebase-config.js` holds the web app config, `firestore.rules` the security rules (publish them with `firebase deploy --only firestore:rules`, or paste them into the Firebase console under Firestore > Rules), and `vendor/firebase.js` the SDK, bundled by `node tools/firebase-bundle.mjs`. The bundle includes the full Firestore client, with its on-device cache and live listeners, because Tasks needs them. It only loads once someone signs in.
 
 ## Credits and license
 3D models from [Z-Anatomy](https://www.z-anatomy.com), the open source atlas of anatomy (CC BY-SA 4.0), derived from BodyParts3D, © The Database Center for Life Science (CC BY-SA 2.1 Japan). The models in this repository are modified (converted and simplified) and are shared under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).

@@ -14,6 +14,11 @@ const ICONS = {
   pulse: '<path d="M3 12.5h4l2-5 3.2 10 2.4-6.5 1.4 1.5H21"/>',
   coin: '<circle cx="12" cy="12" r="8"/><path d="M14.6 9.3c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2s1.1 1.7 2.6 2.1 2.7.9 2.7 2.1-1.2 2-2.7 2c-1.2 0-2.2-.5-2.7-1.5M12 6.4v1.5M12 16.2v1.5"/>',
   menu: '<path d="M4.5 7h15M4.5 12h15M4.5 17h15"/>',
+  check: '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.3l2.8 2.8L16.2 9"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>',
+  upload: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 19.5h14"/>',
+  broom: '<path d="M14.5 3.5 10 11M6.5 11h8l1.5 9.5h-11z M9 15.5v5M12 15.5v5"/>',
   user: '<circle cx="12" cy="8.6" r="3.6"/><path d="M4.8 20c.9-3.7 3.7-5.7 7.2-5.7s6.3 2 7.2 5.7"/>',
   layers: '<path d="M12 3.2 2.6 8.6 12 14l9.4-5.4z M2.6 12.7 12 18.1l9.4-5.4"/>',
   bookmark: '<path d="M6.5 3.5h11v17L12 16.4l-5.5 4.1z"/>',
@@ -38,6 +43,7 @@ export const icon = (name, size = 20) =>
 const SECTIONS = [
   { id: 'anatomy', label: '3D Anatomy', href: '', icon: 'body' },
   { id: 'practice', label: 'Practice', href: 'wellness/', icon: 'lotus' },
+  { id: 'tasks', label: 'Tasks', href: 'tasks/', icon: 'check' },
   { id: 'watch', label: 'Watch', icon: 'play', soon: true },
   { id: 'health', label: 'Health', icon: 'pulse', soon: true },
 ];
