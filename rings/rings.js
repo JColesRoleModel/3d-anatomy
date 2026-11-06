@@ -2,11 +2,11 @@
 // numbers. Today's rings and streaks; then any stretch of time (this week, a month, all time, or two dates) with its
 // totals, a chart of the trend, where the time went (practice by section and routine, each video, the Scroll), and
 // every session with its time and length, practice down to each movement. Then the last 12 weeks and the goals.
-import { $, $$, h, fill, toast, onError, signedInPage, account } from '../hub/page.js';
+import { $, $$, h, fill, toast, onError, openModal, closeModal, signedInPage, account } from '../hub/page.js';
 import { RINGS, ringOf, DEFAULT_GOALS, byDay, activityEntries, practiceEntries, streak, allStreak, ringsSVG, dayKey, daysBack, today, fmtExact, fmtClock, sessionsOf } from '../hub/rings.js';
 
 const DAY = 864e5;
-const SOURCE = { watch: 'Watch', scroll: 'Scroll', practice: 'Practice' };
+const SOURCE = { watch: 'Watch', scroll: 'Scroll', practice: 'Practice', manual: 'Logged' };
 const state = { uid: null, activity: [], sessions: [], goals: { ...DEFAULT_GOALS }, unsubs: [], range: 'week', offset: 0, from: '', to: '', logDays: 14 };
 
 signedInPage({
@@ -173,8 +173,8 @@ function renderBreakdown(entries) {
     const total = mine.reduce((s, e) => s + e.seconds, 0);
     const groups = new Map();
     for (const e of mine) {
-      const key = e.source === 'practice' ? `p|${e.section}` : e.source === 'scroll' ? 's' : `w|${e.title}`;
-      const g = groups.get(key) || { label: e.source === 'practice' ? e.section : e.source === 'scroll' ? 'The Scroll' : (e.title || 'Video'), source: e.source, seconds: 0, count: 0, routines: new Map() };
+      const key = e.source === 'practice' ? `p|${e.section}` : e.source === 'scroll' ? 's' : e.source === 'manual' ? `m|${(e.title || '').toLowerCase()}` : `w|${e.title}`;
+      const g = groups.get(key) || { label: e.source === 'practice' ? e.section : e.source === 'scroll' ? 'The Scroll' : (e.title || (e.source === 'manual' ? 'Logged time' : 'Video')), source: e.source, seconds: 0, count: 0, routines: new Map() };
       g.seconds += e.seconds; g.count++;
       if (e.source === 'practice') { const k = e.routine || '—'; g.routines.set(k, (g.routines.get(k) || 0) + e.seconds); }
       groups.set(key, g);
@@ -214,6 +214,11 @@ function renderLog(sessions) {
           const head = [h('span', { class: 'r-time' }, `${fmtTime(s.start)}–${fmtTime(s.end)}`), h('span', { class: 'r-dot' }),
             h('span', { class: 'r-what' }, h('b', {}, s.title), h('small', {}, [SOURCE[s.source], r.label, s.sub, s.parts.length > 1 ? `${s.parts.length} movements` : ''].filter(Boolean).join(' · '))),
             h('span', { class: 'r-dur' }, fmtExact(s.seconds))];
+          if (s.source === 'manual') {
+            const tags = (s.extra.tags || []).map((t) => `#${t}`).join(' ');
+            return h('button', { type: 'button', class: 'r-entry r-entry-m', style: `--c:${r.color}`, title: 'Edit', onclick: () => openLog(s) }, head,
+              tags || s.extra.notes ? h('span', { class: 'r-entry-extra' }, tags ? h('i', {}, tags) : null, s.extra.notes ? h('span', {}, s.extra.notes) : null) : null);
+          }
           if (s.source !== 'practice' || !s.parts.length) return h('div', { class: 'r-entry', style: `--c:${r.color}` }, head);
           return h('details', { class: 'r-entry r-entry-p', style: `--c:${r.color}`, open: openSessions.has(s.start), ontoggle: (e) => { if (e.target.open) openSessions.add(s.start); else openSessions.delete(s.start); } }, h('summary', {}, head),
             h('div', { class: 'r-parts' }, s.parts.map((p) => h('div', { class: 'r-part' },
@@ -235,6 +240,77 @@ function renderHeat(days) {
     return h('i', { class: `r-cell c${closed}${(v.total || 0) > 0 ? ' any' : ''}`, title: `${day.toLocaleDateString()}: ${fmtExact(v.total || 0)}, ${closed} of 3 rings closed` });
   }))));
 }
+
+/* ---------- Log time by hand ---------- */
+// For anything done away from the site (a walk, a class, a book): what, which ring, the date, start and end, tags and
+// notes. Saved with the other sessions (source 'manual'), so it fills the rings, the trends and the Dashboard the same
+// way. Logged entries open from the session list to edit or delete. An end before the start means past midnight.
+let logEditing = null, logRing = 'body';
+const pad2 = (n) => String(n).padStart(2, '0');
+const hhmm = (d) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+function logSpan() {
+  const date = $('#log-date').value, a = $('#log-start').value, b = $('#log-end').value;
+  if (!date || !a || !b) return null;
+  const start = new Date(`${date}T${a}`), end = new Date(`${date}T${b}`);
+  if (end <= start) end.setDate(end.getDate() + 1); // went past midnight
+  return { start, end, seconds: Math.round((end - start) / 1000) };
+}
+function showLogLength() {
+  const sp = logSpan();
+  $('#log-length').textContent = !sp ? '' : `${fmtExact(sp.seconds)}${sp.end.getDate() !== sp.start.getDate() ? ' (ends the next day)' : ''} toward ${ringOf(logRing).label}`;
+}
+function renderLogRing() {
+  fill($('#log-ring'), RINGS.map((r) => h('button', { type: 'button', role: 'radio', class: 't-seg-btn' + (r.id === logRing ? ' on' : ''), style: `--c:${r.color}`, 'aria-checked': r.id === logRing,
+    onclick: () => { logRing = r.id; renderLogRing(); showLogLength(); } }, r.label)));
+}
+function openLog(entry = null) {
+  if (!state.uid) return document.querySelector('.hub-user-btn')?.click();
+  logEditing = entry;
+  const end = entry ? new Date(entry.end) : new Date();
+  const start = entry ? new Date(entry.start) : new Date(end.getTime() - 30 * 60000);
+  logRing = entry?.ring || 'body';
+  $('#log-title').textContent = entry ? 'Edit logged time' : 'Log time';
+  $('#log-what').value = entry?.title || '';
+  $('#log-date').value = dayKey(start.getTime());
+  $('#log-start').value = hhmm(start);
+  $('#log-end').value = hhmm(end);
+  $('#log-tags').value = (entry?.extra?.tags || []).join(', ');
+  $('#log-notes').value = entry?.extra?.notes || '';
+  $('#log-hint').textContent = '';
+  $('#log-delete').classList.toggle('hidden', !entry);
+  renderLogRing(); showLogLength();
+  openModal($('#logtime'));
+  if (!entry) $('#log-what').focus();
+}
+['#log-date', '#log-start', '#log-end'].forEach((sel) => $(sel).addEventListener('input', showLogLength));
+$('#log-open').addEventListener('click', () => openLog());
+document.getElementById('r-log')?.addEventListener('click', () => openLog());
+$('#log-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const hint = (m) => { $('#log-hint').textContent = m; };
+  const title = $('#log-what').value.trim();
+  if (!title) return hint('Say what you did.');
+  const sp = logSpan();
+  if (!sp || sp.seconds < 1) return hint('Pick a date, a start and an end.');
+  if (sp.seconds > 86400) return hint('One entry can be at most 24 hours.');
+  if (sp.start.getTime() > Date.now() + 60000) return hint("That hasn't happened yet: pick a time in the past.");
+  const tags = $('#log-tags').value.split(',').map((t) => t.trim().replace(/^#/, '')).filter(Boolean).slice(0, 12);
+  const notes = $('#log-notes').value.trim();
+  const id = logEditing?.id || `manual-${sp.start.getTime()}-${Math.random().toString(36).slice(2, 7)}`;
+  account.putDoc(state.uid, 'activity', id, {
+    source: 'manual', ring: logRing, ref: null, title: title.slice(0, 200), seconds: sp.seconds,
+    startedAt: sp.start.getTime(), endedAt: sp.end.getTime(), day: dayKey(sp.start.getTime()), extra: { tags, notes },
+  }, onError);
+  closeModal($('#logtime'));
+  toast(`${logEditing ? 'Updated' : 'Logged'}: ${fmtExact(sp.seconds)} of ${ringOf(logRing).label}`);
+});
+$('#log-delete').addEventListener('click', () => {
+  if (!logEditing) return;
+  const was = state.activity.find((a) => a.id === logEditing.id);
+  account.removeDoc(state.uid, 'activity', logEditing.id, onError);
+  closeModal($('#logtime'));
+  if (was) { const { id, ...data } = was; toast('Deleted', { label: 'Undo', fn: () => account.putDoc(state.uid, 'activity', id, data, onError) }); }
+});
 
 /* ---------- Goals ---------- */
 function renderGoals() {

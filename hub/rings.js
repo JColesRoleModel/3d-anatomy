@@ -2,7 +2,8 @@
 //
 // Time comes from two places:
 //   - users/<id>/activity: one document per Watch or Scroll session, rewritten as it goes (so time already spent is
-//     kept even if the page closes mid-video) and never more than the time actually spent.
+//     kept even if the page closes mid-video) and never more than the time actually spent; or one logged by hand on
+//     the Rings page (source 'manual', with tags and notes in `extra`).
 //   - the practice pages' own records (users/<id>/sessions, and this device's copy in localStorage), mapped to a ring
 //     by their section name.
 
@@ -65,7 +66,7 @@ export function practiceEntries(cloudSessions = []) {
   return out;
 }
 export function activityEntries(docs = []) {
-  return docs.filter((a) => a.seconds > 0).map((a) => ({ source: a.source, ring: a.ring, seconds: a.seconds, at: a.startedAt, title: a.title, ref: a.ref }));
+  return docs.filter((a) => a.seconds > 0).map((a) => ({ id: a.id, source: a.source, ring: a.ring, seconds: a.seconds, at: a.startedAt, title: a.title, ref: a.ref, extra: a.extra || {} }));
 }
 
 /**
@@ -85,7 +86,7 @@ export function sessionsOf(entries) {
     }
     out.push(e.source === 'practice'
       ? { source: 'practice', ring: e.ring, section: e.section, routine: e.routine, title: e.section, sub: e.routine && e.routine !== e.section ? e.routine : '', seconds: e.seconds, start: e.at, end, parts: [e] }
-      : { source: e.source, ring: e.ring, title: e.title || (e.source === 'scroll' ? 'The Scroll' : 'Video'), sub: '', seconds: e.seconds, start: e.at, end, parts: [] });
+      : { id: e.id, source: e.source, ring: e.ring, title: e.title || (e.source === 'scroll' ? 'The Scroll' : e.source === 'manual' ? 'Logged time' : 'Video'), sub: '', seconds: e.seconds, start: e.at, end, parts: [], extra: e.extra || {} });
   }
   return out.reverse();
 }

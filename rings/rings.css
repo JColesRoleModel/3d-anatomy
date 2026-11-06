@@ -111,3 +111,23 @@
 /* Seconds beside the big numbers, a step smaller */
 .r-sec { font-size: 0.62em; opacity: 0.85; }
 .r-dur, .r-bd-time { white-space: nowrap; }
+
+/* ---------- Log time by hand ---------- */
+.r-log-btn { flex-basis: 100%; max-width: 360px; min-height: 46px; font-size: 16px; }
+.r-pick-label { font-size: 13px; color: var(--muted); margin-bottom: -6px; }
+.r-ring-pick { grid-template-columns: repeat(3, 1fr); }
+.r-ring-pick .t-seg-btn { font: 700 18px/1 var(--serif); color: var(--c); }
+.r-ring-pick .t-seg-btn.on { border-color: var(--c); background: rgba(246, 227, 180, 0.08); box-shadow: inset 0 0 0 1px var(--c); color: var(--c); }
+.r-log-times { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
+.r-log-length { margin: -4px 0 0; min-height: 1.2em; font: 700 18px/1.2 var(--serif); color: var(--gold); }
+.r-del { color: var(--red); border-color: rgba(255, 138, 122, 0.4); margin-right: auto; }
+/* A logged entry in the session list: tap to edit; tags and notes underneath */
+.r-entry-m { width: 100%; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.r-entry-m:hover { border-color: var(--c); }
+.r-entry-extra { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 12px; padding-left: 150px; font-size: 12.5px; color: var(--muted); }
+.r-entry-extra i { font-style: normal; color: var(--c); }
+@media (max-width: 560px) {
+  .r-log-times { grid-template-columns: 1fr 1fr; }
+  .r-log-times label:first-child { grid-column: 1 / -1; }
+  .r-entry-extra { padding-left: 0; }
+}

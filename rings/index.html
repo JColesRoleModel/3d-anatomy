@@ -33,6 +33,7 @@
         <div class="t-panel r-today">
           <div class="r-big" id="big"></div>
           <div class="r-legend" id="legend"></div>
+          <button class="t-btn t-primary r-log-btn" id="log-open" type="button">＋ Log time</button>
         </div>
         <section class="t-panel r-streaks">
           <h2 class="r-h2">Streaks</h2>
@@ -84,10 +85,38 @@
     </section>
   </main>
 
+  <!-- Log time by hand: anything done away from the site -->
+  <div class="t-modal hidden" id="logtime">
+    <div class="t-modal-back" data-close></div>
+    <form class="t-modal-card" id="log-form" role="dialog" aria-modal="true" aria-labelledby="log-title" autocomplete="off">
+      <div class="t-modal-head">
+        <h2 id="log-title">Log time</h2>
+        <button class="t-btn t-icon" type="button" data-close aria-label="Close">✕</button>
+      </div>
+      <label class="t-field"><span>What did you do?</span><input class="t-input" id="log-what" maxlength="200" placeholder="Walk outside, yoga class, reading…" required></label>
+      <div class="r-pick-label">Ring</div>
+      <div class="t-seg r-ring-pick" id="log-ring" role="radiogroup" aria-label="Ring"></div>
+      <div class="r-log-times">
+        <label class="t-field"><span>Date</span><input class="t-input" type="date" id="log-date" required></label>
+        <label class="t-field"><span>Start</span><input class="t-input" type="time" id="log-start" required></label>
+        <label class="t-field"><span>End</span><input class="t-input" type="time" id="log-end" required></label>
+      </div>
+      <p class="r-log-length" id="log-length"></p>
+      <label class="t-field"><span>Tags (optional, separated by commas)</span><input class="t-input" id="log-tags" maxlength="200" placeholder="walk, outside, morning"></label>
+      <label class="t-field"><span>Notes (optional)</span><textarea class="t-input t-textarea" id="log-notes" maxlength="1000"></textarea></label>
+      <p class="t-hint" id="log-hint" role="alert"></p>
+      <div class="t-modal-foot">
+        <button class="t-btn r-del hidden" id="log-delete" type="button">Delete</button>
+        <button class="t-btn" type="button" data-close>Cancel</button>
+        <button class="t-btn t-primary" type="submit" id="log-save">Save</button>
+      </div>
+    </form>
+  </div>
+
   <div class="t-toast hidden" id="toast" role="status" aria-live="polite"></div>
   <script type="module">
     import { initHub } from '../hub/nav.js';
-    initHub();
+    initHub({ tools: [{ id: 'r-log', label: 'Log time', icon: 'plus' }] });
   </script>
   <script type="module" src="rings.js"></script>
   <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});</script>

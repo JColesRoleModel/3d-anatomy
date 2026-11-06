@@ -40,14 +40,17 @@ service cloud.firestore {
         && (!('notes' in request.resource.data) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 2000))
         && request.resource.data.size() <= 20;
     }
-    // Activity: one document per Watch or Scroll session, counting toward a ring. At most 4 hours each.
+    // Activity: one document per session counting toward a ring: Watch and Scroll (timed, at most 4 hours each), or
+    // logged by hand on the Rings page (at most 24 hours).
     match /users/{uid}/activity/{sessionId} {
       allow read, delete: if request.auth != null && request.auth.uid == uid;
       allow create, update: if request.auth != null && request.auth.uid == uid
         && request.resource.data.ring in ['body', 'mind', 'spirit']
-        && request.resource.data.source in ['watch', 'scroll']
-        && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 14400
+        && request.resource.data.source in ['watch', 'scroll', 'manual']
+        && request.resource.data.seconds is number && request.resource.data.seconds >= 0
+        && request.resource.data.seconds <= (request.resource.data.source == 'manual' ? 86400 : 14400)
         && request.resource.data.startedAt is number
+        && (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 200))
         && request.resource.data.size() <= 12;
     }
     // The Scroll: one document per card, with its own counts (views, time on screen, liked, saved).
