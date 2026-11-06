@@ -104,3 +104,6 @@
   .d-leg span { width: 60px; font-size: 20px; }
   .d-leg b { font-size: 28px; }
 }
+/* Each new card fades in (a one-off, not a loop) */
+.d-fade { animation: d-fade 0.8s ease-out; }
+@keyframes d-fade { from { opacity: 0; } }

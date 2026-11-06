@@ -1,6 +1,6 @@
 // Dashboard: a light screen to leave on (made for an older iPad on a stand). Clock and temperature with its place,
-// today's rings and streak with the week's seven small rings beneath, today's tasks, a card from the Scroll for the
-// day, and the last five things completed. The top bar hides itself; tap the screen to bring it back. From 10pm to
+// today's rings and streak with the week's seven small rings beneath, today's tasks, a card from the Scroll that
+// changes every minute, and the last five things completed. The top bar hides itself; tap the screen to bring it back. From 10pm to
 // 6am it drops to a dim clock.
 //
 // Kept light on data: it listens only to the last 8 weeks of sessions (enough for the streak), reads practice records
@@ -105,24 +105,41 @@ function renderTasks() {
     general ? h('p', { class: 'd-more' }, `${general} general task${general === 1 ? '' : 's'} waiting`) : null);
 }
 
-/* ---------- Card of the day (read once a day) ---------- */
+/* ---------- Card of the minute (cards are read once a day) ---------- */
 async function loadCards() {
   state.cardsDay = today();
   try { state.cards = await account.readCollection(state.uid, 'scroll'); } catch { state.cards = []; }
   renderQuote();
 }
+// A new card every minute: a shuffled run through all of them (so none repeats until every card has shown), with
+// one you liked or saved every third minute when there are any.
+let deck = [], lastCard = null;
 function renderQuote() {
-  const pool = state.cards.filter((c) => !c.easterEgg && !c.hidden && c.text && c.text.length < 320).sort((a, b) => a.id.localeCompare(b.id));
-  if (!pool.length) { fill($('#quote'), h('p', { class: 'd-empty' }, 'Open the Scroll once to load your cards; one shows here each day.')); return; }
-  const saved = pool.filter((c) => c.saved || c.liked);
-  const d = new Date(); const n = d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate();
-  const list = saved.length && n % 3 === 0 ? saved : pool; // every third day, one you liked or saved
-  const c = list[(n * 2654435761 >>> 0) % list.length];
-  fill($('#quote'),
+  const pool = state.cards.filter((c) => !c.easterEgg && !c.hidden && c.text && c.text.length < 320);
+  if (!pool.length) { fill($('#quote'), h('p', { class: 'd-empty' }, 'Open the Scroll once to load your cards; a new one shows here every minute.')); return; }
+  const saved = pool.filter((c) => (c.saved || c.liked) && c !== lastCard);
+  let c;
+  if (saved.length && Math.floor(Date.now() / 60000) % 3 === 0) c = saved[Math.floor(Math.random() * saved.length)];
+  else {
+    const ids = new Set(pool.map((x) => x.id));
+    deck = deck.filter((id) => ids.has(id));
+    if (!deck.length) deck = pool.map((x) => x.id).sort(() => Math.random() - 0.5);
+    if (deck[0] === lastCard?.id && deck.length > 1) deck.push(deck.shift());
+    const id = deck.shift();
+    c = pool.find((x) => x.id === id);
+  }
+  lastCard = c;
+  const box = $('#quote');
+  box.classList.remove('d-fade');
+  void box.offsetWidth; // restart the fade
+  box.classList.add('d-fade');
+  fill(box,
     c.title ? h('div', { class: 'd-quote-title' }, c.title) : null,
     h('blockquote', { class: 'd-quote-text' }, c.text),
     h('div', { class: 'd-quote-who' }, '— ' + [c.author, c.book].filter(Boolean).join(', ')));
 }
+// Turn the card on each new minute, in step with the clock
+setTimeout(() => { renderQuote(); setInterval(renderQuote, 60000); }, 60000 - (Date.now() % 60000));
 setInterval(() => { renderStats(); renderTasks(); }, 60000);
 
 /* ---------- Temperature and place (Open-Meteo, free, no account) ---------- */
