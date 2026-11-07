@@ -323,7 +323,7 @@ table.keys td { padding: 5px 0; }
 .occ-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
 
 .info { max-height: calc(100vh - 150px); overflow-y: auto; }
-.info-extra { margin-top: 8px; font-size: 13px; color: var(--text); }
+.info-extra { margin-top: 8px; font-size: 13px; color: var(--text); white-space: pre-line; }
 .info-title { flex: 1; min-width: 0; }
 .occ-card-icon-wrap { flex: none; display: grid; place-items: center; width: 52px; height: 52px; }
 .occ-card-icon { width: 52px; height: 52px; object-fit: contain; }
@@ -486,3 +486,14 @@ p.cond-src { margin: 8px 0 0; }
   #hub-nav .hub-tools .hub-tool:not(#btn-search) { display: none; }
 }
 @media (min-width: 800px) { .search { top: 64px; } }
+.search-sides { flex: none; display: flex; gap: 4px; }
+.search-sides button {
+  min-width: 34px; height: 30px; padding: 0 8px; border-radius: 999px; font-size: 12px; color: var(--cream);
+  border: 1px solid rgba(230, 189, 106, 0.3); background: rgba(246, 227, 180, 0.05);
+}
+.search-sides button:hover, .search-sides button[aria-pressed="true"] { border-color: rgba(230, 189, 106, 0.7); background: rgba(230, 189, 106, 0.16); }
+.toast {
+  position: fixed; z-index: 1350; left: 50%; transform: translateX(-50%); top: calc(var(--safe-top) + 110px);
+  max-width: min(420px, calc(100vw - 32px)); padding: 10px 14px; border-radius: 14px; font-size: 13.5px; color: var(--text);
+  background: var(--panel-solid); border: 1px solid rgba(230, 189, 106, 0.35); box-shadow: var(--glow);
+}

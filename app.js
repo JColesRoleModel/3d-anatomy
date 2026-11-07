@@ -7,6 +7,7 @@ import { initCosmos } from './cosmos.js';
 import { initTrace } from './trace.js';
 import { initConditions } from './conditions.js';
 import { initSearch } from './search.js';
+import { initBodyMap } from './bodymap.js';
 import * as account from './account.js';
 import { initHub } from './hub/nav.js';
 
@@ -114,6 +115,12 @@ function stepKeys(dt) {
 // The sky and the art keep moving, so frames are drawn continuously unless motion is turned off. Those ambient
 // frames are capped near 60 a second, and if the device can't keep up the drawing resolution is lowered.
 let sinceFrame = 0, slowFor = 0;
+// After 20 seconds without a touch, the moving sky is drawn about 20 times a second instead of 60, which looks
+// nearly the same and saves a phone's battery. Any touch, key or camera move brings full speed back.
+let lastTouch = performance.now();
+const touched = () => { lastTouch = performance.now(); };
+for (const ev of ['pointerdown', 'pointermove', 'wheel', 'keydown']) window.addEventListener(ev, touched, { passive: true });
+controls.addEventListener('change', touched);
 renderer.setAnimationLoop((now) => {
   timer.update(now);
   const dt = Math.min(timer.getDelta(), 0.05);
@@ -123,12 +130,13 @@ renderer.setAnimationLoop((now) => {
   const pulsing = trace?.update(dt); // path-tracing pulses
   const moving = cond?.update(dt); // a condition study raising the arm
   const ambient = cosmos.update(dt) || pulsing || moving;
-  if (needsRender || flyTo || (ambient && sinceFrame >= 0.015)) {
+  const ambientGap = now - lastTouch > 20000 ? 0.048 : 0.015;
+  if (needsRender || flyTo || (ambient && sinceFrame >= ambientGap)) {
     stepFly();
     occult?.animate?.(cosmos.time, cosmos.breath);
     renderer.render(scene, camera);
     needsRender = false;
-    slowFor = sinceFrame > 0.04 ? slowFor + sinceFrame : 0;
+    slowFor = sinceFrame > 0.04 && ambientGap < 0.04 ? slowFor + sinceFrame : 0;
     if (slowFor > 3 && renderer.getPixelRatio() > 1) { renderer.setPixelRatio(1); resize(); slowFor = 0; }
     sinceFrame = 0;
   }
@@ -199,7 +207,9 @@ const highlight = new THREE.MeshStandardMaterial({ color: HIGHLIGHT, emissive: 0
 
 // Colour precedence: the part's own colour, then a sub-filter colour (e.g. all cranial nerves),
 // then the system colour, then the default colour from the model.
+const tint = new Map(), tintNotes = new Map(); // check-in colours for this visit only (bodymap.js)
 function colorOf(s, key, sys = shownBy(s) || s.tags[0]) {
+  if (tint.has(key)) return tint.get(key);
   const oc = occult?.colorFor(s, key);
   if (oc) return oc;
   const c = state.colors;
@@ -295,6 +305,7 @@ function applyVisibility() {
   $('restore-text').textContent = isolated ? `Focused: ${isolatedLabel}` : `${hidden.size} hidden`;
   $('ghost-wrap').hidden = !isolated;
   trace?.sync();
+  occult?.dim((!!isolated || !!selected) && !occult.isSelected());
   needsRender = true;
 }
 
@@ -484,7 +495,7 @@ function select(key) {
     $('info-occult').hidden = true;
     $('occ-icon').hidden = true;
     const s = structures.get(key);
-    const extra = occult?.describePart(s, key) || '';
+    const extra = [tintNotes.get(key), occult?.describePart(s, key)].filter(Boolean).join('\n');
     $('info-extra').textContent = extra;
     $('info-extra').hidden = !extra;
     $('info-name').textContent = prettyName(s.name);
@@ -551,6 +562,7 @@ $('act-isolate').addEventListener('click', () => {
 });
 $('act-focus').addEventListener('click', () => selected && focusOn(selected));
 $('act-showall').addEventListener('click', () => {
+  tint.clear(); tintNotes.clear();
   hidden.clear();
   isolated = null;
   applyVisibility();
@@ -567,8 +579,19 @@ function focusOnKeys(keys) {
   const center = box.getCenter(new THREE.Vector3());
   const radius = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 0.03);
   const dir = camera.position.clone().sub(controls.target).normalize();
-  const dist = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.3;
-  startFly(center, center.clone().add(dir.multiplyScalar(dist)));
+  // Fit the narrower of the two directions (a phone held upright is narrow).
+  const halfV = THREE.MathUtils.degToRad(camera.fov / 2);
+  const half = Math.min(halfV, Math.atan(Math.tan(halfV) * camera.aspect));
+  let dist = radius / Math.sin(half) * 1.3;
+  let target = center;
+  // On a phone the info card covers the lower part of the screen, so stand back a little and put the part in the
+  // clear space above it.
+  if (!$('info').hidden && !window.matchMedia('(min-width: 800px)').matches) {
+    dist *= 1.35;
+    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+    target = center.clone().addScaledVector(up, -Math.tan(halfV) * dist * 0.42);
+  }
+  startFly(target, target.clone().add(dir.multiplyScalar(dist)));
 }
 function focusPoint(center, radius, dir = camera.position.clone().sub(controls.target).normalize()) {
   const dist = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.3;
@@ -878,8 +901,17 @@ occult?.syncPanel();
 refresh();
 
 const phoneSized = () => !window.matchMedia('(min-width: 800px)').matches;
+// A short message near the top that fades after a few seconds.
+function note(text) {
+  const t = $('toast');
+  t.textContent = text;
+  t.hidden = false;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.hidden = true; }, 7000);
+}
+const actions = await fetch('data/actions.json').then((r) => r.json()).catch(() => ({}));
 search = initSearch({
-  structures, systems: catalog.systems, systemsById, prettyName,
+  structures, systems: catalog.systems, systemsById, prettyName, actions,
   occult, conditions: cond,
   // A part: its system on, it and its other side solid while the rest fades, the camera on it, its card open.
   showPart(keys, label, key) {
@@ -899,9 +931,23 @@ search = initSearch({
     showStructures(keys, label);
   },
   showSystem(id) { state.enabled.add(id); refresh(); },
-  before() { if (phoneSized()) togglePanel(false); },
+  note,
+  before(e) { if (phoneSized()) togglePanel(false); occult?.releaseAuto(e?.layer); },
 });
 if (new URLSearchParams(location.search).has('debug')) window.search = search; // for testing
+// Links from other pages: ?view=3d&q=… opens on that part (see search.js goTo), and ?view=3d&checkin=latest colours
+// the parts measured in the last check-in (bodymap.js).
+{
+  const params = new URLSearchParams(location.search);
+  if (params.get('q')) search.goTo(params.get('q'), params.get('label'));
+}
+const nameToKey = new Map([...structures].map(([k, s]) => [s.name, k]));
+initBodyMap({
+  hub, account, tint, notes: tintNotes,
+  keyOf: (name) => nameToKey.get(name),
+  note,
+  show: (keys, label) => { if (phoneSized()) togglePanel(false); showStructures(keys, label); },
+});
 
 initTrace({
   scene, camera, structures, prettyName, focusOnKeys, focusPoint, applyVisibility,

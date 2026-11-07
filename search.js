@@ -32,17 +32,41 @@ const SYNONYMS = {
   third: ['3rd'], '3rd': ['third'], solar: ['solar'], pinecone: ['pineal'],
   sephirot: ['sephira', 'sephiroth'], sephiroth: ['sephira'], sefirot: ['sephira'], kabbalah: ['tree of life'], qabalah: ['tree of life'],
   winging: ['winging'], winged: ['winging'],
+  // Movements, so a muscle can be found by what it does.
+  rotation: ['turns', 'rotates', 'rotation'], rotate: ['turns', 'rotates'], rotates: ['turns'], turn: ['turns'], twist: ['twists'],
+  flexion: ['flexes', 'bends', 'flexion'], flex: ['flexes', 'bends'], bend: ['bends', 'flexes'],
+  extension: ['extends', 'straightens', 'extension'], extend: ['extends', 'straightens'], straighten: ['straightens', 'extends'],
+  raise: ['raises', 'lifts', 'elevates'], lift: ['lifts', 'raises', 'elevates'], elevate: ['elevates'], elevation: ['elevates'],
+  depress: ['depresses'], abduction: ['out to the side', 'away from', 'abduction'], adduction: ['toward', 'together', 'adduction'],
+  retract: ['retracts'], retraction: ['retracts'], protract: ['protracts'], protraction: ['protracts'],
+  squeeze: ['squeezes', 'retracts'], shrugs: ['shrug'], breathe: ['breathing'], breath: ['breathing'], inhale: ['breathing in'], exhale: ['breathing out'],
+  bite: ['biting'], chew: ['chewing'], clench: ['clenching'], smile: ['smiles'], blink: ['blinking'], frown: ['frowning'], swallow: ['swallowing'],
+  grip: ['grip'], pinch: ['pinch'], squat: ['straightens the knee', 'extends the hip'], walking: ['walking'], walk: ['walking'],
+  pronation: ['pronation', 'palm down'], supination: ['supination', 'palm up'], dorsiflexion: ['dorsiflexion', 'lifts the foot'],
 };
 // Phrases worth swapping as a whole before the words are matched.
 const PHRASES = [
   ['shoulder blade', 'scapula'], ['thigh bone', 'femur'], ['shin bone', 'tibia'], ['collar bone', 'clavicle'],
   ['voice box', 'larynx'], ['belly button', 'umbilicus'], ['tail bone', 'coccyx'], ['breast bone', 'sternum'],
   ['third eye', 'ajna'], ['crown chakra', 'sahasrara'], ['root chakra', 'muladhara'], ['heart chakra', 'anahata'],
-  ['throat chakra', 'visuddha'], ['sacral chakra', 'svadhisthana'], ['solar plexus chakra', 'manipura'],
+  ['throat chakra', 'visuddha'], ['sacral chakra', 'svadhisthana'], ['solar plexus chakra', 'manipura'], ['solar plexus', 'manipura'],
   ['funny bone', 'ulnar nerve'], ['adams apple', 'thyroid cartilage'], ['rotator cuff', 'rotator cuff muscles'],
 ];
 const OCCULT_KIND = (layer, item) => (layer === 'hands' && item.id.startsWith('mudra-') ? 'Mudra'
   : { chakras: 'Chakra', elements: 'Element', trinity: 'Gland trinity', hands: 'Hand map', tree: 'Tree of Life', nadis: 'Nadi', polarity: 'Polarity' }[layer] || 'Occult');
+// Parts the Z-Anatomy model leaves out, each with the nearest thing it does have.
+const MISSING = [
+  ['Lateral cord of brachial plexus', 'Brachial plexus'], ['Medial cord of brachial plexus', 'Brachial plexus'],
+  ['Cervical plexus', 'Brachial plexus', 'neck nerves'], ['Phrenic nerve', 'Diaphragm'],
+  ['Ciliary ganglion', 'Oculomotor nerve', 'parasympathetic'], ['Pterygopalatine ganglion', 'Maxillary nerve', 'sphenopalatine parasympathetic'],
+  ['Submandibular ganglion', 'Lingual nerve', 'parasympathetic'], ['Otic ganglion', 'Mandibular nerve', 'parasympathetic'],
+  ['Greater splanchnic nerve', 'Sympathetic trunk'], ['Lesser splanchnic nerve', 'Sympathetic trunk'],
+  ['Coeliac plexus', 'Coeliac trunk', 'celiac solar plexus nerves'], ['Recurrent laryngeal nerve', 'Vagus nerve'],
+  ['Branches of the facial nerve', 'Facial nerve', 'temporal zygomatic buccal marginal mandibular cervical branch'],
+  ['Posterior rami of spinal nerves', 'Spinal ganglion', 'dorsal rami'],
+  ['Thoracic duct', 'Lymphatic', 'lymph vessel'], ['Cisterna chyli', 'Lymphatic', 'lymph'], ['Lymph vessels', 'Lymphatic', 'lymphatic vessels'],
+  ['Maxillary sinus', 'Sinuses', 'antrum of highmore'],
+];
 const SIDE_WORDS = { left: 'l', right: 'r' };
 
 export const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -85,8 +109,10 @@ function rawWordScore(q, w) {
   const k = allowedTypos(q.length);
   if (!k || w.length < 3) return 0;
   // A typo in a whole word, or in the start of a longer word ("levatr" for "levator", "scapu" for "scapulae").
-  if (editDistance(q, w, k) <= k) return 0.55;
-  if (w.length > q.length && editDistance(q, w.slice(0, q.length), k) <= k) return 0.45;
+  if (q[0] !== w[0]) return 0; // typos are forgiven after the first letter, not in it
+  if (editDistance(q, w, k) <= k) return 0.5;
+  // The start of a longer word: only for 5+ letters, so short words like "ajna" don't turn up "anjali".
+  if (q.length >= 5 && w.length > q.length && editDistance(q, w.slice(0, q.length), k) <= k) return 0.4;
   return 0;
 }
 // The best match for a query word (or any of its everyday synonyms) among a list of words.
@@ -165,7 +191,8 @@ export function initSearch(api) {
       li.setAttribute('aria-selected', i === active);
       li.innerHTML = `${r.e.icon || `<span class="search-dot" style="--c:${r.e.color || '#e6bd6a'}"></span>`}
         <span class="search-text"><span class="search-name">${markUp(r.e.name, r.marks)}</span><span class="search-sub">${esc(r.why || r.e.sub || '')}</span></span>
-        <span class="search-kind">${esc(r.e.kind)}</span>`;
+        ${r.e.sides?.r && r.e.sides?.l ? `<span class="search-sides" role="group" aria-label="Which side">${[['l', 'L', 'Left'], ['r', 'R', 'Right'], ['', 'Both', 'Both sides']].map(([s, t, label]) => `<button type="button" data-side="${s}" aria-label="${label}" aria-pressed="${(r.side || '') === s}">${t}</button>`).join('')}</span>` : `<span class="search-kind">${esc(r.e.kind)}</span>`}`;
+      for (const b of li.querySelectorAll('[data-side]')) b.addEventListener('click', (ev) => { ev.stopPropagation(); choose(i, b.dataset.side || null); });
       li.addEventListener('pointerdown', (ev) => ev.preventDefault()); // keep the keyboard up until the pick
       li.addEventListener('click', () => choose(i));
       li.addEventListener('pointermove', () => { if (active !== i) { active = i; syncActive(); } });
@@ -179,14 +206,14 @@ export function initSearch(api) {
     input.setAttribute('aria-activedescendant', results.length ? `search-opt-${active}` : '');
   }
 
-  function choose(i) {
+  function choose(i, side) {
     const r = results[i];
     if (!r) return;
     recent = [r.e.id, ...recent.filter((id) => id !== r.e.id)].slice(0, 8);
     try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch {}
     close();
-    api.before?.();
-    r.e.go(r.side);
+    api.before?.(r.e);
+    r.e.go(side === undefined ? r.side : side);
   }
 
   input.addEventListener('input', run);
@@ -206,7 +233,23 @@ export function initSearch(api) {
   });
   for (const b of document.querySelectorAll('[data-search-open]')) b.addEventListener('click', () => (box.hidden ? open() : close()));
 
-  return { open, close, get isOpen() { return !box.hidden; }, query: (q) => search(entries, q) };
+  // Opening the page at ?view=3d&q=levator%20scapulae goes straight to it. Several separated by | show together
+  // (?q=levator scapulae|descending part of trapezius&label=Shrug), with an optional label for the focus bar.
+  function goTo(q, label) {
+    const parts = q.split('|').map((x) => x.trim()).filter(Boolean);
+    if (parts.length === 1) {
+      results = search(entries, parts[0]);
+      if (results.length) return choose(0);
+      return open(parts[0]);
+    }
+    const keys = [];
+    for (const p of parts) { const hit = search(entries, p).find((r) => r.e.keys); if (hit) keys.push(...(hit.side ? [hit.e.sides[hit.side]] : hit.e.keys)); }
+    if (!keys.length) return open(parts[0]);
+    api.before?.(null);
+    api.showGroup([...new Set(keys)], label || parts.join(', '));
+  }
+
+  return { open, close, goTo, get isOpen() { return !box.hidden; }, query: (q) => search(entries, q) };
 }
 
 // ---------- The index ----------
@@ -241,6 +284,8 @@ function buildIndex(api) {
       sub: [s.tags.map(sysName).join(' · '), where, sides.length === 2 ? 'both sides' : sides.length ? (keys.r ? 'right' : 'left') : ''].filter(Boolean).join(' · '),
       alt: `${s.tags.map(sysName).join(' ')} ${s.groups.join(' ')}`,
       sides: keys,
+      keys: all,
+      fields: (api.actions?.[p.base] || []).map((v) => ({ k: 'Does', v, w: words(v) })),
       rank: 0,
       go: (side) => {
         const one = side && keys[side];
@@ -262,7 +307,7 @@ function buildIndex(api) {
   for (const [id, { g, s, keys }] of groups) {
     if (keys.length < 2) continue;
     add({
-      id, kind: 'Group', name: g, color: sysColor(s.tags[0]),
+      id, kind: 'Group', name: g, color: sysColor(s.tags[0]), keys,
       sub: `${sysName(s.tags[0])} · ${keys.length} parts`,
       alt: s.tags.map(sysName).join(' '),
       rank: 0.15,
@@ -289,10 +334,10 @@ function buildIndex(api) {
 
   // Occult anatomy: each layer, each symbol, and what's written on its card (so "saturn" or "zaphikiel" finds Sahasrara).
   for (const layer of api.occult?.catalog || []) {
-    add({ id: `ol:${layer.id}`, kind: 'Occult layer', name: layer.name, color: layer.color, icon: api.occult.iconHTML(layer, 'search-icon'), sub: 'Occult anatomy · turn this layer on', alt: 'occult', rank: 0.3, go: () => api.occult.showLayer(layer.id) });
+    add({ id: `ol:${layer.id}`, layer: layer.id, kind: 'Occult layer', name: layer.name, color: layer.color, icon: api.occult.iconHTML(layer, 'search-icon'), sub: 'Occult anatomy · turn this layer on', alt: 'occult', rank: 0.3, go: () => api.occult.showLayer(layer.id) });
     for (const item of layer.items) {
       add({
-        id: `o:${layer.id}/${item.id}`, kind: OCCULT_KIND(layer.id, item), name: item.name, color: item.color || layer.color,
+        id: `o:${layer.id}/${item.id}`, layer: layer.id, kind: OCCULT_KIND(layer.id, item), name: item.name, color: item.color || layer.color,
         icon: api.occult.iconHTML(item.icon || item.glyph || item.color ? item : layer, 'search-icon'),
         sub: [layer.name, item.sub].filter(Boolean).join(' · '),
         alt: `${item.sub || ''} ${layer.name} occult`,
@@ -310,6 +355,20 @@ function buildIndex(api) {
     for (const t of (cond.types || []).filter((t) => t.id !== 'normal')) {
       add({ id: `c:${cond.id}/${t.id}`, kind: 'Condition', name: `${t.name} ${cond.name.toLowerCase()}`, color: '#e6bd6a', sub: `${cond.name} · ${t.name}`, alt: `${cond.name} condition`, rank: 0.12, go: () => api.conditions.open({ type: t.id }) });
     }
+  }
+
+  // Anatomy the source model never drew (see the About box): say so, and show the nearest thing that is there.
+  for (const [name, near, alt = ''] of MISSING) {
+    add({
+      id: `m:${name}`, kind: 'Not in model', name, color: '#7d7896', missing: true,
+      sub: `Not in the 3D model · shows the nearest: ${near}`, alt, rank: 0.25,
+      go: () => {
+        const hit = search(list, near)[0];
+        if (!hit) return;
+        hit.e.go();
+        api.note?.(`${name} isn't in the 3D model (the source never drew it), so here's the nearest: ${hit.e.name}.`);
+      },
+    });
   }
 
   list.byId = new Map(list.map((e) => [e.id, e]));
@@ -374,12 +433,18 @@ function scoreEntry(e, qs, q) {
   if (!inName && !why && qs.length === 1 && e.kind !== 'Part') return null; // a lone word only in the extra text is too loose
   let score = total / qs.length;
   if (inName === qs.length) score += 0.5;
+  // Every word found in one line of what it does (or of its card) reads as one idea: "turn head", "calf raise".
+  if (e.fields && qs.length > 1) {
+    const whole = e.fields.find((f) => qs.every((w) => bestIn([w, ...(SYNONYMS[w] || [])], f.w).s >= 0.55));
+    if (whole) { score += 0.6; why = `${whole.k}: ${whole.v}`; }
+  }
   if (inOrder && inName > 1) score += 0.1;
   if (e.normName === q) score += 1.5;
   else if (e.normName.startsWith(q)) score += 0.6;
   // Fewer extra words in the name means a closer match ("Levator scapulae" before "Levator palpebrae superioris").
   score -= 0.03 * Math.max(0, e.words.length - qs.length);
   score -= e.rank || 0;
+  if (e.missing && !inName) return null;
   return { score, marks, why };
 }
 

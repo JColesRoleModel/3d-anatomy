@@ -286,10 +286,17 @@ function renderStatus() {
 // The same numbers as the Rings page: every ring (practice, Watch, Scroll and logged time) from the account when
 // signed in, to the second; only this device's practice records when not.
 let statsReq = 0;
+const STATS_KEY = 'tolnri.account.stats.v1';
 async function renderStats() {
   const box = document.getElementById('hub-stats');
   if (!box) return;
   const req = ++statsReq;
+  // Last time's numbers show at once while the fresh ones are worked out.
+  const who = user?.uid || '';
+  try {
+    const cached = JSON.parse(localStorage.getItem(STATS_KEY) || 'null');
+    if (cached?.who === who && cached.html && !box.innerHTML) box.innerHTML = cached.html;
+  } catch {}
   let entries = practiceEntries(), goals = { ...DEFAULT_GOALS };
   if (user) {
     try {
@@ -306,4 +313,5 @@ async function renderStats() {
   for (const [k, d] of Object.entries(days)) { total += d.total; if (k >= weekStart) week += d.total; }
   box.innerHTML = [['Today', fmtExact(days[today()]?.total || 0)], ['This week', fmtExact(week)], ['Rings closed in a row', String(allStreak(days, goals))], ['All time', fmtExact(total)]]
     .map(([k, v]) => `<div class="hub-stat"><b>${v}</b><span>${k}</span></div>`).join('');
+  try { localStorage.setItem(STATS_KEY, JSON.stringify({ who, html: box.innerHTML })); } catch {}
 }

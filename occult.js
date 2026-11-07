@@ -79,14 +79,15 @@ export async function initOccult(api) {
   const overlay = (m) => Object.assign(m, { depthTest: false, depthWrite: false, transparent: true });
   // The nadis carry pulses of light rising from the base of the spine.
   const flowTime = { value: 0 };
+  const dimAlpha = { value: 1 }; // see dim()
   const flowMaterial = (color) => new THREE.ShaderMaterial({
-    uniforms: { uColor: { value: new THREE.Color(color) }, uTime: flowTime },
+    uniforms: { uColor: { value: new THREE.Color(color) }, uTime: flowTime, uAlpha: dimAlpha },
     vertexShader: 'varying float vX; void main(){ vX = uv.x; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: /* glsl */`
-      uniform vec3 uColor; uniform float uTime; varying float vX;
+      uniform vec3 uColor; uniform float uTime; uniform float uAlpha; varying float vX;
       void main(){
         float pulse = pow(0.5 + 0.5 * sin(vX * 18.85 - uTime * 2.2), 10.0);
-        gl_FragColor = vec4(mix(uColor, vec3(1.0, 0.97, 0.88), pulse * 0.65), 0.9);
+        gl_FragColor = vec4(mix(uColor, vec3(1.0, 0.97, 0.88), pulse * 0.65), 0.9 * uAlpha);
       }`,
   });
 
@@ -160,7 +161,7 @@ export async function initOccult(api) {
         ${groupsHTML.map(([title, items]) => `<div class="facet">${title ? `<div class="facet-head"><span>${title}</span></div>` : ''}
           <div class="pills">${items.map((i) => `<button class="pill occ-pill" data-layer="${layer.id}" data-item="${i.id}" title="${i.sub || ''}">${iconHTML(i, 'occ-pill-icon')}${i.name}</button>`).join('')}</div></div>`).join('')}
       </div>`;
-    row.querySelector('.sys-toggle').addEventListener('click', () => toggleLayer(layer.id));
+    row.querySelector('.sys-toggle').addEventListener('click', () => { autoOn.delete(layer.id); toggleLayer(layer.id); });
     const expand = row.querySelector('.sys-expand');
     expand.addEventListener('click', () => {
       const open = expand.getAttribute('aria-expanded') !== 'true';
@@ -169,6 +170,7 @@ export async function initOccult(api) {
     });
     for (const pill of row.querySelectorAll('.occ-pill')) {
       pill.addEventListener('click', () => {
+        autoOn.delete(layer.id);
         if (!enabled.has(layer.id)) toggleLayer(layer.id, true);
         select(layer.id, pill.dataset.item, true);
       });
@@ -178,6 +180,25 @@ export async function initOccult(api) {
 
   function syncPanel() {
     for (const el of document.querySelectorAll('[data-occ]')) el.setAttribute('aria-pressed', enabled.has(el.dataset.occ));
+  }
+
+  // Layers that search turned on (not you): they go off again when you search for something else.
+  const autoOn = new Set();
+  // While a body part is the focus, the symbols fade so they don't sit on top of it.
+  let dimmed = false;
+  function dim(on) {
+    if (on === dimmed) return;
+    dimmed = on;
+    dimAlpha.value = on ? 0.18 : 1;
+    for (const group of Object.values(groups)) {
+      for (const obj of group.children) {
+        const m = obj.material;
+        if (!m || m.uniforms) continue;
+        m.userData.base ??= m.opacity;
+        m.opacity = m.userData.base * dimAlpha.value;
+      }
+    }
+    api.render();
   }
 
   function toggleLayer(id, on = !enabled.has(id)) {
@@ -210,6 +231,7 @@ export async function initOccult(api) {
     const layer = byId[layerId], item = itemOf(layerId, itemId);
     if (!item) return;
     api.deselectPart();
+    dim(false);
     current = { layer: layerId, item: itemId };
     $('info').hidden = false;
     $('info-part').hidden = true;
@@ -342,11 +364,17 @@ export async function initOccult(api) {
     // For search: every layer and item, the same small icons, and opening one with its layer turned on.
     catalog: layers,
     iconHTML,
-    showLayer(id) { if (!enabled.has(id)) toggleLayer(id, true); },
+    showLayer(id) { if (!enabled.has(id)) { autoOn.add(id); toggleLayer(id, true); } },
     open(layerId, itemId) {
-      if (!enabled.has(layerId)) toggleLayer(layerId, true);
+      if (!enabled.has(layerId)) { autoOn.add(layerId); toggleLayer(layerId, true); }
+      dim(false);
       select(layerId, itemId, true);
     },
+    // Turn off the layers search switched on, except the one about to be shown.
+    releaseAuto(keep) {
+      for (const id of [...autoOn]) if (id !== keep) { autoOn.delete(id); if (enabled.has(id)) toggleLayer(id, false); }
+    },
+    dim,
     deselect,
     isSelected: () => !!current,
     // Polarity takes over the colour of the parts it covers while the layer is on.
@@ -371,6 +399,7 @@ export async function initOccult(api) {
     // The layers that are on, and turning a whole set on at once (for saved views).
     get layers() { return [...enabled]; },
     setLayers(ids) {
+      autoOn.clear();
       const want = new Set(ids.filter((id) => byId[id]));
       if (current && !want.has(current.layer)) deselect();
       enabled = want;

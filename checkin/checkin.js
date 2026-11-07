@@ -2,10 +2,11 @@
 // what you did beforehand. Ratings run 1 (best) to 4 (worst). Every raw trial is kept, so scores can be re-worked later.
 import { $, h, fill, toast, onError, openModal, closeModal, signedInPage, account } from '../hub/page.js';
 import {
-  COMFORT, ROM_AREAS, ROM_MEASURES, angleBetween, median, rng, mathQuestion, scoreMath, scoreReaction, scoreJumps, avgRating, METRICS, averageOf, trend, fmtMetric, sleepHours,
+  COMFORT, ROM_AREAS, ROM_MEASURES, angleBetween, median, rng, mathQuestion, scoreMath, scoreReaction, scoreJumps, avgRating, METRICS, averageOf, trend, fmtMetric, sleepHours, whatHelps,
 } from './logic.js';
+import { practiceEntries, activityEntries } from '../hub/rings.js';
 
-const state = { uid: null, checkins: [], unsub: null, context: null, open: null, romAreas: null };
+const state = { uid: null, checkins: [], unsub: null, context: null, open: null, romAreas: null, sessions: [], activity: [], helpsUnsubs: [] };
 const now = () => performance.now();
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -100,7 +101,34 @@ function resultsTable(c) {
         h('span', {}, a7 ? fmtMetric(m, a7.avg) : '–', a7 && h('small', {}, ` (${a7.n})`)),
         h('span', {}, a30 ? fmtMetric(m, a30.avg) : '–', a30 && h('small', {}, ` (${a30.n})`)));
     }),
-    h('p', { class: 'c-note' }, 'Ratings: 1 is best, 4 is worst. ▲ better or ▼ worse than your 7-day average (30-day if none). The number in brackets is how many check-ins the average rests on.'));
+    h('p', { class: 'c-note' }, 'Ratings: 1 is best, 4 is worst. ▲ better or ▼ worse than your 7-day average (30-day if none). The number in brackets is how many check-ins the average rests on.'),
+    c.modules?.rom?.measures && h('a', { class: 't-btn c-small c-body-link', href: `../?view=3d&checkin=${encodeURIComponent(c.id)}` }, 'See it on the body'));
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// What helps: scores after each activity (in the 24 hours before the check-in) against scores without it.
+const HELP_NAMES = {
+  'Breathwork Toolkit': 'Breathwork', 'Neuro-Ocular Activation': 'Eyes', 'Mudras': 'Mudras', 'Lower Body Innervation': 'Lower body',
+  'Upper Body Innervation': 'Upper body', 'Head Innervation': 'Head', watch: 'Watch', scroll: 'The Scroll', manual: 'Logged time',
+};
+const MIN_N = 7;
+function renderHelps() {
+  const entries = [...practiceEntries(state.sessions).map((e) => ({ at: e.at, seconds: e.seconds, kind: HELP_NAMES[e.section] || e.section })),
+    ...activityEntries(state.activity).map((e) => ({ at: e.at, seconds: e.seconds, kind: HELP_NAMES[e.source] || e.source }))];
+  const { rows, waiting } = whatHelps(state.checkins, entries, { minN: MIN_N });
+  const box = $('#helps');
+  if (!rows.length) {
+    const close = [...waiting].sort((a, b) => Math.min(b.nWith, b.nWithout) - Math.min(a.nWith, a.nWithout)).slice(0, 4);
+    fill(box, h('p', { class: 'c-note' }, `This compares each score on check-ins after an activity (in the 24 hours before) with check-ins without it. A comparison shows once each side has ${MIN_N} check-ins.`),
+      close.length ? h('div', { class: 'c-helps-wait' }, close.map((w) => h('div', {}, `${w.kind} · ${w.metric.label}: ${w.nWith} with, ${w.nWithout} without`))) : null);
+    return;
+  }
+  rows.sort((a, b) => (a.trend === 'better' ? 0 : a.trend === 'worse' ? 1 : 2) - (b.trend === 'better' ? 0 : b.trend === 'worse' ? 1 : 2));
+  fill(box, h('div', { class: 'c-helps' }, rows.map((r) => h('div', { class: `c-help ${r.trend}` },
+    h('b', {}, r.kind), h('span', {}, r.metric.label),
+    h('span', { class: 'c-help-nums' }, `${fmtMetric(r.metric, r.with)} with (${r.nWith}) · ${fmtMetric(r.metric, r.without)} without (${r.nWithout})`),
+    h('i', { 'aria-label': r.trend }, r.trend === 'better' ? '▲' : r.trend === 'worse' ? '▼' : '=')))),
+  h('p', { class: 'c-note' }, '▲ the score is better on check-ins after that activity, ▼ worse, = about the same. Counts in brackets. This shows what goes together, not proof of cause.'));
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -693,7 +721,11 @@ signedInPage({
     renderHome();
     account.watchCollection(state.uid, 'checkins', (docs) => {
       state.checkins = docs.sort((a, b) => b.startedAt - a.startedAt);
-      if (!run) renderHome();
+      if (!run) { renderHome(); renderHelps(); }
     }, onError).then((un) => { state.unsub = un; }).catch(onError);
+    state.helpsUnsubs.forEach((un) => un()); state.helpsUnsubs = [];
+    const since = Date.now() - 180 * 86400000;
+    account.watchCollection(state.uid, 'sessions', (d) => { state.sessions = d; renderHelps(); }, onError, 'timestamp', since).then((un) => state.helpsUnsubs.push(un)).catch(onError);
+    account.watchCollection(state.uid, 'activity', (d) => { state.activity = d; renderHelps(); }, onError, 'startedAt', since).then((un) => state.helpsUnsubs.push(un)).catch(onError);
   },
 });

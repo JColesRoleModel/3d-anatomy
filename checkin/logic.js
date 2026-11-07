@@ -174,3 +174,68 @@ export function angleBetween(a, b) {
   if (!n) return 0;
   return (Math.acos(Math.max(-1, Math.min(1, dot / n))) * 180) / Math.PI;
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// The body parts behind each range-of-motion measure, for "See it on the body": the muscles that make the movement
+// and the main ones whose tightness limits it (standard anatomy). Names are the 3D model's, without .l / .r.
+// `same` are on the side measured (both sides for a middle measure), `opp` on the other side.
+const NECK_FRONT = ['Sternocleidomastoid muscle', 'Longus colli muscle', 'Longus capitis muscle', 'Scalenus anterior muscle'];
+const NECK_BACK = ['Splenius capitis muscle', 'Splenius colli muscle', 'Semispinalis colli muscle', 'Descending part of trapezius muscle', 'Rectus posterior major capitis muscle', 'Levator scapulae'];
+const HAMSTRINGS = ['Long head of biceps femoris', 'Short head of biceps femoris', 'Semitendinosus muscle', 'Semimembranosus muscle'];
+const HIP_FLEXORS = ['Psoas major', 'Iliacus muscle', 'Rectus femoris muscle'];
+const DEEP_ROTATORS = ['Piriformis muscle', 'Obturator internus', 'Quadratus femoris muscle'];
+export const ROM_PARTS = {
+  neckFlex: { same: [...NECK_FRONT, ...NECK_BACK] },
+  neckExt: { same: [...NECK_BACK, ...NECK_FRONT] },
+  neckSide: { same: ['Scalenus anterior muscle', 'Scalenus medius muscle', 'Scalenus posterior muscle', 'Sternocleidomastoid muscle', 'Levator scapulae', 'Descending part of trapezius muscle'], opp: ['Scalenus medius muscle', 'Descending part of trapezius muscle', 'Levator scapulae'] },
+  neckRot: { same: ['Splenius capitis muscle', 'Splenius colli muscle', 'Obliquus inferior capitis muscle', 'Levator scapulae'], opp: ['Sternocleidomastoid muscle', 'Semispinalis colli muscle'] },
+  shFlex: { same: ['Clavicular part of deltoid muscle', 'Clavicular head of pectoralis major muscle', 'Coracobrachialis muscle', 'Long head of biceps brachii', 'Serratus anterior muscle', 'Latissimus dorsi muscle', 'Teres major muscle'] },
+  shAbd: { same: ['Acromial part of deltoid muscle', 'Supraspinatus muscle', 'Serratus anterior muscle', 'Descending part of trapezius muscle', 'Latissimus dorsi muscle', 'Teres major muscle'] },
+  slr: { same: [...HIP_FLEXORS, ...HAMSTRINGS] },
+  hipFlex: { same: [...HIP_FLEXORS, 'Gluteus maximus muscle'] },
+  hipIR: { same: ['Gluteus minimus muscle', 'Tensor fasciae latae', ...DEEP_ROTATORS] },
+  hipER: { same: [...DEEP_ROTATORS, 'Gluteus maximus muscle', 'Sartorius muscle', 'Gluteus minimus muscle', 'Tensor fasciae latae'] },
+  kneeFlex: { same: [...HAMSTRINGS, 'Rectus femoris muscle', 'Vastus lateralis muscle', 'Vastus medialis muscle'] },
+  ankleDorsi: { same: ['Tibialis anterior muscle', 'Soleus muscle', 'Medial head of gastrocnemius', 'Lateral head of gastrocnemius'] },
+};
+// [{ name, side }] for one measure id, e.g. 'neckRotL' → the left splenius, the right sternocleidomastoid…
+export function partsOfMeasure(id) {
+  const m = /^(.*?)([LR])?$/.exec(id);
+  const base = ROM_PARTS[m[1]];
+  if (!base) return [];
+  const side = m[2]?.toLowerCase() || null, other = side === 'l' ? 'r' : 'l';
+  const out = [];
+  for (const name of base.same || []) for (const s of side ? [side] : ['l', 'r']) out.push({ name, side: s });
+  for (const name of side ? base.opp || [] : []) out.push({ name, side: other });
+  return out;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// What helps: each score on check-ins that had an activity in the 24 hours before them, against check-ins that
+// didn't. entries: [{ at (ms), seconds, kind }] where kind names the activity ('Breathwork', 'Watch'…). A pair is
+// only compared once both sides have `minN` check-ins, and the counts always show.
+export const HELPS_METRICS = ['feel.clarity', 'feel.energy', 'math.correct', 'reaction.medianMs', 'breath.holdS', 'neck.comfort'];
+export function whatHelps(checkins, entries, { minN = 7, windowMs = 86400000, metricIds = HELPS_METRICS } = {}) {
+  const kinds = [...new Set(entries.map((e) => e.kind))].sort();
+  const rows = [], waiting = [];
+  for (const kind of kinds) {
+    const times = entries.filter((e) => e.kind === kind && e.seconds >= 60).map((e) => e.at).sort((a, b) => a - b);
+    const had = (c) => times.some((t) => t <= c.startedAt && t > c.startedAt - windowMs);
+    for (const id of metricIds) {
+      const m = METRICS.find((x) => x.id === id);
+      const withIt = [], without = [];
+      for (const c of checkins) {
+        const v = m.get(c);
+        if (!Number.isFinite(v)) continue;
+        (had(c) ? withIt : without).push(v);
+      }
+      if (withIt.length >= minN && without.length >= minN) {
+        const a = mean(withIt), b = mean(without);
+        rows.push({ kind, metric: m, with: a, without: b, nWith: withIt.length, nWithout: without.length, trend: trend(m, a, b) });
+      } else if (withIt.length + without.length) {
+        waiting.push({ kind, metric: m, nWith: withIt.length, nWithout: without.length });
+      }
+    }
+  }
+  return { rows, waiting };
+}

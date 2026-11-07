@@ -124,3 +124,15 @@
 .c-rom-dots span.on { border-color: rgba(63, 224, 143, 0.6); background: rgba(63, 224, 143, 0.12); }
 #rom-start { align-self: flex-start; }
 .c-stage > .c-clock { text-align: center; }
+.c-body-link { display: inline-block; margin-top: 10px; text-decoration: none; }
+.c-helps { display: flex; flex-direction: column; }
+.c-help { display: grid; grid-template-columns: minmax(80px, auto) 1fr auto 18px; gap: 4px 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.c-help:first-child { border-top: 0; }
+.c-help b { color: var(--cream); }
+.c-help span { color: var(--muted); }
+.c-help-nums { font-variant-numeric: tabular-nums; }
+.c-help i { font-style: normal; text-align: center; }
+.c-help.better i { color: var(--emerald); }
+.c-help.worse i { color: var(--red); }
+.c-helps-wait { margin-top: 8px; font-size: 13px; color: var(--muted); display: grid; gap: 2px; }
+@media (max-width: 560px) { .c-help { grid-template-columns: 1fr 18px; } .c-help span { grid-column: 1; } .c-help i { grid-row: 1; grid-column: 2; } }
