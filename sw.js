@@ -1,6 +1,6 @@
 // Offline support: app files are network-first so updates show up,
 // models and libraries are cache-first because they are large and rarely change.
-const VERSION = 'v18';
+const VERSION = 'v19';
 const SHELL = `shell-${VERSION}`;
 const ASSETS = `assets-${VERSION}`;
 const PRECACHE = ['./', 'index.html', 'style.css', 'app.js', 'occult.js', 'cosmos.js', 'trace.js', 'conditions.js', 'account.js', 'firebase-config.js', 'hub/nav.js', 'hub/nav.css', 'hub/page.css', 'hub/page.js', 'hub/rings.js', 'tasks/', 'tasks/index.html', 'tasks/tasks.css', 'tasks/tasks.js', 'tasks/logic.js', 'watch/', 'watch/index.html', 'watch/watch.css', 'watch/watch.js', 'scroll/', 'scroll/index.html', 'scroll/scroll.css', 'scroll/scroll.js', 'rings/', 'rings/index.html', 'rings/rings.css', 'rings/rings.js', 'checkin/', 'checkin/index.html', 'checkin/checkin.css', 'checkin/checkin.js', 'checkin/logic.js', 'home/', 'home/index.html', 'manifest.webmanifest', 'data/catalog.json', 'data/occult.json', 'data/paths.json', 'data/conditions.json',

@@ -6,6 +6,7 @@
 // A page puts <header id="hub-nav" data-section="…" data-base="…"></header> where the bar goes (data-base is the
 // path from that page back to the site's root, like "../") and calls initHub({ tools }) before its own code runs.
 import * as account from '../account.js';
+import { practiceEntries, activityEntries, byDay, allStreak, fmtExact, today, dayKey, DEFAULT_GOALS } from './rings.js';
 
 const ICONS = {
   body: '<circle cx="12" cy="4.6" r="2.3"/><path d="M5 9.2h14M12 9.2v6.3M12 15.5l-3.2 5.6M12 15.5l3.2 5.6"/>',
@@ -281,26 +282,27 @@ function renderStatus() {
   if (box) box.innerHTML = Object.values(hub.status).filter(Boolean).map((t) => `<div>${esc(t)}</div>`).join('');
 }
 
-// A quiet summary of the practice time on this device: this week, the run of days in a row, and all time.
-function renderStats() {
+// The same numbers as the Rings page: every ring (practice, Watch, Scroll and logged time) from the account when
+// signed in, to the second; only this device's practice records when not.
+let statsReq = 0;
+async function renderStats() {
   const box = document.getElementById('hub-stats');
-  let sessions = [];
-  try { sessions = JSON.parse(localStorage.getItem(PRACTICE_KEY) || '{}').sessions || []; } catch {}
-  const now = new Date();
-  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)).getTime();
-  let week = 0, total = 0;
-  const days = new Set();
-  for (const s of sessions) {
-    const d = Number(s.duration) || 0;
-    total += d;
-    if (s.timestamp >= startOfWeek) week += d;
-    days.add(new Date(s.timestamp).toDateString());
+  if (!box) return;
+  const req = ++statsReq;
+  let entries = practiceEntries(), goals = { ...DEFAULT_GOALS };
+  if (user) {
+    try {
+      const [acts, sess, prefs] = await Promise.all(['activity', 'sessions', 'prefs'].map((n) => account.readCollection(user.uid, n)));
+      entries = [...activityEntries(acts), ...practiceEntries(sess)];
+      goals = { ...goals, ...(prefs.find((p) => p.id === 'main')?.goals || {}) };
+    } catch {}
   }
-  let streak = 0;
-  const day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  if (!days.has(day.toDateString())) day.setDate(day.getDate() - 1); // today doesn't break the run until it's over
-  while (days.has(day.toDateString())) { streak++; day.setDate(day.getDate() - 1); }
-  const fmt = (sec) => sec >= 3600 ? `${Math.floor(sec / 3600)}h ${Math.round((sec % 3600) / 60)}m` : `${Math.round(sec / 60)}m`;
-  box.innerHTML = [['This week', fmt(week)], ['Days in a row', String(streak)], ['All time', fmt(total)]]
+  if (req !== statsReq) return;
+  const days = byDay(entries);
+  const now = new Date();
+  const weekStart = dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)).getTime());
+  let week = 0, total = 0;
+  for (const [k, d] of Object.entries(days)) { total += d.total; if (k >= weekStart) week += d.total; }
+  box.innerHTML = [['Today', fmtExact(days[today()]?.total || 0)], ['This week', fmtExact(week)], ['Rings closed in a row', String(allStreak(days, goals))], ['All time', fmtExact(total)]]
     .map(([k, v]) => `<div class="hub-stat"><b>${v}</b><span>${k}</span></div>`).join('');
 }

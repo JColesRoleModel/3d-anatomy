@@ -1,7 +1,7 @@
 // The Dashboard's own offline cache, kept small on purpose: only what this page needs (not the 3D site's engine and
 // models), so a screen left on downloads as little as possible. Its own files are network-first, so updates show
 // up; fonts, icons and the Firebase code are cache-first, since they rarely change.
-const CACHE = 'tolnri-dash-v2';
+const CACHE = 'tolnri-dash-v3';
 const FILES = ['./', 'index.html', 'dash.css', 'dash.js', 'manifest.webmanifest',
   '../hub/nav.js', '../hub/nav.css', '../hub/page.css', '../hub/page.js', '../hub/rings.js', '../checkin/logic.js',
   '../account.js', '../firebase-config.js', '../vendor/firebase.js', '../icons/brand/tree-of-life.webp', '../icons/icon-192.png',

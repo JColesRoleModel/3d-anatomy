@@ -112,9 +112,9 @@
 .hub-avatar { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none; color: var(--hub-accent); border: 1px solid rgba(230, 189, 106, 0.5); background: rgba(230, 189, 106, 0.1); }
 .hub-acct-name { font: 700 21px/1.1 var(--hub-serif); color: var(--hub-cream); overflow-wrap: anywhere; }
 .hub-acct-sub { font-size: 13px; color: var(--hub-muted); overflow-wrap: anywhere; }
-.hub-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 10px; }
+.hub-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 14px 0 10px; }
 .hub-stat { padding: 9px 6px; border-radius: 12px; border: 1px solid var(--hub-line); background: rgba(246, 227, 180, 0.04); text-align: center; }
-.hub-stat b { display: block; font: 700 22px/1.1 var(--hub-serif); color: var(--hub-accent); }
+.hub-stat b { display: block; font: 700 20px/1.1 var(--hub-serif); color: var(--hub-accent); }
 .hub-stat span { font-size: 11px; color: var(--hub-muted); }
 .hub-links { display: flex; gap: 8px; margin-bottom: 12px; }
 .hub-link {
