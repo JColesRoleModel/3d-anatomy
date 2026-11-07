@@ -60,7 +60,7 @@ function renderHome() {
   fill(list, state.checkins.map((c) => {
     const open = state.open === c.id;
     const bits = [
-      c.modules?.math && `math ${c.modules.math.correct}`,
+      c.modules?.math && `math ${c.modules.math.perMin ?? c.modules.math.correct}/min`,
       c.modules?.reaction?.medianMs != null && `reaction ${c.modules.reaction.medianMs} ms`,
       c.modules?.breath?.holdS != null && `hold ${c.modules.breath.holdS.toFixed(1)} s`,
       c.feel?.clarity && `clarity ${c.feel.clarity}`,
@@ -262,9 +262,9 @@ async function feel() {
 }
 
 // --- Mental math -----------------------------------------------------------------------------------------------
-const MATH_MS = 60000;
+const MATH_MS = 30000;
 async function math() {
-  await intro('Mental math', 'Two-digit sums and differences for 60 seconds. Type each answer and press ✓. Fast, but right.');
+  await intro('Mental math', 'Two-digit sums and differences for 30 seconds. Type each answer and press ✓. Fast, but right.');
   const rand = rng(Date.now());
   const trials = [];
   const qEl = h('div', { class: 'c-math-q' }), aEl = h('div', { class: 'c-math-a' });
@@ -308,7 +308,7 @@ async function math() {
   await timeUp();
   const score = scoreMath(trials, MATH_MS);
   const rating = await rate(`${score.correct} right, ${score.errors} wrong`, 'How hard did that feel?');
-  return { v: 1, ...score, rating, trials };
+  return { v: 2, ...score, perMin: Math.round((score.correct * 60000) / MATH_MS), lengthMs: MATH_MS, rating, trials };
 }
 
 // --- Reaction time ---------------------------------------------------------------------------------------------
@@ -387,87 +387,6 @@ async function tapCount(label, ms, startOnTap = true) {
   });
   await timeUp(`${count} taps`);
   return count;
-}
-
-// --- Neuro-ocular ----------------------------------------------------------------------------------------------
-const EYE_MS = 10000;
-const wave = (t, period) => Math.sin((2 * Math.PI * t) / period);
-const EYE_MOVES = [
-  ['pursuitH', 'Smooth, side to side', 'Follow the dot with your eyes only. Keep your head still.', (t) => ({ x: wave(t, 4000) * 0.9, y: 0 })],
-  ['pursuitV', 'Smooth, up and down', 'Follow the dot with your eyes only.', (t) => ({ x: 0, y: wave(t, 4000) * 0.9 })],
-  ['jumpH', 'Jumps, side to side', 'Look at the dot each time it jumps.', (t) => ({ x: Math.floor(t / 800) % 2 ? 0.9 : -0.9, y: 0 })],
-  ['jumpV', 'Jumps, up and down', 'Look at the dot each time it jumps.', (t) => ({ x: 0, y: Math.floor(t / 800) % 2 ? 0.9 : -0.9 })],
-  ['diagonal', 'Diagonals', 'Follow the dot corner to corner.', (t) => { const s = wave(t, 5000) * 0.85; return t < 5000 ? { x: s, y: s } : { x: s, y: -s }; }],
-  ['nearFar', 'Near and far', 'Hold your thumb at arm\'s length below the dot. Slowly bring it toward your nose and back, keeping it single. Follow the dot\'s rhythm.', (t) => ({ x: 0, y: 0, s: 1 + 1.6 * (0.5 - 0.5 * Math.cos((2 * Math.PI * t) / 5000)) })],
-  ['edges', 'Hold at the edges', 'Look at the dot and hold your gaze there.', (t) => [{ x: -0.95, y: 0 }, { x: 0.95, y: 0 }, { x: 0, y: -0.95 }, { x: 0, y: 0.95 }][Math.min(3, Math.floor(t / 2500))]],
-];
-const SYMPTOMS = ['Dizzy', 'Headache', 'Eye strain', 'Nausea', 'Watery eyes', 'Blurry', 'Double vision'];
-const JUMPS = 12;
-
-async function eyes() {
-  await intro('Neuro-ocular', 'Seven short eye movements of 10 seconds, each rated for comfort, then a dot-tapping test. Hold the screen at a comfortable reading distance.');
-  const ratings = {};
-  for (const [id, name, how, path] of EYE_MOVES) {
-    await intro(name, how);
-    const dot = h('div', { class: 'c-dot' });
-    const arena = h('div', { class: 'c-arena' }, dot);
-    screen(arena);
-    const { width: w, height: ht } = arena.getBoundingClientRect();
-    const rx = w / 2 - 18, ry = ht / 2 - 18;
-    await animate(EYE_MS, (t) => {
-      const p = path(t);
-      dot.style.transform = `translate(${w / 2 + p.x * rx}px, ${ht / 2 + p.y * ry}px) translate(-50%, -50%) scale(${p.s || 1})`;
-    });
-    ratings[id] = await rate(name, 'How comfortable was that?');
-  }
-  const symptoms = await chips('Anything come up?', 'Tap any you noticed, or just Next.', SYMPTOMS);
-
-  await intro('Dot-jump test', `A dot appears somewhere, ${JUMPS} times. Tap right on it as fast as you can.`);
-  const dot = h('div', { class: 'c-dot c-dot-tap hidden' });
-  const arena = h('div', { class: 'c-arena' }, dot);
-  screen(arena);
-  const box = arena.getBoundingClientRect();
-  const trials = [];
-  for (let i = 0; i < JUMPS; i++) {
-    dot.classList.add('hidden');
-    await sleep(400 + Math.random() * 600);
-    const x = 30 + Math.random() * (box.width - 60), y = 30 + Math.random() * (box.height - 60);
-    dot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-    dot.classList.remove('hidden');
-    const onset = await nextFrame();
-    const hit = await press(arena, 3000);
-    const r = arena.getBoundingClientRect();
-    trials.push(hit
-      ? { ms: Math.round(Math.max(0, hit.t - onset)), errPx: Math.round(Math.hypot(hit.x - r.left - x, hit.y - r.top - y) * 10) / 10 }
-      : { ms: 3000, errPx: null, missed: true });
-  }
-  await timeUp('Done');
-  return { v: 1, ratings, avgRating: avgRating(ratings), symptoms, jump: { ...scoreJumps(trials), trials }, arena: { w: Math.round(box.width), h: Math.round(box.height) } };
-}
-
-// --- Neck and shoulders ----------------------------------------------------------------------------------------
-const NECK = [
-  ['turnLeft', 'Turn your head left', 'Slowly, as far as is comfortable. Two or three times.'],
-  ['turnRight', 'Turn your head right', 'Slowly, as far as is comfortable.'],
-  ['chinDown', 'Chin to chest', 'Let the head drop forward gently.'],
-  ['lookUp', 'Look up', 'Tip the head back gently, mouth closed.'],
-  ['earLeft', 'Ear to left shoulder', 'Keep the shoulders level.'],
-  ['earRight', 'Ear to right shoulder', 'Keep the shoulders level.'],
-  ['shrugs', 'Shoulder shrugs', 'Lift both shoulders to the ears and drop them, five times.'],
-  ['rolls', 'Shoulder rolls', 'Roll both shoulders back in big circles, five times.'],
-  ['armUpLeft', 'Left arm overhead', 'Raise the straight arm forward and up beside the ear.'],
-  ['armUpRight', 'Right arm overhead', 'Raise the straight arm forward and up beside the ear.'],
-  ['behindLeft', 'Left hand up the back', 'Reach behind and slide the back of the hand up the spine.'],
-  ['behindRight', 'Right hand up the back', 'Reach behind and slide the back of the hand up the spine.'],
-];
-const PULLS = ['Left neck', 'Right neck', 'Back of neck', 'Base of skull', 'Left shoulder', 'Right shoulder', 'Between shoulder blades', 'Left arm', 'Right arm', 'Upper chest'];
-
-async function neck() {
-  await intro('Neck and shoulders', 'Twelve gentle movements. Do each one slowly two or three times, then rate how it felt. Never push into pain.');
-  const ratings = {};
-  for (const [id, name, how] of NECK) ratings[id] = await rate(name, how);
-  const pulls = await chips('Where did anything pull?', 'Tap any, or just Next.', PULLS);
-  return { v: 1, ratings, avgRating: avgRating(ratings), pulls };
 }
 
 // --- Mudras and fingers ----------------------------------------------------------------------------------------
@@ -621,13 +540,13 @@ const MODULES = [
   { id: 'math', label: 'Mental math', run: math },
   { id: 'reaction', label: 'Reaction time', run: reaction },
   { id: 'breath', label: 'Breath hold', run: breath },
-  { id: 'eyes', label: 'Neuro-ocular', run: eyes },
-  { id: 'neck', label: 'Neck & shoulders', run: neck },
   { id: 'mudras', label: 'Mudras & fingers', run: mudras },
 ];
-const MODULE_BY = Object.fromEntries([...MODULES, { id: 'rom', label: 'Range of motion', run: rom }].map((m) => [m.id, m]));
-const KINDS = { quick: ['feel', 'math', 'reaction', 'breath'], full: MODULES.map((m) => m.id) };
-const KIND_LABEL = { quick: 'Quick', full: 'Full', single: 'One test' };
+// Eyes and neck ratings were retired for range of motion; their labels stay for older check-ins.
+const MODULE_BY = Object.fromEntries([...MODULES, { id: 'rom', label: 'Range of motion', run: rom }, { id: 'eyes', label: 'Neuro-ocular' }, { id: 'neck', label: 'Neck & shoulders' }].map((m) => [m.id, m]));
+// Daily is the minute-long one; Weekly adds the slower tests. (Saved as 'quick' and 'full'.)
+const KINDS = { quick: ['feel', 'math'], full: ['feel', 'math', 'reaction', 'breath'] };
+const KIND_LABEL = { quick: 'Daily', full: 'Weekly', single: 'One test' };
 
 function device() {
   const ua = navigator.userAgent;

@@ -81,7 +81,8 @@ export const METRICS = [
   { id: 'feel.mood', label: 'Mood', unit: 'rating', better: 'low', get: (c) => c.feel?.mood },
   { id: 'feel.sleep', label: 'Sleep quality', unit: 'rating', better: 'low', get: (c) => c.feel?.sleep },
   { id: 'feel.sleepHours', label: 'Hours slept', unit: 'h', better: 'high', get: (c) => c.feel?.sleepHours },
-  { id: 'math.correct', label: 'Math: right in 60 s', unit: '', better: 'high', get: (c) => c.modules?.math?.correct },
+  // Right answers per minute: the daily test is 30 seconds (older check-ins ran 60, so the two compare).
+  { id: 'math.correct', label: 'Math: right per minute', unit: '', better: 'high', get: (c) => c.modules?.math?.perMin ?? c.modules?.math?.correct },
   { id: 'math.medianMs', label: 'Math: time per answer', unit: 'ms', better: 'low', get: (c) => c.modules?.math?.medianMs },
   { id: 'math.rating', label: 'Math: fog felt', unit: 'rating', better: 'low', get: (c) => c.modules?.math?.rating },
   { id: 'reaction.medianMs', label: 'Reaction time', unit: 'ms', better: 'low', get: (c) => c.modules?.reaction?.medianMs },

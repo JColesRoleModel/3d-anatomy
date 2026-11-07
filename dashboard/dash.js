@@ -144,7 +144,7 @@ function renderCheck() {
   const list = state.checkins;
   const last = list[0];
   if (!last) { fill($('#check'), h('p', { class: 'd-empty' }, 'Your check-in scores show here after your first check-in.')); return; }
-  const kind = { quick: 'Quick', full: 'Full', single: 'One test' }[last.kind] || '';
+  const kind = { quick: 'Daily', full: 'Weekly', single: 'One test' }[last.kind] || '';
   const rows = CHECK_SCORES.map((m) => {
     const withIt = list.filter((c) => Number.isFinite(m.get(c)));
     const latest = withIt[0];
