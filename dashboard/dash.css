@@ -21,8 +21,8 @@
 .d-temp small { font-size: 14px; color: var(--muted); max-width: 180px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .d-temp-icon { font-size: clamp(26px, 3.4vw, 40px); color: var(--gold); }
 
-.d-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 18px; grid-template-areas: 'rings tasks' 'recent quote'; }
-.d-rings { grid-area: rings; } .d-tasks { grid-area: tasks; } .d-quote { grid-area: quote; } .d-recent { grid-area: recent; }
+.d-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 18px; grid-template-areas: 'rings check' 'recent quote'; }
+.d-rings { grid-area: rings; } .d-check { grid-area: check; } .d-quote { grid-area: quote; } .d-recent { grid-area: recent; }
 .d-card { padding: 20px; border-radius: 26px; border: 1px solid var(--line); background: var(--panel);
   -webkit-backdrop-filter: var(--glass); backdrop-filter: var(--glass); box-shadow: var(--glow); min-width: 0; }
 .d-h2 { margin: 0 0 12px; font: 700 26px/1 var(--serif); color: var(--cream); }
@@ -36,14 +36,6 @@
 .d-leg small { font-size: 16px; color: var(--muted); }
 .d-streak { grid-column: 1 / -1; font: 600 18px/1.2 var(--serif); color: var(--gold); text-align: center; }
 
-.d-task-list { display: flex; flex-direction: column; gap: 8px; }
-.d-task { display: grid; grid-template-columns: 12px 1fr auto; gap: 12px; align-items: center; font-size: clamp(17px, 1.8vw, 22px); }
-.d-task-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); }
-.d-task.b-overdue .d-task-dot { background: var(--red); box-shadow: 0 0 8px var(--red); }
-.d-task.b-tomorrow .d-task-dot { background: var(--amber); }
-.d-task-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.d-task-when { font-size: 14px; color: var(--muted); white-space: nowrap; }
-.d-task.b-overdue .d-task-when { color: var(--red); }
 .d-more, .d-empty { margin: 8px 0 0; color: var(--muted); font-size: 16px; }
 .d-done { margin: 0; font: 700 26px/1.2 var(--serif); color: var(--gold); }
 
@@ -95,7 +87,7 @@
 .is-night .sky { display: none; }
 
 @media (max-width: 900px), (orientation: portrait) {
-  .d-grid { grid-template-columns: 1fr; grid-template-areas: 'rings' 'quote' 'tasks' 'recent'; }
+  .d-grid { grid-template-columns: 1fr; grid-template-areas: 'rings' 'check' 'quote' 'recent'; }
 }
 @media (max-width: 560px) {
   .d-main { padding-left: 12px; padding-right: 12px; }
@@ -116,3 +108,19 @@
 /* Seconds beside the ring minutes, a step smaller */
 .d-leg b .d-sec { font-size: 0.62em; color: var(--text); opacity: 0.85; }
 .d-done-dur { white-space: nowrap; }
+
+/* Check-in scores */
+.d-check-last { margin: -4px 0 12px; color: var(--gold); font-size: 17px; }
+.d-check-last small { color: var(--muted); font-size: 15px; }
+.d-scores { display: flex; flex-direction: column; }
+.d-score { display: grid; grid-template-columns: minmax(0, 1.3fr) auto 92px 120px; gap: 12px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); }
+.d-score-label { color: var(--muted); font-size: clamp(15px, 1.5vw, 18px); }
+.d-score-val { color: var(--cream); font: 700 clamp(22px, 2.4vw, 28px)/1 var(--serif); font-variant-numeric: lining-nums; white-space: nowrap; text-align: right; }
+.d-score-val.muted { color: var(--muted); }
+.d-score-trend { font-size: 18px; color: var(--muted); white-space: nowrap; }
+.d-score-trend small { font-size: 13px; color: var(--muted); }
+.d-score-trend.better { color: var(--emerald); }
+.d-score-trend.worse { color: var(--amber); }
+.d-spark { display: block; line-height: 0; }
+.d-spark-none { font-size: 13px; color: var(--muted); }
+.d-check-key { margin: 10px 0 0; font-size: 12px; color: var(--muted); }

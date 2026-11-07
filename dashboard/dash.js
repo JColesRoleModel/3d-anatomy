@@ -1,5 +1,5 @@
 // Dashboard: a light screen to leave on (made for an older iPad on a stand). Clock and temperature with its place,
-// today's rings and streak with the week's seven small rings beneath, today's tasks, a card from the Scroll that
+// today's rings and streak with the week's seven small rings beneath, the latest Check-in scores with their trends, a card from the Scroll that
 // changes every minute, and the last five things completed. The top bar hides itself; tap the screen to bring it
 // back. From 10pm to 6am it drops to a dim clock.
 //
@@ -8,11 +8,12 @@
 // whether it's live and when the latest session ended.
 import { $, h, fill, onError, openModal, closeModal, signedInPage, account } from '../hub/page.js';
 import { RINGS, DEFAULT_GOALS, byDay, activityEntries, practiceEntries, allStreak, ringsSVG, today, fmtExact, dayKey, daysBack, sessionsOf, ago, ringOf } from '../hub/rings.js';
-import { groupByDue, sectionOf, formatDue } from '../tasks/logic.js';
+import { METRICS, averageOf, trend, fmtMetric } from '../checkin/logic.js';
 
 const NIGHT_FROM = 22, NIGHT_TO = 6;
 const WINDOW_DAYS = 56;
-const state = { live: false, heardAt: null, uid: null, tasks: [], activity: [], sessions: [], goals: { ...DEFAULT_GOALS }, cards: [], cardsDay: null, unsubs: [], forceNight: null };
+const CHECK_DAYS = 120; // check-ins listened to: plenty for 14 points per score and the 7-day averages
+const state = { live: false, heardAt: null, uid: null, checkins: [], activity: [], sessions: [], goals: { ...DEFAULT_GOALS }, cards: [], cardsDay: null, unsubs: [], forceNight: null };
 
 signedInPage({
   gateText: 'Sign in once on this screen. It stays signed in.',
@@ -22,7 +23,7 @@ signedInPage({
     if (!user) return;
     const sub = (p) => p.then((u) => state.unsubs.push(u)).catch(onError);
     const since = () => daysBack(WINDOW_DAYS).getTime();
-    sub(account.watchTasks(state.uid, (t) => { state.tasks = t; renderTasks(); }, onError));
+    sub(account.watchCollection(state.uid, 'checkins', (d) => { state.checkins = d.sort((a, b) => b.startedAt - a.startedAt); renderCheck(); }, onError, 'startedAt', daysBack(CHECK_DAYS).getTime()));
     // Watch, Scroll and practice time all arrive live: a session finished on the phone shows here within seconds
     sub(account.watchCollection(state.uid, 'activity', (d, meta) => { state.activity = d; heard(meta); renderStats(); }, onError, 'startedAt', since()));
     sub(account.watchCollection(state.uid, 'sessions', (d, meta) => { state.sessions = d; heard(meta); renderStats(); }, onError, 'timestamp', since()));
@@ -113,17 +114,55 @@ function renderStats() {
     : [h('p', { class: 'd-empty' }, 'Nothing yet. Watch, scroll or practice and it shows up here.')]);
 }
 
-/* ---------- Tasks: overdue, today, tomorrow ---------- */
-function renderTasks() {
-  const open = state.tasks.filter((x) => !x.completed);
-  const groups = groupByDue(open.filter((x) => sectionOf(x) === 'due')).filter((g) => ['overdue', 'today', 'tomorrow'].includes(g.key));
-  $('#task-count').textContent = groups.reduce((n, g) => n + g.tasks.length, 0);
-  const general = open.filter((x) => sectionOf(x) === 'general').length;
-  const when = (x) => formatDue(x).toLowerCase().replace(/^today · /, '').replace(/(^|\s)\S/g, (c) => c.toUpperCase());
-  const rows = groups.flatMap((g) => g.tasks.slice(0, 6).map((x) => h('div', { class: `d-task b-${g.key}` },
-    h('span', { class: 'd-task-dot' }), h('span', { class: 'd-task-title' }, x.title), h('span', { class: 'd-task-when' }, when(x)))));
-  fill($('#tasks'), rows.length ? rows : [h('p', { class: 'd-empty' }, 'Nothing due today ✦')],
-    general ? h('p', { class: 'd-more' }, `${general} general task${general === 1 ? '' : 's'} waiting`) : null);
+/* ---------- Check-in: the last one, and four scores with their trends ---------- */
+const CHECK_SCORES = ['feel.clarity', 'math.correct', 'reaction.medianMs', 'breath.holdS'].map((id) => METRICS.find((m) => m.id === id));
+const SPARK_N = 14;
+function whenText(ts) {
+  const d = new Date(ts);
+  const t = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' }).toLowerCase();
+  if (dayKey(ts) === today()) return `today ${t}`;
+  if (dayKey(ts) === dayKey(daysBack(1).getTime() + 43200000)) return `yesterday ${t}`;
+  return `${d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}, ${t}`;
+}
+// A small line of the last values, drawn so that up is always better.
+function spark(values, better) {
+  const W = 120, H = 34, P = 4;
+  if (values.length < 2) return h('span', { class: 'd-spark-none' }, values.length ? 'first one' : '');
+  const lo = Math.min(...values), hi = Math.max(...values), span = hi - lo || 1;
+  const pts = values.map((v, i) => {
+    const x = P + (i * (W - 2 * P)) / (values.length - 1);
+    const f = (v - lo) / span;
+    const y = P + (better === 'low' ? f : 1 - f) * (H - 2 * P);
+    return [x.toFixed(1), y.toFixed(1)];
+  });
+  const [lx, ly] = pts[pts.length - 1];
+  const el = h('span', { class: 'd-spark' });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><polyline points="${pts.map((p) => p.join(',')).join(' ')}" fill="none" stroke="#e6bd6a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/><circle cx="${lx}" cy="${ly}" r="3.5" fill="#f6e3b4"/></svg>`;
+  return el;
+}
+function renderCheck() {
+  const list = state.checkins;
+  const last = list[0];
+  if (!last) { fill($('#check'), h('p', { class: 'd-empty' }, 'Your check-in scores show here after your first check-in.')); return; }
+  const kind = { quick: 'Quick', full: 'Full', single: 'One test' }[last.kind] || '';
+  const rows = CHECK_SCORES.map((m) => {
+    const withIt = list.filter((c) => Number.isFinite(m.get(c)));
+    const latest = withIt[0];
+    if (!latest) return h('div', { class: 'd-score' }, h('span', { class: 'd-score-label' }, m.label), h('span', { class: 'd-score-val muted' }, '–'), h('span'), h('span'));
+    const v = m.get(latest);
+    const avg = averageOf(m, list, 7, latest.startedAt, latest.id);
+    const t = trend(m, v, avg ? avg.avg : null);
+    const arrow = t === 'better' ? '▲' : t === 'worse' ? '▼' : t === 'same' ? '=' : '';
+    return h('div', { class: 'd-score' },
+      h('span', { class: 'd-score-label' }, m.label),
+      h('span', { class: 'd-score-val' }, fmtMetric(m, v)),
+      h('span', { class: `d-score-trend ${t || ''}`, title: avg ? `7-day average ${fmtMetric(m, avg.avg)}` : 'No 7-day average yet' }, arrow, avg ? h('small', {}, ` ${fmtMetric(m, avg.avg)}`) : null),
+      spark(withIt.slice(0, SPARK_N).map((c) => m.get(c)).reverse(), m.better));
+  });
+  fill($('#check'),
+    h('p', { class: 'd-check-last' }, `Last check-in ${whenText(last.startedAt)}`, kind ? h('small', {}, ` · ${kind}`) : null),
+    h('div', { class: 'd-scores' }, rows),
+    h('p', { class: 'd-check-key' }, 'Arrow and small number: against your 7-day average. Lines: last 14, up is better. Ratings: 1 best, 4 worst.'));
 }
 
 /* ---------- Card of the minute (cards are read once a day) ---------- */
@@ -161,7 +200,7 @@ function renderQuote() {
 }
 // Turn the card on each new minute, in step with the clock
 setTimeout(() => { renderQuote(); setInterval(renderQuote, 60000); }, 60000 - (Date.now() % 60000));
-setInterval(() => { renderStats(); renderTasks(); }, 60000);
+setInterval(() => { renderStats(); renderCheck(); }, 60000);
 
 /* ---------- Temperature and place (Open-Meteo, free, no account) ---------- */
 const PLACE_KEY = 'tolnri.dash.place';
