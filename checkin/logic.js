@@ -111,7 +111,8 @@ export function averageOf(metric, checkins, days, now = Date.now(), exceptId = n
 // 'better', 'worse' or 'same' (within 3% of the average, or a quarter point on a rating).
 export function trend(metric, value, avg) {
   if (value == null || avg == null) return null;
-  const close = metric.unit === 'rating' ? 0.25 : Math.max(Math.abs(avg) * 0.03, 1e-9);
+  // Phone angle readings wobble by a few degrees, so under 5° counts as the same.
+  const close = metric.unit === 'rating' ? 0.25 : metric.unit === 'deg' ? 5 : Math.max(Math.abs(avg) * 0.03, 1e-9);
   if (Math.abs(value - avg) <= close) return 'same';
   return (value < avg) === (metric.better === 'low') ? 'better' : 'worse';
 }
@@ -119,6 +120,7 @@ export function trend(metric, value, avg) {
 export function fmtMetric(metric, v) {
   if (v == null) return '–';
   if (metric.unit === 'ms') return v >= 1000 ? `${(v / 1000).toFixed(2)} s` : `${Math.round(v)} ms`;
+  if (metric.unit === 'deg') return `${Math.round(v)}°`;
   if (metric.unit === 's') return `${v.toFixed(1)} s`;
   if (metric.unit === 'h') return `${v.toFixed(2).replace(/\.?0+$/, '')} h`;
   if (metric.unit === 'px') return `${v.toFixed(1)} px`;
@@ -133,4 +135,42 @@ export function sleepHours(bed, wake) {
   let d = toMin(wake) - toMin(bed);
   if (d <= 0) d += 1440;
   return round(d / 60, 2);
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Range of motion: the phone's gravity sensor reads how far it tilts from where it was when you were still at the
+// start. Only movements that tilt against gravity are measured, since those read within a few degrees.
+
+export const ROM_AREAS = [
+  ['neck', 'Neck'], ['shoulders', 'Shoulders'], ['hips', 'Hips'], ['knees', 'Knees'], ['ankles', 'Ankles'],
+];
+const both = (id, label, area, setup, move) => ['Left', 'Right'].map((side) => ({
+  id: `${id}${side[0]}`, label: `${label}, ${side.toLowerCase()}`, area,
+  setup: setup.replace(/\{side\}/g, side.toLowerCase()), move: move.replace(/\{side\}/g, side.toLowerCase()),
+}));
+const FOREHEAD = 'Sit tall with your back against the chair. Hold the phone flat against your forehead, screen facing out.';
+export const ROM_MEASURES = [
+  { id: 'neckFlex', label: 'Neck: chin to chest', area: 'neck', setup: FOREHEAD, move: 'Slowly drop your chin toward your chest, hold, then come back up.' },
+  { id: 'neckExt', label: 'Neck: look up', area: 'neck', setup: FOREHEAD, move: 'Slowly tip your head back to look up, hold, then come back.' },
+  ...both('neckSide', 'Neck: ear to shoulder', 'neck', FOREHEAD, 'Tip your {side} ear toward your {side} shoulder without lifting the shoulder, hold, then come back.'),
+  ...both('neckRot', 'Neck: turn', 'neck', 'Lie on your back, head on the floor or bed without a pillow. Hold the phone flat on your forehead.', 'Roll your head to look {side}, hold, then come back to the middle.'),
+  ...both('shFlex', 'Shoulder: arm forward and up', 'shoulders', 'Stand tall, {side} arm straight down by your side. Hold the phone flat along the outside of that forearm (an armband is easiest).', 'Raise the straight arm forward and up as high as it goes, hold, then lower it.'),
+  ...both('shAbd', 'Shoulder: arm out to the side and up', 'shoulders', 'Stand tall, {side} arm straight down by your side, phone along the outside of the forearm.', 'Raise the straight arm out to the side and up, hold, then lower it.'),
+  ...both('slr', 'Hip: straight-leg raise', 'hips', 'Lie on your back, legs straight. Rest the phone flat on the front of your {side} shin (a long sock or band holds it).', 'Keeping the knee straight, raise the leg as high as is comfortable, hold, then lower it.'),
+  ...both('hipFlex', 'Hip: knee to chest', 'hips', 'Lie on your back, legs straight. Hold the phone flat on the front of your {side} thigh.', 'Draw the knee toward your chest, hold, then straighten the leg back down.'),
+  ...both('hipIR', 'Hip: turn in', 'hips', 'Sit on a high chair or table edge, knees bent, feet hanging. Phone flat against the outside of the {side} shin.', 'Keeping the thigh still, swing the foot outward (this turns the hip in), hold, then come back.'),
+  ...both('hipER', 'Hip: turn out', 'hips', 'Sit on a high chair or table edge, knees bent, feet hanging. Phone flat against the inside of the {side} shin.', 'Keeping the thigh still, swing the foot inward (this turns the hip out), hold, then come back.'),
+  ...both('kneeFlex', 'Knee: bend', 'knees', 'Lie on your stomach, legs straight. Phone flat on the back of your {side} shin (a band or sock holds it).', 'Bend the knee to bring the heel toward your bottom, hold, then lower it.'),
+  ...both('ankleDorsi', 'Ankle: knee to wall', 'ankles', 'Stand facing a wall, {side} foot forward, heel down. Hold the phone flat on the front of that shin, shin upright.', 'Bend the knee toward the wall, keeping the heel on the floor, hold, then straighten up.'),
+];
+for (const m of ROM_MEASURES) {
+  METRICS.push({ id: `rom.${m.id}`, label: m.label, unit: 'deg', better: 'high', get: (c) => c.modules?.rom?.measures?.[m.id]?.deg });
+}
+
+// Angle in degrees between two gravity readings [x, y, z].
+export function angleBetween(a, b) {
+  const dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const n = Math.hypot(...a) * Math.hypot(...b);
+  if (!n) return 0;
+  return (Math.acos(Math.max(-1, Math.min(1, dot / n))) * 180) / Math.PI;
 }

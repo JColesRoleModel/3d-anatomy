@@ -113,3 +113,14 @@
 .c-dot-tap { width: 36px; height: 36px; }
 
 .c-stop-foot { flex-wrap: wrap; }
+
+/* Range of motion */
+.c-chips-left { justify-content: flex-start; }
+.c-rom-count { margin: 0; text-align: center; font-size: 12px; color: var(--muted); }
+.c-rom-move { color: var(--cream); opacity: 1; }
+.c-rom-status { text-align: center; color: var(--gold); font-size: 16px; min-height: 1.4em; }
+.c-rom-dots { display: flex; justify-content: center; gap: 10px; }
+.c-rom-dots span { width: 56px; height: 34px; border-radius: 10px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--cream); font-size: 14px; }
+.c-rom-dots span.on { border-color: rgba(63, 224, 143, 0.6); background: rgba(63, 224, 143, 0.12); }
+#rom-start { align-self: flex-start; }
+.c-stage > .c-clock { text-align: center; }

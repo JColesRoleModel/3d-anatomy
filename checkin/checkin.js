@@ -2,10 +2,10 @@
 // what you did beforehand. Ratings run 1 (best) to 4 (worst). Every raw trial is kept, so scores can be re-worked later.
 import { $, h, fill, toast, onError, openModal, closeModal, signedInPage, account } from '../hub/page.js';
 import {
-  COMFORT, rng, mathQuestion, scoreMath, scoreReaction, scoreJumps, avgRating, METRICS, averageOf, trend, fmtMetric, sleepHours,
+  COMFORT, ROM_AREAS, ROM_MEASURES, angleBetween, median, rng, mathQuestion, scoreMath, scoreReaction, scoreJumps, avgRating, METRICS, averageOf, trend, fmtMetric, sleepHours,
 } from './logic.js';
 
-const state = { uid: null, checkins: [], unsub: null, context: null, open: null };
+const state = { uid: null, checkins: [], unsub: null, context: null, open: null, romAreas: null };
 const now = () => performance.now();
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -30,6 +30,23 @@ function renderHome() {
     onclick: () => { state.context = id; renderHome(); },
   }, label)));
   fill($('#singles'), MODULES.map((m) => h('button', { type: 'button', class: 't-btn c-single', onclick: () => start('single', [m.id]) }, m.label)));
+  if (!state.romAreas) { try { state.romAreas = JSON.parse(localStorage.getItem('tolnri.checkin.romAreas') || 'null'); } catch {} }
+  state.romAreas ||= ['neck', 'shoulders'];
+  fill($('#rom-areas'), ROM_AREAS.map(([id, label]) => {
+    const on = state.romAreas.includes(id);
+    const n = ROM_MEASURES.filter((m) => m.area === id).length;
+    return h('button', {
+      type: 'button', class: 'c-chip', 'aria-pressed': String(on),
+      onclick: () => {
+        state.romAreas = on ? state.romAreas.filter((a) => a !== id) : [...state.romAreas, id];
+        try { localStorage.setItem('tolnri.checkin.romAreas', JSON.stringify(state.romAreas)); } catch {}
+        renderHome();
+      },
+    }, `${label} · ${n}`);
+  }));
+  const count = ROM_MEASURES.filter((m) => state.romAreas.includes(m.area)).length;
+  $('#rom-start').disabled = !count;
+  $('#rom-start').textContent = count ? `Start · ${count} measurements, about ${Math.max(1, Math.round(count * 0.4))} min` : 'Pick an area';
 
   const last = state.checkins[0];
   $('#latest-panel').classList.toggle('hidden', !last);
@@ -46,6 +63,7 @@ function renderHome() {
       c.modules?.reaction?.medianMs != null && `reaction ${c.modules.reaction.medianMs} ms`,
       c.modules?.breath?.holdS != null && `hold ${c.modules.breath.holdS.toFixed(1)} s`,
       c.feel?.clarity && `clarity ${c.feel.clarity}`,
+      c.modules?.rom && `range of motion: ${Object.keys(c.modules.rom.measures || {}).length} measured`,
     ].filter(Boolean).join(' · ');
     return h('div', { class: `c-hist${open ? ' open' : ''}` },
       h('button', { type: 'button', class: 'c-hist-row', 'aria-expanded': String(open), onclick: () => { state.open = open ? null : c.id; renderHome(); } },
@@ -449,6 +467,125 @@ async function mudras() {
   return { v: 1, ratings, avgRating: avgRating(ratings), timesMs, setMs: Object.values(timesMs).reduce((s, x) => s + x, 0), tapsRight, tapsLeft, stiffness };
 }
 
+// --- Range of motion -------------------------------------------------------------------------------------------
+// Hands-free: once the phone is in place and still, it buzzes and beeps (set), you move to your end range and hold,
+// then come back; when you're back it buzzes twice (rep counted) and sets again. Three reps; the middle one is kept.
+const ROM_REPS = 3;
+let audio = null;
+function beep(freq = 880, ms = 140, times = 1) {
+  try {
+    navigator.vibrate?.(times > 1 ? [90, 80, 90] : 120);
+    audio ||= new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < times; i++) {
+      const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime + i * (ms + 80) / 1000;
+      o.frequency.value = freq; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + ms / 1000);
+      o.connect(g).connect(audio.destination); o.start(t); o.stop(t + ms / 1000 + 0.02);
+    }
+  } catch {}
+}
+// Gravity as the phone feels it, smoothed. read() gives [x, y, z] or null before the first reading.
+function gravity() {
+  let g = null, count = 0;
+  const f = (e) => {
+    const a = e.accelerationIncludingGravity;
+    if (!a || a.x == null) return;
+    const v = [a.x, a.y, a.z];
+    g = g ? g.map((x, i) => x + 0.2 * (v[i] - x)) : v;
+    count++;
+  };
+  window.addEventListener('devicemotion', f);
+  return { read: () => g, count: () => count, stop: () => window.removeEventListener('devicemotion', f) };
+}
+// iPhones and iPads ask first; other browsers may answer too. Either way, whether readings arrive decides.
+async function askMotion() {
+  try { if (typeof DeviceMotionEvent?.requestPermission === 'function') await DeviceMotionEvent.requestPermission(); } catch {}
+}
+
+// One measurement: three reps, each zeroed where you start. Gives { deg, reps } or null if skipped.
+async function measureRom(m, sensor, i, n) {
+  const angle = h('div', { class: 'c-clock' }, '–');
+  const status = h('div', { class: 'c-rom-status' }, 'Getting still…');
+  const dots = h('div', { class: 'c-rom-dots' });
+  const drawDots = (done) => fill(dots, Array.from({ length: ROM_REPS }, (_, k) => h('span', { class: k < done.length ? 'on' : '' }, k < done.length ? `${Math.round(done[k])}°` : '')));
+  const reps = [];
+  drawDots(reps);
+  const ctl = { button: null };
+  const press = (v) => () => { if (now() - drawnAt > 350) ctl.button = v; };
+  screen(h('p', { class: 'c-rom-count' }, `${i + 1} of ${n}`), ...title(m.label, m.setup), h('p', { class: 'c-step-sub c-rom-move' }, m.move),
+    angle, status, dots,
+    h('div', { class: 'c-two' },
+      h('button', { type: 'button', class: 't-btn', onclick: press('redo') }, 'Redo'),
+      h('button', { type: 'button', class: 't-btn', onclick: press('skip') }, 'Skip this one')));
+  for (;;) {
+    const r = await oneRep(sensor, angle, status, ctl);
+    if (r.button === 'skip') return null;
+    if (r.button === 'redo') { ctl.button = null; reps.length = 0; drawDots(reps); continue; }
+    reps.push(r.deg);
+    drawDots(reps);
+    if (reps.length >= ROM_REPS) {
+      status.textContent = `${Math.round(median(reps))}° kept`;
+      beep(1175, 120, 3);
+      await sleep(1400);
+      return { deg: Math.round(median(reps) * 10) / 10, reps: reps.map((x) => Math.round(x * 10) / 10) };
+    }
+  }
+}
+
+// One rep: wait until still, zero there, follow the angle, keep the furthest angle held still, end when back near zero.
+const oneRep = (sensor, angleEl, statusEl, ctl) => waitable((done) => {
+  let phase = 'settle', g0 = null, peak = 0, heldPeak = 0;
+  const hist = []; // [t, g]
+  const still = (ms, within) => {
+    const t = now(), g = sensor.read();
+    const recent = hist.filter(([ht]) => t - ht <= ms);
+    return recent.length > 5 && t - recent[0][0] >= ms * 0.8 && recent.every(([, hg]) => angleBetween(hg, g) < within);
+  };
+  const id = setInterval(() => {
+    if (ctl.button) { done({ button: ctl.button }); return; }
+    const g = sensor.read();
+    if (!g) return;
+    const t = now();
+    hist.push([t, g]); while (hist.length && t - hist[0][0] > 1500) hist.shift();
+    if (phase === 'settle') {
+      angleEl.textContent = '–';
+      statusEl.textContent = 'Getting still…';
+      if (still(900, 1.2)) { g0 = g; phase = 'move'; beep(880); statusEl.textContent = 'Go: move slowly, hold at the end'; }
+      return;
+    }
+    const a = angleBetween(g, g0);
+    angleEl.textContent = `${Math.round(a)}°`;
+    if (a > peak) peak = a;
+    if (a > 8 && still(500, 1.5) && a > heldPeak) heldPeak = a;
+    if (peak >= 12 && a < 6 && a < peak * 0.3) {
+      beep(660, 110, 2);
+      done({ deg: heldPeak || peak });
+    }
+  }, 40);
+  return () => clearInterval(id);
+});
+
+async function rom() {
+  const list = ROM_MEASURES.filter((m) => (state.romAreas || []).includes(m.area));
+  await intro('Range of motion', 'The phone measures each movement in degrees, hands-free. Put it in place and keep still until it buzzes and beeps, then move slowly to your end range, hold for 2 seconds, and come back. Two buzzes means the rep counted. Three reps each; the middle one is kept.', 'Start',
+    h('p', { class: 'c-safety' }, 'Never push into pain. Turn your sound on for the beeps.'));
+  beep(880, 60); // starts the sound on this tap, so later beeps can play
+  await askMotion();
+  const sensor = gravity();
+  try {
+    await sleep(800);
+    if (!sensor.count()) { await intro('No motion readings', 'Open this on your phone to measure range of motion. If you are on your phone, allow motion sensors for this site in the browser settings.', 'OK'); return null; }
+    const measures = {};
+    for (let i = 0; i < list.length; i++) {
+      $('#run-bar').style.width = `${(i / list.length) * 100}%`;
+      const r = await measureRom(list[i], sensor, i, list.length);
+      if (r) measures[list[i].id] = r;
+    }
+    if (!Object.keys(measures).length) return null;
+    return { v: 1, areas: [...state.romAreas], measures };
+  } finally { sensor.stop(); }
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 
 const MODULES = [
@@ -460,7 +597,7 @@ const MODULES = [
   { id: 'neck', label: 'Neck & shoulders', run: neck },
   { id: 'mudras', label: 'Mudras & fingers', run: mudras },
 ];
-const MODULE_BY = Object.fromEntries(MODULES.map((m) => [m.id, m]));
+const MODULE_BY = Object.fromEntries([...MODULES, { id: 'rom', label: 'Range of motion', run: rom }].map((m) => [m.id, m]));
 const KINDS = { quick: ['feel', 'math', 'reaction', 'breath'], full: MODULES.map((m) => m.id) };
 const KIND_LABEL = { quick: 'Quick', full: 'Full', single: 'One test' };
 
@@ -534,6 +671,7 @@ async function start(kind, ids = KINDS[kind]) {
   window.scrollTo(0, 0);
 }
 
+$('#rom-start').addEventListener('click', () => start('single', ['rom']));
 document.addEventListener('click', (e) => {
   const k = e.target.closest('[data-kind]');
   if (k) start(k.dataset.kind);
