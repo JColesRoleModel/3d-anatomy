@@ -1,0 +1,10 @@
+{
+  "name": "anatomy-connector",
+  "private": true,
+  "type": "module",
+  "description": "Claude connector (MCP server on a Cloudflare Worker) for 3D Anatomy: rings, time, tasks and check-ins.",
+  "scripts": {
+    "test": "node test.mjs",
+    "deploy": "npx wrangler@4.151.1 deploy"
+  }
+}

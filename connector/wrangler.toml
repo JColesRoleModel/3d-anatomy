@@ -1,0 +1,9 @@
+# 3D Anatomy connector (Claude MCP server). Deploy: npx wrangler@4.151.1 deploy
+# Secrets (never in git): MCP_SECRET, FIREBASE_SA, OWNER_EMAIL — set with `npx wrangler@4.151.1 secret put NAME`.
+name = "anatomy-connector"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[vars]
+TZ_NAME = "America/Los_Angeles"
