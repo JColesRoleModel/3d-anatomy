@@ -30,6 +30,7 @@ const ICONS = {
   bookmark: '<path d="M6.5 3.5h11v17L12 16.4l-5.5 4.1z"/>',
   keys: '<rect x="2.8" y="6" width="18.4" height="12" rx="2.2"/><path d="M6.5 9.5h.01M10 9.5h.01M13.5 9.5h.01M17 9.5h.01M7.5 14.5h9"/>',
   reset: '<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v3.7h3.7"/>',
+  search: '<circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 4.8 4.8"/>',
   info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.2M12 7.8h.01"/>',
   stats: '<path d="M5 19.5V12M10 19.5V6M15 19.5v-9M20 19.5V9"/>',
   home: '<path d="M4 11.2 12 4.5l8 6.7M6.5 9.5v10h11v-10"/>',

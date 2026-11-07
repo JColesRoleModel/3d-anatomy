@@ -339,6 +339,14 @@ export async function initOccult(api) {
     animate,
     pick,
     select,
+    // For search: every layer and item, the same small icons, and opening one with its layer turned on.
+    catalog: layers,
+    iconHTML,
+    showLayer(id) { if (!enabled.has(id)) toggleLayer(id, true); },
+    open(layerId, itemId) {
+      if (!enabled.has(layerId)) toggleLayer(layerId, true);
+      select(layerId, itemId, true);
+    },
     deselect,
     isSelected: () => !!current,
     // Polarity takes over the colour of the parts it covers while the layer is on.

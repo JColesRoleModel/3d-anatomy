@@ -563,6 +563,7 @@ export async function initConditions(ctx) {
 
   return {
     get active() { return !!study; },
+    catalog: cond, // for search
     open, close,
     // Each frame: plays the arm raise, and catches up parts that just appeared. Returns true while moving.
     update(dt) {

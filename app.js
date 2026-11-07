@@ -6,6 +6,7 @@ import { initOccult } from './occult.js';
 import { initCosmos } from './cosmos.js';
 import { initTrace } from './trace.js';
 import { initConditions } from './conditions.js';
+import { initSearch } from './search.js';
 import * as account from './account.js';
 import { initHub } from './hub/nav.js';
 
@@ -13,6 +14,7 @@ const $ = (id) => document.getElementById(id);
 
 // The site menu, with this page's own tools in it.
 const hub = initHub({ tools: [
+  { id: 'btn-search', icon: 'search', label: 'Search', title: 'Search the body, chakras and symbols (/)' },
   { id: 'btn-scene', icon: 'layers', label: 'Sky and art' },
   { id: 'btn-saves', icon: 'bookmark', label: 'Saved views' },
   { id: 'btn-keys', icon: 'keys', label: 'Keyboard', title: 'Keyboard controls (?)', desktopOnly: true },
@@ -311,7 +313,14 @@ const layersChip = document.createElement('button');
 layersChip.className = 'chip chip-layers';
 layersChip.innerHTML = '☰ Layers';
 layersChip.addEventListener('click', () => togglePanel());
-nav.append(layersChip);
+const searchChip = document.createElement('button');
+searchChip.className = 'chip chip-layers chip-search';
+searchChip.dataset.searchOpen = '';
+searchChip.setAttribute('aria-label', 'Search');
+searchChip.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 4.8 4.8"/></svg>Search';
+nav.append(searchChip, layersChip);
+$('btn-search').dataset.searchOpen = '';
+let search = null; // the search box (search.js)
 
 function togglePanel(open = $('panel').classList.contains('closed')) {
   $('panel').classList.toggle('closed', !open);
@@ -604,6 +613,7 @@ $('btn-about').addEventListener('click', () => $('about').showModal());
 
 // ---------- Keyboard shortcuts ----------
 window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.code === 'KeyK' && search) { e.preventDefault(); held.clear(); search.open(); return; }
   if (e.target.closest?.('input, textarea, [contenteditable]') || e.metaKey || e.ctrlKey) { held.clear(); return; }
   if (document.querySelector('dialog[open]') && e.code !== 'Slash') return;
   held.add(e.code);
@@ -624,6 +634,7 @@ window.addEventListener('keydown', (e) => {
     case 'Escape': trace?.cancelRoute(); select(null); occult?.deselect(); break;
     case 'KeyL': togglePanel(); break;
     case 'Slash': {
+      if (e.key !== '?' && search && !document.querySelector('dialog[open]')) { held.clear(); search.open(); break; }
       const d = $('keys');
       d.open ? d.close() : d.showModal();
       break;
@@ -865,6 +876,32 @@ occult = await initOccult({
 }).catch((err) => { console.error('Occult layers failed to load', err); return null; });
 occult?.syncPanel();
 refresh();
+
+const phoneSized = () => !window.matchMedia('(min-width: 800px)').matches;
+search = initSearch({
+  structures, systems: catalog.systems, systemsById, prettyName,
+  occult, conditions: cond,
+  // A part: its system on, it and its other side solid while the rest fades, the camera on it, its card open.
+  showPart(keys, label, key) {
+    if (phoneSized()) togglePanel(false);
+    cond?.active && cond.close();
+    trace?.cancelRoute();
+    occult?.deselect();
+    select(null);
+    showSet(keys, label);
+    select(key);
+  },
+  showGroup(keys, label) {
+    if (phoneSized()) togglePanel(false);
+    cond?.active && cond.close();
+    trace?.cancelRoute();
+    occult?.deselect();
+    showStructures(keys, label);
+  },
+  showSystem(id) { state.enabled.add(id); refresh(); },
+  before() { if (phoneSized()) togglePanel(false); },
+});
+if (new URLSearchParams(location.search).has('debug')) window.search = search; // for testing
 
 initTrace({
   scene, camera, structures, prettyName, focusOnKeys, focusPoint, applyVisibility,
